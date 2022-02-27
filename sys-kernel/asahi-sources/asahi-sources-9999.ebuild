@@ -3,6 +3,7 @@
 
 EAPI="7"
 ETYPE="sources"
+PYTHON_COMPAT="( python3_{8..10} )"
 
 inherit eutils autotools
 
