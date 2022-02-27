@@ -9,7 +9,7 @@ inherit eutils autotools
 
 DESCRIPTION="Asahi Linux kernel sources"
 HOMEPAGE="https://asahilinux.org/"
-LICENSE="GPL-2.0 freedist"
+LICENSE="GPL-2.0"
 INSTALL_DIR=/usr/src/linux-ashai
 IUSE="symlink"
 
