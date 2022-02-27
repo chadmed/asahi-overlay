@@ -65,7 +65,8 @@ src_install() {
 pkg_postinst() {
 	elog "From here, follow the standard Gentoo Handbook instructions for"
 	elog "building a kernel."
-	elog "Install sys-firmware/applesilicon for proper firmware support."
+	elog " "
+	elog "For proper firmware support, see the Asahi Linux wiki."
 }
 
 pkg_postrm() {
