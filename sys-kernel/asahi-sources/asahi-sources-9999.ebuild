@@ -10,8 +10,9 @@ inherit eutils autotools
 DESCRIPTION="Asahi Linux kernel sources"
 HOMEPAGE="https://asahilinux.org/"
 LICENSE="GPL-2"
-INSTALL_DIR=/usr/src/linux-ashai
 IUSE="symlink"
+KEYWORDS="~arm64"
+SLOT="0"
 
 
 # We need to do some extra stuff to get a non-tagged git repo
@@ -26,9 +27,6 @@ if [[ ${PV} == "9999" ]]; then
 else
 	SRC_URI="https://github.com/AsahiLinux/linux/archive/refs/tags/asahi-${PV}.tar.gz -> ${P}.tar.gz"
 fi
-
-KEYWORDS="~arm64"
-SLOT="0"
 
 RDEPEND="
 	app-arch/cpio
