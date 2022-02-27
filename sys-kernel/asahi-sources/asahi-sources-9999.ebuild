@@ -4,7 +4,7 @@
 EAPI="8"
 ETYPE="sources"
 
-inherit etools autotools
+inherit eutils autotools
 
 DESCRIPTION="Asahi Linux kernel sources"
 HOMEPAGE="https://asahilinux.org/"
