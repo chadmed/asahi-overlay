@@ -3,7 +3,7 @@
 
 EAPI="7"
 ETYPE="sources"
-PYTHON_COMPAT="( python3_{8..10} )"
+PYTHON_COMPAT=( python3_{8..10} )
 
 inherit eutils autotools
 
@@ -14,7 +14,7 @@ INSTALL_DIR=/usr/src/linux-ashai
 IUSE="symlink"
 
 
-# We need to do some extra stuff to get a non-tagged git repo.
+# We need to do some extra stuff to get a non-tagged git repo
 if [[ ${PV} == "9999" ]]; then
 	inherit git-r3 distutils-r1
 	EGIT_REPO_URI="https://github.com/AsahiLinux/linux.git"
