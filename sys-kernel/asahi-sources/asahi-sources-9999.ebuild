@@ -53,12 +53,12 @@ src_unpack() {
 	fi
 }
 
+src_compile() {
+	cd "${S}" || die
+}
+
 src_install() {
-	if [[ -n ${INSTALL_DIR} ]]; then
-		einfo "Creating install directory..."
-		mkdir -p ${INSTALL_DIR}
-	fi
-	mv ${WORKDIR}/${P} ${INSTALL_DIR}/
+	mv ${S} ${INSTALL_DIR}
 	use symlink && ln -snf ${INSTALL_DIR} /usr/src/linux
 }
 
