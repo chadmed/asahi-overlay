@@ -56,17 +56,18 @@ src_compile() {
 }
 
 src_install() {
-	mv ${S} ${INSTALL_DIR}
-	use symlink && ln -snf ${INSTALL_DIR} /usr/src/linux
+	dodir /usr/src
+	mv ${S} "${ED%/}"/usr/src || die
+	use symlink && ln -snf /usr/src/${P} /usr/src/linux
 }
 
 
 pkg_postinst() {
-	einfo "From here, follow the standard Gentoo Handbook instructions for"
-	einfo "building a kernel."
-	einfo "Install sys-firmware/applesilicon for proper firmware support."
+	elog "From here, follow the standard Gentoo Handbook instructions for"
+	elog "building a kernel."
+	elog "Install sys-firmware/applesilicon for proper firmware support."
 }
 
 pkg_postrm() {
-	einfo "Follow the standard kernel removal/upgrade procedure"
+	elog "Follow the standard kernel removal/upgrade procedure"
 }
