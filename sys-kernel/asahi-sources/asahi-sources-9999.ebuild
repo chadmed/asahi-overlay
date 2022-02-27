@@ -46,7 +46,7 @@ src_unpack() {
 	if [[ ${PV} == "9999" ]]; then
 		einfo "Using GitHub sources, nothing to unpack"
 	else
-		if [[ -n ${A} ]];
+		if [[ -n ${A} ]]; then
 			unpack ${A}
 		fi
 	fi
