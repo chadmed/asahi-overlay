@@ -1,7 +1,7 @@
 # Copyright 2022 chadmed <jcalligeros99@gmail.com>
 # Distributed under the terms of the GNU General Public License v2
 
-EAPI="8"
+EAPI="7"
 ETYPE="sources"
 
 inherit eutils autotools
