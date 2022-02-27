@@ -1,0 +1,16 @@
+<?xml version="1.0" ?>
+<repositories version="1.0">
+    <repo priority="100" quality="experimental" status="unofficial">
+        <name>asahi</name>
+        <description lang="en">Asahi Linux overlay providing support packages for Apple Silicon devices</description>
+        <homepage>https://github.com/chadmed/asahi-overlay</homepage>
+        <owner>
+            <name>chadmed  </name>
+            <email>jcalligeros99@gmail.com</email>
+        </owner>
+        <source type="git">https://github.com/chadmed/asahi-overlay.git</source>
+        <source type="git">git://github.com/chadmed/asahi-overlay.git</source>
+        <source type="git">git@github.com:chadmed/asahi-overlay.git</source>
+        <feed>https://github.com/chadmed/asahi-overlay/commits/main.atom</feed>
+    </repo>
+</repositories>
