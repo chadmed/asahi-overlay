@@ -1,6 +1,6 @@
 <?xml version="1.0" ?>
 <repositories version="1.0">
-    <repo priority="100" quality="experimental" status="unofficial">
+    <repo priority="-1001" quality="experimental" status="unofficial">
         <name>asahi</name>
         <description lang="en">Asahi Linux overlay providing support packages for Apple Silicon devices</description>
         <homepage>https://github.com/chadmed/asahi-overlay</homepage>
