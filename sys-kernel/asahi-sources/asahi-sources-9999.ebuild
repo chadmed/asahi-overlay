@@ -13,7 +13,6 @@ LICENSE="GPL-2"
 IUSE="symlink"
 KEYWORDS="~arm64"
 SLOT="0"
-PATCHES=( "${FILESDIR}/${P}-applemca.patch" )
 
 # We need to do some extra stuff to get a non-tagged git repo
 if [[ ${PV} == "9999" ]]; then
