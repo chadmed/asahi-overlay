@@ -11,7 +11,6 @@ DESCRIPTION="Asahi Linux kernel sources"
 HOMEPAGE="https://asahilinux.org/"
 LICENSE="GPL-2"
 IUSE="symlink"
-KEYWORDS="arm64 ~arm64"
 SLOT="0"
 
 # We need to do some extra stuff to get a non-tagged git repo
