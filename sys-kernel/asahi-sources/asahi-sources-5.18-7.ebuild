@@ -34,6 +34,7 @@ RDEPEND="
 	sys-devel/bison
 	sys-devel/flex
 	sys-devel/make
+	sys-apps/dtc
 	>=sys-libs/ncurses-5.2
 	virtual/libelf
 	virtual/pkgconfig"
