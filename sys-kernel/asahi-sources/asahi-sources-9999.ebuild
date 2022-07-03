@@ -1,4 +1,4 @@
-# Copyright 2022 chadmed <jcalligeros99@gmail.com>
+# Copyright 2022 James Calligeros <jcalligeros99@gmail.com>
 # Distributed under the terms of the GNU General Public License v2
 
 EAPI="7"
