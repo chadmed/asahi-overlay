@@ -52,7 +52,7 @@ src_compile() {
 
 src_install() {
 	dodir /usr/lib/asahi-boot
-	cp ${S}/u-boot-nodtb.bin "${ED%/}"/usr/lib/asahi-boot/u-boot-notdtb.bin || die
+	cp ${S}/u-boot-nodtb.bin "${ED%/}"/usr/lib/asahi-boot/u-boot-nodtb.bin || die
 }
 
 
