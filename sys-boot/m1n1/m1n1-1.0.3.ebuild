@@ -43,8 +43,30 @@ src_unpack() {
 
 src_compile() {
 	cd "${S}" || die
+		use clang && emake CC="$(tc-getCC)" \
+			  USE_CLANG=1 \
+			  CXX="$(tc-getCXX)" \
+			  LD="$(tc-getLD)" \
+			  AR="$(tc-getAR)" \
+			  NM="$(tc-getNM)" \
+			  RANLIB="$(tc-getRANLIB)" \
+			  OBJCOPY="$(tc-getOBJCOPY)" \
+			  RELEASE=1 \
+			  EXTRA_CFLAGS="" \
+			  ARCH="aarch64-unknown-linux-gnu-" \
+			  || die "emake failed"
 
-	emake || die "emake failed"
+		emake CC="$(tc-getCC)" \
+			  CXX="$(tc-getCXX)" \
+			  LD="$(tc-getLD)" \
+			  AR="$(tc-getAR)" \
+			  NM="$(tc-getNM)" \
+			  RANLIB="$(tc-getRANLIB)" \
+			  OBJCOPY="$(tc-getOBJCOPY)" \
+			  RELEASE=1 \
+			  EXTRA_CFLAGS="" \
+			  ARCH="aarch64-unknown-linux-gnu-" \
+			  || die "emake failed"
 }
 
 src_install() {
