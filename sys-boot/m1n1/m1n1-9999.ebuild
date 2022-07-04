@@ -51,10 +51,10 @@ src_compile() {
 	      CXX="$(tc-getCXX)" \
 	      LD="$(tc-getLD)" \
 	      AR="$(tc-getAR)" \
-	      AS="$(tc-getAS)" \
 	      NM="$(tc-getNM)" \
 	      RANLIB="$(tc-getRANLIB)" \
 	      OBJCOPY="$(tc-getOBJCOPY)" \
+	      RELEASE=1 \
 	      || die "emake failed"
 }
 
