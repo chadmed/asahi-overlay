@@ -4,7 +4,7 @@
 EAPI="7"
 PYTHON_COMPAT=( python3_{8..10} )
 
-inherit eutils autotools
+inherit eutils autotools toolchain-funcs
 
 DESCRIPTION="Apple Silicon bootloader and experimentation playground"
 HOMEPAGE="https://asahilinux.org/"
@@ -47,8 +47,15 @@ src_unpack() {
 
 src_compile() {
 	cd "${S}" || die
-
-	emake || die "emake failed"
+	emake CC="$(tc-getCC)" \
+	      CXX="$(tc-getCXX)" \
+	      LD="$(tc-getLD)" \
+	      AR="$(tc-getAR)" \
+	      AS="$(tc-getAS)" \
+	      NM="$(tc-getNM)" \
+	      RANLIB="$(tc-getRANLIB)" \
+	      OBJCOPY="$(tc-getOBJCOPY)" \
+	      || die "emake failed"
 }
 
 src_install() {
