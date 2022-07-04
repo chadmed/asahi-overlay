@@ -24,7 +24,8 @@ RDEPEND="
 if [[ ${PV} == "9999" ]]; then
 	inherit git-r3 distutils-r1
 	EGIT_REPO_URI="https://github.com/AsahiLinux/m1n1.git"
-	EGIT_CLONE_TYPE="recursive"
+	EGIT_CLONE_TYPE="shallow"
+	EGIT_SUBMODULES=( '*' )
 	EGIT_BRANCH="main"
 	SRC_URI=""
 	BDEPEND="${BDEPEND}
