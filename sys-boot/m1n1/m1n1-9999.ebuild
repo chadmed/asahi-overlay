@@ -58,6 +58,7 @@ src_compile() {
 			  OBJCOPY="$(tc-getOBJCOPY)" \
 			  RELEASE=1 \
 			  EXTRA_CFLAGS="" \
+			  ARCH="aarch64-unknown-linux-gnu" \
 			  || die "emake failed"
 }
 
