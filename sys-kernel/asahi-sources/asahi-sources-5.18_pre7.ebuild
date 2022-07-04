@@ -11,9 +11,21 @@ DESCRIPTION="Asahi Linux kernel sources"
 HOMEPAGE="https://asahilinux.org/"
 LICENSE="GPL-2"
 IUSE="symlink"
-KEYWORDS="arm64 ~arm64"
 SLOT="0"
-SRC_URI="https://github.com/AsahiLinux/linux/archive/refs/tags/asahi-5.18-7.tar.gz -> ${P}.tar.gz"
+KEYWORDS="~arm64"
+
+# We need to do some extra stuff to get a non-tagged git repo
+if [[ ${PV} == "9999" ]]; then
+	inherit git-r3 distutils-r1
+	EGIT_REPO_URI="https://github.com/AsahiLinux/linux.git"
+	EGIT_CLONE_TYPE="shallow" # --depth=1
+	EGIT_BRANCH="asahi"
+	SRC_URI=""
+	BDEPEND="${BDEPEND}
+		dev-vcs/git"
+else
+	SRC_URI="https://github.com/AsahiLinux/linux/archive/refs/tags/asahi-${PV}.tar.gz"
+fi
 
 RDEPEND="
 	app-arch/cpio
@@ -22,8 +34,8 @@ RDEPEND="
 	sys-devel/bison
 	sys-devel/flex
 	sys-devel/make
-	sys-apps/dtc
 	>=sys-libs/ncurses-5.2
+	sys-apps/dtc
 	virtual/libelf
 	virtual/pkgconfig"
 

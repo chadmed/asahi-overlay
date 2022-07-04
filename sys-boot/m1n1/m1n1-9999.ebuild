@@ -29,7 +29,7 @@ if [[ ${PV} == "9999" ]]; then
 	BDEPEND="${BDEPEND}
 		dev-vcs/git"
 else
-	SRC_URI="https://github.com/AsahiLinux/m1n1/archive/refs/tags/v${PV}.tar.gz -> ${P}.tar.gz"
+	SRC_URI="https://github.com/AsahiLinux/m1n1/archive/refs/tags/v${PV}.tar.gz"
 fi
 
 src_unpack() {
