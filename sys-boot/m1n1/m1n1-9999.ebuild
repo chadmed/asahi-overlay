@@ -11,6 +11,7 @@ HOMEPAGE="https://asahilinux.org/"
 LICENSE="MIT"
 SLOT="0"
 KEYWORDS="~arm64"
+IUSE="clang"
 
 BDEPEND="
     sys-devel/make
@@ -47,15 +48,17 @@ src_unpack() {
 
 src_compile() {
 	cd "${S}" || die
-	emake CC="$(tc-getCC)" \
-	      CXX="$(tc-getCXX)" \
-	      LD="$(tc-getLD)" \
-	      AR="$(tc-getAR)" \
-	      NM="$(tc-getNM)" \
-	      RANLIB="$(tc-getRANLIB)" \
-	      OBJCOPY="$(tc-getOBJCOPY)" \
-	      RELEASE=1 \
-	      || die "emake failed"
+		use clang && USE_CLANG=1
+		emake CC="$(tc-getCC)" \
+			  CXX="$(tc-getCXX)" \
+			  LD="$(tc-getLD)" \
+			  AR="$(tc-getAR)" \
+			  NM="$(tc-getNM)" \
+			  RANLIB="$(tc-getRANLIB)" \
+			  OBJCOPY="$(tc-getOBJCOPY)" \
+			  RELEASE=1 \
+			  EXTRA_CFLAGS="" \
+			  || die "emake failed"
 }
 
 src_install() {
