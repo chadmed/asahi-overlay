@@ -4,34 +4,31 @@
 EAPI="7"
 PYTHON_COMPAT=( python3_{8..10} )
 
-inherit eutils autotools
+inherit eutils autotools toolchain-funcs
 
 DESCRIPTION="Apple Silicon bootloader and experimentation playground"
 HOMEPAGE="https://asahilinux.org/"
 LICENSE="MIT"
-KEYWORDS="arm64 ~arm64"
 SLOT="0"
+KEYWORDS="~arm64"
+IUSE="clang"
 
 BDEPEND="
-	sys-devel/make
+    sys-devel/make
     sys-apps/dtc"
 
 RDEPEND="
     sys-boot/u-boot
     sys-kernel/asahi-sources"
 
-# We need to do some extra stuff to get a non-tagged git repo
-if [[ ${PV} == "9999" ]]; then
-	inherit git-r3 distutils-r1
-	EGIT_REPO_URI="https://github.com/AsahiLinux/m1n1.git"
-	EGIT_CLONE_TYPE="recursive"
-	EGIT_BRANCH="main"
-	SRC_URI=""
-	BDEPEND="${BDEPEND}
-		dev-vcs/git"
-else
-	SRC_URI="https://github.com/AsahiLinux/m1n1/archive/refs/tags/v${PV}.tar.gz"
-fi
+inherit git-r3 distutils-r1
+EGIT_REPO_URI="https://github.com/AsahiLinux/m1n1.git"
+EGIT_CLONE_TYPE="shallow"
+EGIT_SUBMODULES=( '*' )
+EGIT_BRANCH="main"
+SRC_URI=""
+BDEPEND="${BDEPEND}
+	dev-vcs/git"
 
 src_unpack() {
 	if [[ ${PV} == "9999" ]]; then
