@@ -58,7 +58,7 @@ src_compile() {
 src_install() {
 	dodir /usr/src
 	mv ${S} "${ED%/}"/usr/src || die
-	use symlink && ln -snf /usr/src/${P} /usr/src/linux
+	use symlink && dosym /usr/src/${P} /usr/src/linux
 }
 
 
