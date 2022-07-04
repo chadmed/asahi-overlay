@@ -12,6 +12,7 @@ HOMEPAGE="https://asahilinux.org/"
 LICENSE="GPL-2"
 IUSE="symlink"
 SLOT="0"
+KEYWORDS="~arm64"
 
 # We need to do some extra stuff to get a non-tagged git repo
 if [[ ${PV} == "9999" ]]; then
