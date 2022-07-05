@@ -41,14 +41,8 @@ RDEPEND="
 
 
 src_unpack() {
-	if [[ ${PV} == "9999" ]]; then
-		einfo "Using GitHub sources, cloning from AsahiLinux/linux..."
-		git-r3_src_unpack
-	else
-		if [[ -n ${A} ]]; then
-			unpack ${A}
-		fi
-	fi
+	einfo "Using GitHub sources, cloning from AsahiLinux/linux..."
+	git-r3_src_unpack
 }
 
 src_compile() {
