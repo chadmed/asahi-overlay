@@ -10,7 +10,7 @@ DESCRIPTION="Apple Silicon bootloader and experimentation playground"
 HOMEPAGE="https://asahilinux.org/"
 LICENSE="MIT"
 SLOT="0"
-KEYWORDS="~arm64"
+KEYWORDS="arm64 ~arm64"
 IUSE="clang"
 
 BDEPEND="
@@ -30,15 +30,15 @@ SRC_URI=""
 BDEPEND="${BDEPEND}
 	dev-vcs/git"
 
+if [[ ${PV} == '9999' ]]; then
+	EGIT_COMMIT=""
+else
+	EGIT_COMMIT="v${PV}"
+fi
+
 src_unpack() {
-	if [[ ${PV} == "9999" ]]; then
-		einfo "Using GitHub sources, cloning from AsahiLinux/m1n1..."
-		git-r3_src_unpack
-	else
-		if [[ -n ${A} ]]; then
-			unpack ${A}
-		fi
-	fi
+	einfo "Using GitHub sources, cloning from AsahiLinux/m1n1..."
+	git-r3_src_unpack
 }
 
 src_compile() {
