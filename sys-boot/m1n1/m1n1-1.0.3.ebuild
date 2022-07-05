@@ -28,10 +28,8 @@ EGIT_SUBMODULES=( '*' )
 EGIT_BRANCH="main"
 SRC_URI=""
 BDEPEND="${BDEPEND}
+	clang? ( sys-devel/clang )
 	dev-vcs/git"
-
-use clang && BDEPEND="${BDEPEND}
-				sys-devel/clang"
 
 if [[ ${PV} == '9999' ]]; then
 	EGIT_COMMIT=""
