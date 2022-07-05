@@ -30,6 +30,9 @@ SRC_URI=""
 BDEPEND="${BDEPEND}
 	dev-vcs/git"
 
+use clang && BDEPEND="${BDEPEND}
+				sys-devel/clang"
+
 if [[ ${PV} == '9999' ]]; then
 	EGIT_COMMIT=""
 else
