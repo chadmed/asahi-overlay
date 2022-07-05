@@ -21,34 +21,41 @@ RDEPEND="
     sys-boot/u-boot
     sys-kernel/asahi-sources"
 
-# We need to do some extra stuff to get a non-tagged git repo
-if [[ ${PV} == "9999" ]]; then
-	inherit git-r3 distutils-r1
-	EGIT_REPO_URI="https://github.com/AsahiLinux/m1n1.git"
-	EGIT_CLONE_TYPE="shallow"
-	EGIT_SUBMODULES=( '*' )
-	EGIT_BRANCH="main"
-	SRC_URI=""
-	BDEPEND="${BDEPEND}
-		dev-vcs/git"
+inherit git-r3 distutils-r1
+EGIT_REPO_URI="https://github.com/AsahiLinux/m1n1.git"
+EGIT_CLONE_TYPE="shallow"
+EGIT_SUBMODULES=( '*' )
+EGIT_BRANCH="main"
+SRC_URI=""
+BDEPEND="${BDEPEND}
+	dev-vcs/git"
+
+if [[ ${PV} == '9999' ]]; then
+	EGIT_COMMIT=""
 else
-	SRC_URI="https://github.com/AsahiLinux/m1n1/archive/refs/tags/v${PV}.tar.gz"
+	EGIT_COMMIT="v${PV}"
 fi
 
 src_unpack() {
-	if [[ ${PV} == "9999" ]]; then
-		einfo "Using GitHub sources, cloning from AsahiLinux/m1n1..."
-		git-r3_src_unpack
-	else
-		if [[ -n ${A} ]]; then
-			unpack ${A}
-		fi
-	fi
+	einfo "Using GitHub sources, cloning from AsahiLinux/m1n1..."
+	git-r3_src_unpack
 }
 
 src_compile() {
 	cd "${S}" || die
-		use clang && USE_CLANG=1
+		use clang && emake CC="$(tc-getCC)" \
+			  USE_CLANG=1 \
+			  CXX="$(tc-getCXX)" \
+			  LD="$(tc-getLD)" \
+			  AR="$(tc-getAR)" \
+			  NM="$(tc-getNM)" \
+			  RANLIB="$(tc-getRANLIB)" \
+			  OBJCOPY="$(tc-getOBJCOPY)" \
+			  RELEASE=1 \
+			  EXTRA_CFLAGS="" \
+			  ARCH="aarch64-unknown-linux-gnu-" \
+			  || die "emake failed"
+
 		emake CC="$(tc-getCC)" \
 			  CXX="$(tc-getCXX)" \
 			  LD="$(tc-getLD)" \
