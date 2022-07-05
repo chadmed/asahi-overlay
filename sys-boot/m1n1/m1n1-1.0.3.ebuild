@@ -44,30 +44,32 @@ src_unpack() {
 
 src_compile() {
 	cd "${S}" || die
-		use clang && emake CC="$(tc-getCC)" \
-			  USE_CLANG=1 \
-			  CXX="$(tc-getCXX)" \
-			  LD="$(tc-getLD)" \
-			  AR="$(tc-getAR)" \
-			  NM="$(tc-getNM)" \
-			  RANLIB="$(tc-getRANLIB)" \
-			  OBJCOPY="$(tc-getOBJCOPY)" \
-			  RELEASE=1 \
-			  EXTRA_CFLAGS="" \
-			  ARCH="aarch64-unknown-linux-gnu-" \
-			  || die "emake failed"
-
+	if use clang; then
 		emake CC="$(tc-getCC)" \
-			  CXX="$(tc-getCXX)" \
-			  LD="$(tc-getLD)" \
-			  AR="$(tc-getAR)" \
-			  NM="$(tc-getNM)" \
-			  RANLIB="$(tc-getRANLIB)" \
-			  OBJCOPY="$(tc-getOBJCOPY)" \
-			  RELEASE=1 \
-			  EXTRA_CFLAGS="" \
-			  ARCH="aarch64-unknown-linux-gnu-" \
-			  || die "emake failed"
+			USE_CLANG=1 \
+			CXX="$(tc-getCXX)" \
+			LD="$(tc-getLD)" \
+			AR="$(tc-getAR)" \
+			NM="$(tc-getNM)" \
+			RANLIB="$(tc-getRANLIB)" \
+			OBJCOPY="$(tc-getOBJCOPY)" \
+			RELEASE=1 \
+			EXTRA_CFLAGS="" \
+			ARCH="aarch64-unknown-linux-gnu-" \
+			|| die "emake failed"
+	else
+		emake CC="$(tc-getCC)" \
+			CXX="$(tc-getCXX)" \
+			LD="$(tc-getLD)" \
+			AR="$(tc-getAR)" \
+			NM="$(tc-getNM)" \
+			RANLIB="$(tc-getRANLIB)" \
+			OBJCOPY="$(tc-getOBJCOPY)" \
+			RELEASE=1 \
+			EXTRA_CFLAGS="" \
+			ARCH="aarch64-unknown-linux-gnu-" \
+			|| die "emake failed"
+	fi
 }
 
 src_install() {
