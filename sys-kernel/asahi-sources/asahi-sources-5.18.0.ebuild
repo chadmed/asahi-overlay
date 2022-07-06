@@ -19,7 +19,7 @@ inherit git-r3 distutils-r1
 EGIT_REPO_URI="https://github.com/AsahiLinux/linux.git"
 EGIT_CLONE_TYPE="shallow" # --depth=1
 EGIT_BRANCH="asahi"
-EGIT_COMMIT="asahi-5.18-7"
+EGIT_COMMIT="asahi-5.18-3"
 SRC_URI=""
 BDEPEND="${BDEPEND}
 	dev-vcs/git"
