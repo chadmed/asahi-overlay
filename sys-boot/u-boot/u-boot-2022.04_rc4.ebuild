@@ -9,7 +9,7 @@ inherit eutils autotools git-r3 distutils-r1
 DESCRIPTION="Asahi Linux fork of Das U-Boot"
 HOMEPAGE="https://asahilinux.org/"
 LICENSE="GPL-2"
-KEYWORDS="arm64"
+KEYWORDS="arm64 ~arm64"
 SLOT="0"
 EGIT_REPO_URI="https://github.com/AsahiLinux/u-boot.git"
 EGIT_CLONE_TYPE="shallow"
