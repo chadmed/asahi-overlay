@@ -1,6 +1,8 @@
 # Copyright 2022 James Calligeros <jcalligeros99@gmail.com>
 # Distributed under the terms of the GNU General Public License v2
 
+# TODO: Migrate to ebuild based on Gentoo kernel eclass
+
 EAPI="7"
 ETYPE="sources"
 PYTHON_COMPAT=( python3_{8..10} )
@@ -15,14 +17,17 @@ SLOT="0"
 KEYWORDS="arm64 ~arm64"
 
 # We need to do some extra stuff to get a non-tagged git repo
-inherit git-r3 distutils-r1
-EGIT_REPO_URI="https://github.com/AsahiLinux/linux.git"
-EGIT_CLONE_TYPE="shallow" # --depth=1
-EGIT_BRANCH="asahi"
-EGIT_COMMIT="asahi-5.18-3"
-SRC_URI=""
-BDEPEND="${BDEPEND}
-	dev-vcs/git"
+if [[ ${PV} == "9999" ]]; then
+	inherit git-r3 distutils-r1
+	EGIT_REPO_URI="https://github.com/AsahiLinux/linux.git"
+	EGIT_CLONE_TYPE="shallow" # --depth=1
+	EGIT_BRANCH="asahi"
+	SRC_URI=""
+	BDEPEND="${BDEPEND}
+		dev-vcs/git"
+else
+	SRC_URI="https://github.com/AsahiLinux/linux/archive/refs/tags/asahi-5.18-3.tar.gz"
+fi
 
 RDEPEND="
 	app-arch/cpio
@@ -38,8 +43,13 @@ RDEPEND="
 
 
 src_unpack() {
-	einfo "Using GitHub sources, cloning from AsahiLinux/linux..."
-	git-r3_src_unpack
+	if [[ ${PV} == "9999" ]]; then
+		einfo "Using GitHub sources, cloning from AsahiLinux/linux..."
+		git-r3_src_unpack
+	else
+		if [[ -n ${A} ]]; then
+			unpack ${A}
+		fi
 
 }
 
