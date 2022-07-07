@@ -50,6 +50,7 @@ src_unpack() {
 		if [[ -n ${A} ]]; then
 			unpack ${A}
 		fi
+	fi
 
 }
 
