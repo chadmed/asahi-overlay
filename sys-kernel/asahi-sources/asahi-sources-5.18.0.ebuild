@@ -17,16 +17,18 @@ SLOT="0"
 KEYWORDS="arm64 ~arm64"
 
 # We need to do some extra stuff to get a non-tagged git repo
+inherit git-r3 distutils-r1
+EGIT_REPO_URI="https://github.com/AsahiLinux/linux.git"
+EGIT_CLONE_TYPE="shallow" # --depth=1
+EGIT_BRANCH="asahi"
+SRC_URI=""
+BDEPEND="${BDEPEND}
+	dev-vcs/git"
+
 if [[ ${PV} == "9999" ]]; then
-	inherit git-r3 distutils-r1
-	EGIT_REPO_URI="https://github.com/AsahiLinux/linux.git"
-	EGIT_CLONE_TYPE="shallow" # --depth=1
-	EGIT_BRANCH="asahi"
-	SRC_URI=""
-	BDEPEND="${BDEPEND}
-		dev-vcs/git"
+	EGIT_COMMIT=""
 else
-	SRC_URI="https://github.com/AsahiLinux/linux/archive/refs/tags/asahi-5.18-3.tar.gz"
+	EGIT_COMMIT="asahi-5.18-3"
 fi
 
 RDEPEND="
@@ -43,14 +45,8 @@ RDEPEND="
 
 
 src_unpack() {
-	if [[ ${PV} == "9999" ]]; then
-		einfo "Using GitHub sources, cloning from AsahiLinux/linux..."
-		git-r3_src_unpack
-	else
-		if [[ -n ${A} ]]; then
-			unpack ${A}
-		fi
-	fi
+	einfo "Using GitHub sources, cloning from AsahiLinux/linux..."
+	git-r3_src_unpack
 
 }
 
