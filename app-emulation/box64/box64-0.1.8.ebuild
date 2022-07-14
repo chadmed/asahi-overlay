@@ -13,7 +13,7 @@ inherit eutils autotools cmake
 DESCRIPTION="box64 - amd64 binary translator for Linux"
 HOMEPAGE="https://box86.org/"
 LICENSE="MIT"
-IUSE="i386 dynarec"
+IUSE="!arm64? ( -dynarec )"
 SLOT="0"
 KEYWORDS="arm64 ~arm64"
 
@@ -28,7 +28,7 @@ BDEPEND="
 "
 
 RDEPEND="
-	i386? ( app-emulation/box86 )
+	32bit? ( app-emulation/box86 )
 "
 
 DEPEND="
