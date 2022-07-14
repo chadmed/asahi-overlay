@@ -1,6 +1,12 @@
 # Copyright 2022 James Calligeros <jcalligeros99@gmail.com>
 # Distributed under the terms of the GNU General Public License v2
 
+###############################################################################
+#																			  #
+#						DOES NOT WORK ON AARCH64 YET!						  #
+#																			  #
+###############################################################################
+
 EAPI="7"
 PYTHON_COMPAT=( python3_{8..10} )
 
@@ -9,12 +15,12 @@ inherit eutils autotools cmake
 DESCRIPTION="box64 - amd64 binary translator for Linux"
 HOMEPAGE="https://box86.org/"
 LICENSE="MIT"
-IUSE="!arm64? ( -dynarec )"
+IUSE="dynarec"
 SLOT="0"
-KEYWORDS="arm64 ~arm64"
+KEYWORDS=""
 
-inherit git-r3 distutils-r1
-EGIT_REPO_URI="https://github.com/pitSeb/box86.git"
+inherit git-r3
+EGIT_REPO_URI="https://github.com/ptitSeb/box86.git"
 EGIT_CLONE_TYPE="shallow" # --depth=1
 EGIT_BRANCH="main"
 SRC_URI=""
@@ -29,8 +35,14 @@ else
 	EGIT_COMMIT="v${PV}"
 fi
 
+CMAKE_MAKEFILE_GENERATOR="emake"
+
 src_unpack() {
 	git-r3_src_unpack
+}
+
+src_prepare() {
+    cmake_src_prepare
 }
 
 src_configure() {
