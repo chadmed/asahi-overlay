@@ -5,7 +5,7 @@
 # Apple Silicon devices by using the -DM1 flag. If porting for
 # upstream, take this into consideration.
 
-EAPI="8"
+EAPI="7"
 PYTHON_COMPAT=( python3_{8..10} )
 
 inherit eutils autotools cmake
