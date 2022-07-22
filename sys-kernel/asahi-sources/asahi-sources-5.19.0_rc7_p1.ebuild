@@ -14,7 +14,7 @@ HOMEPAGE="https://asahilinux.org/"
 LICENSE="GPL-2"
 IUSE="symlink"
 SLOT="0"
-KEYWORDS="arm64 ~arm64"
+KEYWORDS="arm64"
 
 # We need to do some extra stuff to get a non-tagged git repo
 inherit git-r3 distutils-r1
@@ -28,7 +28,7 @@ BDEPEND="${BDEPEND}
 if [[ ${PV} == "9999" ]]; then
 	EGIT_COMMIT=""
 else
-	EGIT_COMMIT="asahi-5.18-7"
+	EGIT_COMMIT="asahi-5.19-rc7-1"
 fi
 
 RDEPEND="
