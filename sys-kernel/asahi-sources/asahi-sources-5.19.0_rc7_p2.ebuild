@@ -28,7 +28,7 @@ BDEPEND="${BDEPEND}
 if [[ ${PV} == "9999" ]]; then
 	EGIT_COMMIT=""
 else
-	EGIT_COMMIT="asahi-5.19-rc7-1"
+	EGIT_COMMIT="asahi-5.19-rc7-2"
 fi
 
 RDEPEND="
