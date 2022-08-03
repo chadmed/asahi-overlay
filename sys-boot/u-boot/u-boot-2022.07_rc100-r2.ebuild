@@ -33,7 +33,7 @@ RDEPEND="${BDEPEND}"
 if [[ ${PV} == "9999" ]]; then
 	EGIT_BRANCH="asahi"
 else
-	EGIT_COMMIT="asahi-v2022.07-1"
+	EGIT_COMMIT="asahi-v2022.07-2"
 fi
 
 src_unpack() {
