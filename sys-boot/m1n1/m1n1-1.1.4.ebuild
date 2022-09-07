@@ -21,34 +21,20 @@ RDEPEND="
     sys-boot/u-boot
     sys-kernel/asahi-sources"
 
-inherit git-r3 distutils-r1
-EGIT_REPO_URI="https://github.com/AsahiLinux/m1n1.git"
-EGIT_CLONE_TYPE="shallow"
-EGIT_SUBMODULES=( '*' )
-EGIT_BRANCH="main"
-SRC_URI=""
+inherit distutils-r1
+
+SRC_URI="https://github.com/AsahiLinux/m1n1/archive/refs/tags/v${PV}.tar.gz -> ${PN}-${PV}.tar.gz"
 BDEPEND="${BDEPEND}
 	clang? ( sys-devel/clang )
-	dev-vcs/git"
-
-if [[ ${PV} == '9999' ]]; then
-	EGIT_COMMIT=""
-else
-	EGIT_COMMIT="v${PV}"
-fi
-
-src_unpack() {
-	einfo "Using GitHub sources, cloning from AsahiLinux/m1n1..."
-	git-r3_src_unpack
-}
+"
 
 src_compile() {
 	cd "${S}" || die
 	if use clang; then
-		emake CC="$(tc-getCC)" \
+		emake CC="clang" \
 			USE_CLANG=1 \
-			CXX="$(tc-getCXX)" \
-			LD="$(tc-getLD)" \
+			CXX="clang++" \
+			LD="ld.lld" \
 			AR="$(tc-getAR)" \
 			NM="$(tc-getNM)" \
 			RANLIB="$(tc-getRANLIB)" \
