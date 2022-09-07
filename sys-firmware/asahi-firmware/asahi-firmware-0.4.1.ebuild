@@ -12,7 +12,7 @@ _name=asahi-installer
 
 DESCRIPTION="Asahi FW extraction script"
 HOMEPAGE="https://asahilinux.org"
-SRC_URI="https://github.com/AsahiLinux/${_name}/archive/refs/tags/v${PV}.tar.gz"
+SRC_URI="https://github.com/AsahiLinux/${_name}/archive/refs/tags/v${PV}.tar.gz -> ${PN}-${PV}.tar.gz"
 
 LICENSE="MIT"
 SLOT="0"
