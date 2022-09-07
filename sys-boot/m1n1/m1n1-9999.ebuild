@@ -75,6 +75,7 @@ src_compile() {
 src_install() {
 	dodir /usr/lib/asahi-boot
 	cp ${S}/build/m1n1.bin "${ED%/}"/usr/lib/asahi-boot/m1n1.bin || die
+	dosbin ${FILESDIR}/update-m1n1
 }
 
 
@@ -83,6 +84,9 @@ pkg_postinst() {
 	elog "You must run update-m1n1 for the new version to be installed"
 	elog "in the ESP."
 	elog "Please see the Asahi Linux Wiki for more information."
+	if [ -e ${ROOT}/bin/update-m1n1 ]; then
+		ewarn "You must remove /bin/update-m1n1."
+	fi
 }
 
 pkg_postrm() {
