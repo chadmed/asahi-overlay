@@ -4,15 +4,15 @@
 EAPI="7"
 PYTHON_COMPAT=( python3_{8..10} )
 
-inherit eutils autotools git-r3 distutils-r1
+inherit eutils autotools distutils-r1
 
 DESCRIPTION="Asahi Linux fork of Das U-Boot"
 HOMEPAGE="https://asahilinux.org/"
 LICENSE="GPL-2"
 KEYWORDS="arm64"
 SLOT="0"
-EGIT_REPO_URI="https://github.com/AsahiLinux/u-boot.git"
-EGIT_CLONE_TYPE="shallow"
+SRC_URI="https://github.com/AsahiLinux/u-boot/archive/refs/tags/asahi-v2022.07-3.tar.gz -> ${PN}-${PV}.tar.gz"
+MY_P="u-boot-asahi-v2022.07-3"
 
 BDEPEND="
     app-arch/cpio
@@ -29,17 +29,9 @@ BDEPEND="
 
 RDEPEND="${BDEPEND}"
 
-# We need to do some extra stuff to get a non-tagged git repo
-if [[ ${PV} == "9999" ]]; then
-	EGIT_BRANCH="asahi"
-else
-	EGIT_BRANCH="releng/installer-release"
-	EGIT_COMMIT_ID="300817d324f73c30c998a10435d5d830b58df894"
-fi
-
 src_unpack() {
-    einfo "Using GitHub sources, cloning from AsahiLinux/u-boot..."
-    git-r3_src_unpack
+    unpack ${PN}-${PV}.tar.gz || die "Could not unpack sources!"
+    mv ${MY_P} ${PN}-${PV}
 }
 
 src_configure() {
