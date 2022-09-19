@@ -12,11 +12,18 @@ inherit kernel-2
 detect_version
 detect_arch
 
+if [[ ${PV} != ${PV/_rc} ]] ; then
+    # $PV is expected to be of following form: 6.0_rc5_p1
+    MY_P="asahi-$(ver_rs 2 - $(ver_cut 1-4))-$(ver_cut 6)"
+else
+    # $PV is expected to be of following form: 5.19.0_p1
+    MY_P="asahi-$(ver_cut 1-2)-$(ver_cut 5)"
+fi
+
 DESCRIPTION="Asahi Linux kernel sources"
 HOMEPAGE="https://asahilinux.org"
-KERNEL_URI="https://github.com/AsahiLinux/linux/archive/refs/tags/asahi-6.0-rc5-4.tar.gz -> ${PN}-${PV}.tar.gz"
+KERNEL_URI="https://github.com/AsahiLinux/linux/archive/refs/tags/${MY_P}.tar.gz -> ${PN}-${PV}.tar.gz"
 SRC_URI="${KERNEL_URI} ${GENPATCHES_URI} ${ARCH_URI}"
-MY_P="asahi-6.0-rc5-1"
 IUSE="experimental"
 
 KEYWORDS="~arm64"
