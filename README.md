@@ -4,7 +4,7 @@ An overlay for Gentoo providing packages to better support Apple Silicon
 devices.
 
 ## Installing this overlay
-If you used my installer script (coming soon), you should not need to
+If you used [asahi-gentoosupport](https://github.com/chadmed/asahi-gentoosupport), you should not need to
 do anything. That script sets up this repo automatically. For all other users:
 
 1. Go clone asahi-gentoosupport.
