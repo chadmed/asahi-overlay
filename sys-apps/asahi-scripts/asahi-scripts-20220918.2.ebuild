@@ -12,6 +12,9 @@ LICENSE="MIT"
 SLOT="0"
 KEYWORDS="arm64"
 
+PATCHES=("${FILESDIR}/update-m1n1-dtbs.patch"
+         "${FILESDIR}/update-m1n1-installdir.patch")
+
 BDEPEND="
     sys-devel/make"
 
@@ -19,12 +22,16 @@ inherit distutils-r1
 
 SRC_URI="https://github.com/AsahiLinux/${PN}/archive/refs/tags/${PV}.tar.gz -> ${PN}-${PV}.tar.gz"
 
+src_prepare() {
+        default
+}
+
 src_compile() {
         emake || die "Could not invoke emake"
 }
 
 src_install() {
-        default
+        emake install || die "Could not install!"
 }
 
 pkg_postinst() {
