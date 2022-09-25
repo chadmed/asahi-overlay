@@ -19,6 +19,14 @@ inherit distutils-r1
 
 SRC_URI="https://github.com/AsahiLinux/${PN}/archive/refs/tags/${PV}.tar.gz -> ${PN}-${PV}.tar.gz"
 
+src_compile() {
+        emake || die "Could not invoke emake"
+}
+
+src_install() {
+        default
+}
+
 pkg_postinst() {
         if [ ! -e ${ROOT}/usr/lib/asahi-boot ]; then
                 ewarn "These scripts are intended for use on Apple Silicon"
