@@ -31,7 +31,7 @@ src_compile() {
 }
 
 src_install() {
-        emake install || die "Could not install!"
+        default
 }
 
 pkg_postinst() {
