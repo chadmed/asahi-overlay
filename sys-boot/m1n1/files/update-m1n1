@@ -1,24 +1,58 @@
 #!/bin/sh
+# SPDX-License-Identifier: MIT
+
 set -e
 
-m1n1_dir="/boot/efi/m1n1"
-src=/usr/lib/asahi-boot
+[ -e /etc/default/update-m1n1 ] && . /etc/default/update-m1n1
 
-target="$m1n1_dir/boot.bin"
-if [ ! -z "$1" ]; then
-        target="$1"
+if [ -e "$(dirname "$0")"/functions.sh ]; then
+    . "$(dirname "$0")"/functions.sh
+else
+    . /usr/share/asahi-scripts/functions.sh
 fi
 
-if [ ! -e "$m1n1_dir" ]; then
-        echo "$m1n1_dir does not exist, is /boot/efi mounted?" 1>&2
-        exit 1
+: ${SOURCE:="/usr/lib/asahi-boot/"}
+: ${M1N1:="$SOURCE/m1n1.bin"}
+: ${U_BOOT:="$SOURCE/u-boot-nodtb.bin"}
+: ${TARGET:="$1"}
+: ${DTBS:=/lib/modules/*-ARCH/dtbs/*.dtb}
+: ${CONFIG:=/etc/m1n1.conf}
+
+umount=false
+
+m1n1config=/run/m1n1.conf
+>"$m1n1config"
+
+if [ -e "$CONFIG" ]; then
+    info "Reading m1n1 config from $CONFIG:"
+    while read line; do
+        case "$line" in
+            "") ;;
+            \#*) ;;
+            chosen.*=*|display=*)
+                echo "$line" >> "$m1n1config"
+                info "  Option: $line"
+                ;;
+            *)
+                warn "  Ignoring unknown option: $line"
+                ;;
+        esac
+    done <$CONFIG
 fi
 
-DTBS=/usr/src/linux/arch/arm64/boot/dts/apple/*.dtb
+if [ -z "$TARGET" ]; then
+    mount_sys_esp /run/.system-efi
+    TARGET="/run/.system-efi/m1n1/boot.bin"
+    umount=true
+fi
 
-cat "$src/m1n1.bin" $DTBS \
-    <(gzip -c "$src/u-boot-nodtb.bin") \
-    >"${target}.new"
-mv -f "${target}.new" "$target"
+cat "$M1N1" $DTBS >"${TARGET}.new"
+gzip -c "$U_BOOT" >>"${TARGET}.new"
+cat "$m1n1config" >>"${TARGET}.new"
 
-echo "m1n1 updated at ${target}"
+[ -e "$TARGET" ] && mv -f "$TARGET" "${TARGET}.old"
+mv -f "${TARGET}.new" "$TARGET"
+
+echo "m1n1 updated at ${TARGET}"
+$umount && umount /run/.system-efi
+true
