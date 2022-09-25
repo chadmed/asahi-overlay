@@ -20,8 +20,8 @@ BDEPEND="
 RDEPEND="
     sys-boot/u-boot
     sys-kernel/asahi-sources
-    app-admin/asahi-scripts"
-
+    sys-app/asahi-scripts"
+    
 inherit distutils-r1
 
 SRC_URI="https://github.com/AsahiLinux/m1n1/archive/refs/tags/v${PV}.tar.gz -> ${PN}-${PV}.tar.gz"
