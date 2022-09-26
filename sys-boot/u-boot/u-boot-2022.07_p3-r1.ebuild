@@ -15,7 +15,7 @@ SRC_URI="https://github.com/AsahiLinux/u-boot/archive/refs/tags/asahi-v2022.07-3
 MY_P="u-boot-asahi-v2022.07-3"
 
 BDEPEND="
-    app-arch/cpio
+    	app-arch/cpio
 	dev-lang/perl
 	sys-devel/bc
 	sys-devel/bison
@@ -24,11 +24,11 @@ BDEPEND="
 	>=sys-libs/ncurses-5.2
 	virtual/libelf
 	virtual/pkgconfig
-    sys-apps/dtc
-    dev-vcs/git"
+    	sys-apps/dtc
+    	dev-vcs/git"
 
 RDEPEND="${BDEPEND}
-         app-admin/asahi-scripts"
+         sys-apps/asahi-scripts"
 
 src_unpack() {
     unpack ${PN}-${PV}.tar.gz || die "Could not unpack sources!"
