@@ -1,0 +1,22 @@
+Title: Mesa Asahi/AGX enablement
+Author: James Calligeros <jcalligeros99@gmail.com>
+Posted: 2022-09-27
+Revision: 1
+News-Item-Format: 2.0
+
+We have now added Mesa to the Asahi overlay. This allows us to
+enable AGX/Asahi Gallium driver support without waiting for the
+ebuild to be changed upstream.
+
+
+Steps required to build the Asahi Gallium driver:
+
+1. Add VIDEO_CARDS="asahi" to your make.conf.
+2. Run
+    # emerge -1av media-libs/mesa
+   This will source the ebuild from the Asahi overlay and replace the
+   version currently installed.
+
+This will allow you to enjoy 3D acceleration as soon as DCP and AGX
+are merged into linux-asahi with no further intervention required.
+Simply update the kernel when the time comes and reboot.
