@@ -14,4 +14,4 @@ mv -f /boot/efi/vendorfw/manifest.txt{.new,}
 mv -f /boot/efi/vendorfw/firmware.tar{.new,}
 printf '    Firmware upgraded\n'
 
-/usr/sbin/update-vendor-firmware
+/usr/local/bin/update-vendor-firmware
