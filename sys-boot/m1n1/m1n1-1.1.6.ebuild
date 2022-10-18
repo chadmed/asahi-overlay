@@ -61,7 +61,6 @@ src_compile() {
 src_install() {
 	dodir /usr/lib/asahi-boot
 	cp ${S}/build/m1n1.bin "${ED%/}"/usr/lib/asahi-boot/m1n1.bin || die
-	dosbin ${FILESDIR}/update-m1n1
 }
 
 
