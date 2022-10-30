@@ -5,7 +5,7 @@ inherit kernel-build toolchain-funcs
 
 EAPI=8
 K_SECURITY_UNSUPPORTED=1
-CONFIG_VER=6.0-rc6-asahi-1
+CONFIG_VER=asahi-config-${PV}
 
 DESCRIPTION="Asahi Linux dist kernel"
 HOMEPAGE="https://asahilinux.org"
@@ -29,6 +29,11 @@ SRC_URI+="
     https://github.com/AsahiLinux/linux/archive/refs/tags/${MY_P}.tar.gz -> ${PN}-${PV}.tar.gz
     https://chadmed.github.io/res/${CONFIG_VER}.config
 "
+
+src_unpack() {
+    unpack ${PN}-${PV}.tar.gz || die "Could not unpack kernel sources"
+    mv linux-${MY_P} linux-${KV_FULL} || die "Could not move source tree"
+}
 
 src_prepare() {
     default
