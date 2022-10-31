@@ -27,7 +27,7 @@ S="${WORKDIR}/${_name}-${PV}"
 src_install() {
 	distutils-r1_src_install
 
-	dosbin ${FILESDIR}/asahi-fwextract
+	dosbin ${FILESDIR}/asahi-fwextract-compat
 	dosbin ${FILESDIR}/update-vendor-firmware
 
 	# install for now a simple rc script into /etc/local.d
@@ -37,7 +37,7 @@ src_install() {
 
 pkg_postinst() {
 	elog "Asahi vendor firmware update script"
-	elog "Please run 'asahi-fwextract' after each update of this package."
+	elog "Please run 'asahi-fwextract-compat' after each update of this package."
 
 	if [ -e ${ROOT}/bin/update-vendor-fw -o -e ${ROOT}/etc/local.d/apple-firmware.start ]; then
 		ewarn "please remober to remove '/bin/update-vendor-fw' and"
