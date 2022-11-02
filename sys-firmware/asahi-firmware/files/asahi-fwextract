@@ -3,6 +3,11 @@
 
 set -e
 
+if [ $(whoami) -ne "root" ]; then
+    echo "This script must be run as root"
+    exit 1
+fi
+
 PREFIX="/boot/efi"
 
 if [ ! -f ${PREFIX}/asahi/all_firmware.tar.gz ]; then
