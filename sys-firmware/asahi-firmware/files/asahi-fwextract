@@ -9,13 +9,14 @@ if [ $(whoami) -ne "root" ]; then
 fi
 
 PREFIX="/boot/efi"
+FW_ARCHIVE="asahi/all_firmware.tar.gz"
 
-if [ ! -f ${PREFIX}/asahi/all_firmware.tar.gz ]; then
+if [ ! -f ${PREFIX}/${FW_ARCHIVE} ]; then
     printf '==> No /boot/efi/asahi/all_firmware.tar.gz, trying /boot'
     PREFIX="/boot"
-    if [ ! -f ${PREFIX}/asahi/all_firmware.gz ]; then
+    if [ ! -f ${PREFIX}/${FW_ARCHIVE} ]; then
         printf '==> No /boot/asahi/all_firmware.tar.gz. Skipping firmware upgrade.'
-        return 0
+        exit 1
     fi
 fi
 
