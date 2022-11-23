@@ -9,29 +9,26 @@ PYTHON_COMPAT=( python3_{8..10} )
 inherit distutils-r1
 
 _name=asahi-installer
+MY_P="0.5pre10"
 
 DESCRIPTION="Asahi FW extraction script"
 HOMEPAGE="https://asahilinux.org"
-SRC_URI="https://github.com/AsahiLinux/${_name}/archive/refs/tags/v${PV}.tar.gz -> ${PN}-${PV}.tar.gz"
+SRC_URI="https://github.com/AsahiLinux/${_name}/archive/refs/tags/v${MY_P}.tar.gz -> ${PN}-${PV}.tar.gz"
 
 LICENSE="MIT"
 SLOT="0"
 KEYWORDS="arm64"
 
 DEPEND="sys-apps/asahi-scripts"
-RDEPEND="${DEPEND}"
+RDEPEND="${DEPEND}
+	app-arch/lzfse"
 BDEPEND=""
 
-S="${WORKDIR}/${_name}-${PV}"
+S="${WORKDIR}/${_name}-${MY_P}"
 
 src_install() {
 	distutils-r1_src_install
 
-	dosbin ${FILESDIR}/asahi-fwextract
-
-	# install for now a simple rc script into /etc/local.d
-	exeinto /etc/local.d/
-	doexe ${FILESDIR}/asahi-firmware.start
 }
 
 pkg_postinst() {
@@ -41,5 +38,14 @@ pkg_postinst() {
 	if [ -e ${ROOT}/bin/update-vendor-fw -o -e ${ROOT}/etc/local.d/apple-firmware.start ]; then
 		ewarn "Please remember to remove '/{s}bin/update-vendor-fw' and"
 		ewarn "'/etc/local.d/apple-firmware.start'"
+	fi
+
+	if [ -e ${ROOT}/etc/local.d/asahi-firmware.start ]; then
+		ewarn "Please remove /etc/local.d/asahi-firmware.start as it is"
+		ewarn "obsolete and no longer required."
+	fi
+
+	if [ -e ${ROOT}/sbin/update-vendor-firmware ]; then
+		ewarn "Please remove /sbin/update-vendor-firmware"
 	fi
 }

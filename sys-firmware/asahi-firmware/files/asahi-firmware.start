@@ -1,9 +1,0 @@
-#!/bin/bash
-# SPDX-License-Identifier: MIT
-
-if [ -e /etc/local.d/apple-firmware.start ]; then
-    return 0
-fi
-
-# Check for updates to Apple Silicon firmware at boot
-exec /usr/local/bin/update-vendor-firmware
