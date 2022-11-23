@@ -10,7 +10,7 @@ DESCRIPTION="Apple Silicon support scripts"
 HOMEPAGE="https://asahilinux.org/"
 LICENSE="MIT"
 SLOT="0"
-KEYWORDS="~arm64"
+KEYWORDS="arm64"
 
 PATCHES=("${FILESDIR}/makefile.patch")
 
@@ -31,10 +31,11 @@ src_compile() {
 
 src_install() {
         default
+	emake DESTDIR="${D}" SYS_PREFIX="" install-dracut || die "Error installing dracut modules!"
 }
 
 pkg_postinst() {
-	if [ ! -e ${ROOT}/usr/lib/asahi-boot ]; then
+	if [[ ! -e ${ROOT}/usr/lib/asahi-boot ]]; then
 		ewarn "These scripts are intended for use on Apple Silicon"
 		ewarn "machines with the Asahi tooling installed! Please"
 		ewarn "install sys-boot/m1n1, sys-boot/u-boot and"
@@ -44,15 +45,18 @@ pkg_postinst() {
 	elog "Asahi scripts have been installed to /usr/. For more"
 	elog "information on how to use them, please visit the Wiki."
 
-	if [ -e ${ROOT}/bin/update-m1n1 ]; then
+	if [[ -e ${ROOT}/bin/update-m1n1 ]]; then
 		ewarn "You need to remove /bin/update-m1n1."
 	fi
 
-	if [ -e ${ROOT}/usr/local/share/asahi-scripts/functions.sh ]; then
+	if [[ -e ${ROOT}/usr/local/share/asahi-scripts/functions.sh ]]; then
 		ewarn "You have upgraded to a new version of ${PN}. Please"
 		ewarn "remove /usr/local/share/asahi-scripts/,"
 		ewarn " /usr/local/bin/update-m1n1, and"
 		ewarn "/usr/local/bin/update-vendor-firmware."
 	fi
 
+	if [[ -e ${ROOT}/etc/dracut.conf.d/10-apple.conf ]]; then
+		ewarn "Please remove /etc/dracut.conf.d/10-apple.conf"
+	fi
 }
