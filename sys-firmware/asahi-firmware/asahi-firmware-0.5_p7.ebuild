@@ -9,7 +9,7 @@ PYTHON_COMPAT=( python3_{8..10} )
 inherit distutils-r1
 
 _name=asahi-installer
-MY_P="0.5pre10"
+MY_P="0.5pre7"
 
 DESCRIPTION="Asahi FW extraction script"
 HOMEPAGE="https://asahilinux.org"
@@ -17,7 +17,7 @@ SRC_URI="https://github.com/AsahiLinux/${_name}/archive/refs/tags/v${MY_P}.tar.g
 
 LICENSE="MIT"
 SLOT="0"
-KEYWORDS=""
+KEYWORDS="arm64"
 
 DEPEND="sys-apps/asahi-scripts"
 RDEPEND="${DEPEND}
