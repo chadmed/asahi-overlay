@@ -29,7 +29,7 @@ BDEPEND="${BDEPEND}
 	rust? ( >=virtual/rust-1.62.0 )
 "
 
-KEYWORDS="~arm64"
+KEYWORDS="arm64"
 
 src_unpack() {
     unpack ${PN}-${PV}.tar.gz || die "Could not unpack the archive"
