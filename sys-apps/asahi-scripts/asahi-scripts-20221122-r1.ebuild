@@ -10,9 +10,10 @@ DESCRIPTION="Apple Silicon support scripts"
 HOMEPAGE="https://asahilinux.org/"
 LICENSE="MIT"
 SLOT="0"
-KEYWORDS=""
+KEYWORDS="arm64"
 
-PATCHES=("${FILESDIR}/makefile.patch")
+PATCHES=("${FILESDIR}/makefile.patch"
+	 "${FILESDIR}/update-m1n1-dtbs.patch")
 
 BDEPEND="
     sys-devel/make"
