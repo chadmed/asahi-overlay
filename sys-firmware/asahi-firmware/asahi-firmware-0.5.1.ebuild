@@ -14,7 +14,7 @@ MY_P="0.5.1"
 DESCRIPTION="Asahi FW extraction script"
 HOMEPAGE="https://asahilinux.org"
 SRC_URI="https://github.com/AsahiLinux/${_name}/archive/refs/tags/v${MY_P}.tar.gz -> ${PN}-${PV}.tar.gz"
-
+PATCHES=("${FILESDIR}/modname.patch")
 LICENSE="MIT"
 SLOT="0"
 KEYWORDS="arm64"
