@@ -9,7 +9,7 @@ PYTHON_COMPAT=( python3_{8..10} )
 inherit distutils-r1
 
 _name=asahi-installer
-MY_P="0.5pre7"
+MY_P="0.5.1"
 
 DESCRIPTION="Asahi FW extraction script"
 HOMEPAGE="https://asahilinux.org"
