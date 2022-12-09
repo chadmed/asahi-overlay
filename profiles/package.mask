@@ -1,0 +1,5 @@
+# mask mesa ebuilds claiming to be 23.0
+# should be removed at the beginning of 2023 to avoid confusion with
+# actual mesa 23.0 releases.
+=media-libs/mesa-23.0
+=media-libs/mesa-23.0-r1
