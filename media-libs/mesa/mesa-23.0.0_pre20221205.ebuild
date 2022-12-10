@@ -16,7 +16,7 @@ EGIT_REPO_URI="https://gitlab.freedesktop.org/asahi/mesa.git"
 EGIT_COMMIT="af7db4903008b012bca13558261d552ed0828b7d"
 EGIT_MIN_CLONE_TYPE="single"
 inherit git-r3
-KEYWORDS="~arm64"
+KEYWORDS=""
 
 LICENSE="MIT"
 SLOT="0"
