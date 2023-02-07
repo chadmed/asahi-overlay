@@ -13,7 +13,7 @@ DESCRIPTION="OpenGL-like graphic library for Linux"
 HOMEPAGE="https://www.mesa3d.org/ https://mesa.freedesktop.org/"
 
 EGIT_REPO_URI="https://gitlab.freedesktop.org/asahi/mesa.git"
-EGIT_COMMIT="7be6b639a915d66fab9069a2b42e6194ed0d1fb2"
+EGIT_COMMIT="77aabd78399aa2c39f841306b501755d930ba208"
 EGIT_MIN_CLONE_TYPE="single"
 inherit git-r3
 KEYWORDS=""
