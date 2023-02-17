@@ -13,6 +13,7 @@ MY_PV="20221229"
 DESCRIPTION="OpenGL-like graphic library for Linux"
 HOMEPAGE="https://www.mesa3d.org/ https://mesa.freedesktop.org/"
 SRC_URI="https://gitlab.freedesktop.org/asahi/mesa/-/archive/asahi-${MY_PV}/mesa-asahi-${MY_PV}.tar.gz"
+S="${WORKDIR}/mesa-asahi-${MY_PV}"
 
 KEYWORDS=""
 
@@ -190,7 +191,7 @@ BDEPEND="
 	wayland? ( dev-util/wayland-scanner )
 "
 
-S="${WORKDIR}/${MY_P}"
+#S="${WORKDIR}/${MY_P}"
 EGIT_CHECKOUT_DIR=${S}
 
 QA_WX_LOAD="
