@@ -190,7 +190,7 @@ BDEPEND="
 	wayland? ( dev-util/wayland-scanner )
 "
 
-S="${WORKDIR}/${MY_P}"
+S="${WORKDIR}/mesa-asahi-${MY_PV}"
 EGIT_CHECKOUT_DIR=${S}
 
 QA_WX_LOAD="
