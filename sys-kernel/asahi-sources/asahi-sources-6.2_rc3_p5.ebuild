@@ -1,4 +1,4 @@
-# Copyright 1999-2022 Gentoo Authors
+# Copyright 2023 James Calligeros <jcalligeros99@gmail.com>
 # Distributed under the terms of the GNU General Public License v2
 
 EAPI="8"
@@ -24,12 +24,9 @@ DESCRIPTION="Asahi Linux kernel sources"
 HOMEPAGE="https://asahilinux.org"
 KERNEL_URI="https://github.com/AsahiLinux/linux/archive/refs/tags/${MY_P}.tar.gz -> ${PN}-${PV}.tar.gz"
 SRC_URI="${KERNEL_URI} ${GENPATCHES_URI} ${ARCH_URI}"
-IUSE="experimental rust"
-BDEPEND="${BDEPEND}
-	rust? ( >=virtual/rust-1.62.0 )
-"
 
-KEYWORDS="~arm64"
+IUSE="experimental rust"
+KEYWORDS="arm64"
 
 src_unpack() {
     unpack ${PN}-${PV}.tar.gz || die "Could not unpack the archive"
@@ -53,6 +50,6 @@ pkg_postinst() {
     einfo "For more information about Asahi Linux please visit ${HOMEPAGE},"
     einfo "or consult the Wiki at https://github.com/AsahiLinux/docs/wiki."
     use rust && ewarn "Building kernel rust drivers requires the bindgen-cli crate and"
-    use rust && ewarn "Rust to be built with the rust-src USE flag enabled!"
+    use rust && ewarn "the use of Rustup and Cargo to manage your Rust versions! Ahead be many a dragon..."
     kernel-2_pkg_postinst
 }
