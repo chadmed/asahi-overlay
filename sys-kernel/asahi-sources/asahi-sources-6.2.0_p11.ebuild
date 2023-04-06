@@ -26,7 +26,7 @@ KERNEL_URI="https://github.com/AsahiLinux/linux/archive/refs/tags/${MY_P}.tar.gz
 SRC_URI="${KERNEL_URI} ${GENPATCHES_URI} ${ARCH_URI}"
 
 IUSE="experimental rust"
-KEYWORDS="~arm64"
+KEYWORDS="arm64"
 
 src_unpack() {
     unpack ${PN}-${PV}.tar.gz || die "Could not unpack the archive"
