@@ -14,10 +14,12 @@ detect_arch
 
 if [[ ${PV} != ${PV/_rc} ]] ; then
     # $PV is expected to be of following form: 6.0_rc5_p1
-    MY_P="asahi-$(ver_rs 2 - $(ver_cut 1-4))-$(ver_cut 6)"
+    MY_TAG="$(ver_cut 6)"
+    MY_P="asahi-$(ver_rs 2 - $(ver_cut 1-4))-${MY_TAG}"
 else
     # $PV is expected to be of following form: 5.19.0_p1
-    MY_P="asahi-$(ver_cut 1-2)-$(ver_cut 5)"
+    MY_TAG="$(ver_cut 5)"
+    MY_P="asahi-$(ver_cut 1-2)-${MY_TAG}"
 fi
 
 DESCRIPTION="Asahi Linux kernel sources"
@@ -42,6 +44,7 @@ src_prepare() {
     #    unipatch "${UNIPATCH_LIST_DEFAULT} ${UNIPATCH_LIST_GENPATCHES} ${UNIPATCH_LIST}"
     #unpack_fix_install_path
     #env_setup_xmakeopts
+    echo "-${MY_TAG}" > localversion.10-pkgrel
     cd "${S}" || die
 }
 
