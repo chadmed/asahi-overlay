@@ -9,7 +9,7 @@ HOMEPAGE="https://asahilinux.org/"
 LICENSE="GPL-2"
 KEYWORDS="~arm64"
 SLOT="0"
-SRC_URI="https://github.com/AsahiLinux/u-boot/archive/refs/tags/asahi-v2023.01-1.tar.gz -> ${PN}-${PV}.tar.gz"
+SRC_URI="https://github.com/AsahiLinux/u-boot/archive/refs/tags/asahi-v2023.01-3.tar.gz -> ${PN}-${PV}.tar.gz"
 MY_P="u-boot-asahi-v2023.01-3"
 
 BDEPEND="
