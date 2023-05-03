@@ -8,15 +8,15 @@ PYTHON_COMPAT=( python3_{8..11} )
 inherit llvm meson-multilib python-any-r1 linux-info
 
 MY_P="${P/_/-}"
+MY_PV="20230321"
 
 DESCRIPTION="OpenGL-like graphic library for Linux"
 HOMEPAGE="https://www.mesa3d.org/ https://mesa.freedesktop.org/"
 
-EGIT_REPO_URI="https://gitlab.freedesktop.org/asahi/mesa.git"
-EGIT_COMMIT="asahi-20230321"
-EGIT_MIN_CLONE_TYPE="single"
-inherit git-r3
-KEYWORDS="~arm64"
+SRC_URI="https://gitlab.freedesktop.org/asahi/mesa/-/archive/asahi-${MY_PV}/mesa-asahi-${MY_PV}.tar.gz"
+S="${WORKDIR}/mesa-asahi-${MY_PV}"
+
+KEYWORDS="arm64"
 
 LICENSE="MIT"
 SLOT="0"
@@ -192,7 +192,6 @@ BDEPEND="
 	wayland? ( dev-util/wayland-scanner )
 "
 
-S="${WORKDIR}/${MY_P}"
 EGIT_CHECKOUT_DIR=${S}
 
 QA_WX_LOAD="
