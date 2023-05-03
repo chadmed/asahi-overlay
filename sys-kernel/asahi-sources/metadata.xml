@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE pkgmetadata SYSTEM "https://www.gentoo.org/dtd/metadata.dtd">
+<pkgmetadata>
+<maintainer type="person">
+  <email>jcalligeros99@gmail.com</email>
+  <name>James Calligeros</name>
+</maintainer>
+<use>
+  <flag name="symlink">Automatically symlink the kernel sources to /usr/src/linux</flag>
+  <flag name="rust">Pull in required Rust infrastructure.</flag>
+</use>
+<upstream>
+  <remote-id type="github">AsahiLinux/linux</remote-id>
+</upstream>
+</pkgmetadata>

@@ -5,7 +5,7 @@
         <description lang="en">Asahi Linux overlay providing support packages for Apple Silicon devices</description>
         <homepage>https://github.com/chadmed/asahi-overlay</homepage>
         <owner>
-            <name>chadmed  </name>
+            <name>chadmed</name>
             <email>jcalligeros99@gmail.com</email>
         </owner>
         <source type="git">https://github.com/chadmed/asahi-overlay.git</source>
