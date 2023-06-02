@@ -9,8 +9,12 @@ HOMEPAGE="https://asahilinux.org/"
 LICENSE="GPL-2"
 KEYWORDS="arm64"
 SLOT="0"
-SRC_URI="https://github.com/AsahiLinux/u-boot/archive/refs/tags/asahi-v2023.01-3.tar.gz -> ${PN}-${PV}.tar.gz"
-MY_P="u-boot-asahi-v2023.01-3"
+
+# $PV is expected to be of following form: 2023.01_p3
+MY_TAG="$(ver_cut 4)"
+MY_P="asahi-v$(ver_cut 1-2)-${MY_TAG}"
+
+SRC_URI="https://github.com/AsahiLinux/u-boot/archive/refs/tags/${MY_P}.tar.gz -> ${PN}-${PV}.tar.gz"
 
 BDEPEND="
         app-arch/cpio
@@ -30,7 +34,7 @@ RDEPEND="${BDEPEND}
 
 src_unpack() {
     unpack ${PN}-${PV}.tar.gz || die "Could not unpack sources!"
-    mv ${MY_P} ${PN}-${PV}
+    mv u-boot-${MY_P} ${PN}-${PV}
 }
 
 src_configure() {
