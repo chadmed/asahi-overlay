@@ -1,0 +1,148 @@
+From f2153d56b3a7a2e4650606d972b0786a18cd7f7e Mon Sep 17 00:00:00 2001
+From: Asahi Lina <lina@asahilina.net>
+Date: Fri, 2 Jun 2023 16:51:07 +0900
+Subject: [PATCH 1/4] asahi: Use os_dupfd_cloexec() instead of dup()
+
+This fixes file descriptor leaks in konsole/etc.
+
+Signed-off-by: Asahi Lina <lina@asahilina.net>
+---
+ src/asahi/lib/agx_device.c | 5 +++--
+ 1 file changed, 3 insertions(+), 2 deletions(-)
+
+diff --git a/src/asahi/lib/agx_device.c b/src/asahi/lib/agx_device.c
+index 99cbb22b0425..3ce130ad7bdd 100644
+--- a/src/asahi/lib/agx_device.c
++++ b/src/asahi/lib/agx_device.c
+@@ -14,6 +14,7 @@
+ #include "drm-uapi/asahi_drm.h"
+ #include "drm-uapi/dma-buf.h"
+ #include "util/log.h"
++#include "util/os_file.h"
+ #include "util/os_mman.h"
+ #include "util/simple_mtx.h"
+ 
+@@ -232,7 +233,7 @@ agx_bo_import(struct agx_device *dev, int fd)
+ 
+       bo->flags = AGX_BO_SHARED | AGX_BO_SHAREABLE;
+       bo->handle = gem_handle;
+-      bo->prime_fd = dup(fd);
++      bo->prime_fd = os_dupfd_cloexec(fd);
+       bo->label = "Imported BO";
+       assert(bo->prime_fd >= 0);
+ 
+@@ -297,7 +298,7 @@ agx_bo_export(struct agx_bo *bo)
+    if (!(bo->flags & AGX_BO_SHARED)) {
+       bo->flags |= AGX_BO_SHARED;
+       assert(bo->prime_fd == -1);
+-      bo->prime_fd = dup(fd);
++      bo->prime_fd = os_dupfd_cloexec(fd);
+ 
+       /* If there is a pending writer to this BO, import it into the buffer
+        * for implicit sync.
+-- 
+2.39.3
+
+
+From badf1f82aa15f0c94ca116f5615af8f4813e4310 Mon Sep 17 00:00:00 2001
+From: Asahi Lina <lina@asahilina.net>
+Date: Fri, 2 Jun 2023 17:17:19 +0900
+Subject: [PATCH 2/4] asahi: Remove batch handle junk leftovers from macOS
+ support
+
+This is dead code except it's actually leaking memory...
+
+Signed-off-by: Asahi Lina <lina@asahilina.net>
+---
+ src/gallium/drivers/asahi/agx_pipe.c | 20 --------------------
+ 1 file changed, 20 deletions(-)
+
+diff --git a/src/gallium/drivers/asahi/agx_pipe.c b/src/gallium/drivers/asahi/agx_pipe.c
+index ff0dc6e43f09..285ce018373a 100644
+--- a/src/gallium/drivers/asahi/agx_pipe.c
++++ b/src/gallium/drivers/asahi/agx_pipe.c
+@@ -1510,26 +1510,6 @@ agx_flush_batch(struct agx_context *ctx, struct agx_batch *batch)
+       batch->occlusion_buffer.gpu = 0;
+    }
+ 
+-   unsigned handle_count = agx_batch_num_bo(batch) +
+-                           agx_pool_num_bos(&batch->pool) +
+-                           agx_pool_num_bos(&batch->pipeline_pool);
+-
+-   uint32_t *handles = calloc(sizeof(uint32_t), handle_count);
+-   unsigned handle = 0, handle_i = 0;
+-
+-   AGX_BATCH_FOREACH_BO_HANDLE(batch, handle) {
+-      handles[handle_i++] = handle;
+-   }
+-
+-   agx_pool_get_bo_handles(&batch->pool, handles + handle_i);
+-   handle_i += agx_pool_num_bos(&batch->pool);
+-
+-   agx_pool_get_bo_handles(&batch->pipeline_pool, handles + handle_i);
+-   handle_i += agx_pool_num_bos(&batch->pipeline_pool);
+-
+-   /* Size calculation should've been exact */
+-   assert(handle_i == handle_count);
+-
+    unsigned cmd_ta_id = agx_get_global_id(dev);
+    unsigned cmd_3d_id = agx_get_global_id(dev);
+    unsigned encoder_id = agx_get_global_id(dev);
+-- 
+2.39.3
+
+
+From 1a2826d88852a3ff6284a9b6c80f8448862da763 Mon Sep 17 00:00:00 2001
+From: Asahi Lina <lina@asahilina.net>
+Date: Fri, 2 Jun 2023 17:20:44 +0900
+Subject: [PATCH 3/4] asahi: Fix memory leak in agx_nir_lower_sysvals()
+
+We need to free the dynarray.
+
+Signed-off-by: Asahi Lina <lina@asahilina.net>
+---
+ src/gallium/drivers/asahi/agx_nir_lower_sysvals.c | 3 +++
+ 1 file changed, 3 insertions(+)
+
+diff --git a/src/gallium/drivers/asahi/agx_nir_lower_sysvals.c b/src/gallium/drivers/asahi/agx_nir_lower_sysvals.c
+index 3ffe61ac36de..f804254cb6a3 100644
+--- a/src/gallium/drivers/asahi/agx_nir_lower_sysvals.c
++++ b/src/gallium/drivers/asahi/agx_nir_lower_sysvals.c
+@@ -315,5 +315,8 @@ agx_nir_lower_sysvals(nir_shader *shader, struct agx_compiled_shader *compiled,
+       &state);
+ 
+    *push_size = lay_out_uniforms(compiled, &state);
++
++   util_dynarray_fini(&state.load_preambles);
++
+    return true;
+ }
+-- 
+2.39.3
+
+
+From 67be712bf6b1c8dd0a09dff46315d7b7a0fa1b59 Mon Sep 17 00:00:00 2001
+From: Asahi Lina <lina@asahilina.net>
+Date: Fri, 2 Jun 2023 17:25:49 +0900
+Subject: [PATCH 4/4] asahi: Do not leak meta shader NIR
+
+Signed-off-by: Asahi Lina <lina@asahilina.net>
+---
+ src/asahi/lib/agx_meta.c | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/src/asahi/lib/agx_meta.c b/src/asahi/lib/agx_meta.c
+index b9297851cc3f..faaf09c59a24 100644
+--- a/src/asahi/lib/agx_meta.c
++++ b/src/asahi/lib/agx_meta.c
+@@ -27,6 +27,7 @@ agx_compile_meta_shader(struct agx_meta_cache *cache, nir_shader *shader,
+    res->ptr = agx_pool_upload_aligned_with_bo(&cache->pool, binary.data,
+                                               binary.size, 128, &res->bo);
+    util_dynarray_fini(&binary);
++   ralloc_free(shader);
+ 
+    return res;
+ }
+-- 
+2.39.3
+
