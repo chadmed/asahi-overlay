@@ -220,9 +220,8 @@ llvm_check_deps() {
 }
 
 PATCHES=(
-        # memleak fixes from https://gitlab.freedesktop.org/asahi/mesa/-/merge_requests/80
-        # and https://gitlab.freedesktop.org/asahi/mesa/-/merge_requests/81
-        "${FILESDIR}/${PN}-20230530_memleak-fixes.patch"
+        # none
+        #"${FILESDIR}/.patch"
 )
 
 pkg_pretend() {
