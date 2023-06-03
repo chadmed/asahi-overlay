@@ -31,8 +31,7 @@ IUSE="experimental rust"
 KEYWORDS="~arm64"
 
 PATCHES=(
-        # XFS Metadata Corruption Fix from 6.3.5
-        "${FILESDIR}/6.3.0_xfs-fix-livelock-in-delayed-allocation-at-ENOSPC.patch"
+        # none
 )
 
 src_unpack() {
