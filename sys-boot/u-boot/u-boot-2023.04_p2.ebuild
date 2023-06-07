@@ -7,7 +7,7 @@ PYTHON_COMPAT=( python3_{10..11} )
 DESCRIPTION="Asahi Linux fork of Das U-Boot"
 HOMEPAGE="https://asahilinux.org/"
 LICENSE="GPL-2"
-KEYWORDS="~arm64"
+KEYWORDS="arm64"
 SLOT="0"
 
 # $PV is expected to be of following form: 2023.01_p3
