@@ -15,7 +15,7 @@ HOMEPAGE="https://asahilinux.org"
 SRC_URI="https://github.com/AsahiLinux/${_name}/archive/refs/tags/v${PV}.tar.gz -> ${PN}-${PV}.tar.gz"
 LICENSE="MIT"
 SLOT="0"
-KEYWORDS="~arm64"
+KEYWORDS="arm64"
 
 DEPEND=">=sys-apps/asahi-scripts-20230606"
 RDEPEND="${DEPEND}
