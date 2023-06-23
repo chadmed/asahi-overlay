@@ -6,6 +6,7 @@
   <name>Sasha Finkelstein</name>
 </maintainer>
 <use>
+  <flag name="systemd">Install systemd-specific files</flag>
 </use>
 <upstream>
   <remote-id type="github">WhatAmISupposedToPutHere/tiny-dfr</remote-id>

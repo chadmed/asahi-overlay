@@ -252,6 +252,8 @@ LICENSE="MIT"
 SLOT="0"
 KEYWORDS="~arm64"
 
+IUSE="systemd"
+
 SRC_URI="
 	$(cargo_crate_uris)
 	https://gitlab.gnome.org/GNOME/librsvg/-/archive/2.56.0/librsvg-2.56.0.tar.gz -> librsvg-2.56.0.crate
@@ -277,7 +279,7 @@ src_install() {
 	doins share/tiny-dfr/*
 
 	udev_dorules etc/udev/rules.d/*
-	systemd_dounit etc/systemd/system/tiny-dfr.service
-	systemd_newunit /dev/null 'systemd-backlight@backlight:228200000.display-pipe.0.service'
+	use systemd && systemd_dounit etc/systemd/system/tiny-dfr.service
+	use systemd && systemd_newunit /dev/null 'systemd-backlight@backlight:228200000.display-pipe.0.service'
 	newinitd "${FILESDIR}"/${PN}.initd ${PN}
 }
