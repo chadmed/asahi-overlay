@@ -281,5 +281,5 @@ src_install() {
 	udev_dorules etc/udev/rules.d/*
 	use systemd && systemd_dounit etc/systemd/system/tiny-dfr.service
 	use systemd && systemd_newunit /dev/null 'systemd-backlight@backlight:228200000.display-pipe.0.service'
-	newinitd "${FILESDIR}"/${PN}.initd ${PN}
+	use systemd || newinitd "${FILESDIR}"/${PN}.initd ${PN}
 }
