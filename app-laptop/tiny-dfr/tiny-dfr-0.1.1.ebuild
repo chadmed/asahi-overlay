@@ -256,7 +256,7 @@ IUSE="systemd"
 
 SRC_URI="
 	$(cargo_crate_uris)
-	https://gitlab.gnome.org/GNOME/librsvg/-/archive/2.56.0/librsvg-2.56.0.tar.gz -> librsvg-2.56.0.crate
+	https://gitlab.gnome.org/GNOME/librsvg/-/archive/2.56.0/librsvg-2.56.0.tar.bz2 -> librsvg-2.56.0.crate
 	https://github.com/WhatAmISupposedToPutHere/tiny-dfr/archive/refs/tags/v${PV}.tar.gz -> ${P}.tar.gz
 "
 
