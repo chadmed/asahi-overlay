@@ -17,7 +17,7 @@ MY_P="asahi-v$(ver_cut 1-2)-${MY_TAG}"
 SRC_URI="https://github.com/AsahiLinux/u-boot/archive/refs/tags/${MY_P}.tar.gz -> ${PN}-${PV}.tar.gz"
 
 BDEPEND="
-        app-arch/cpio
+	app-arch/cpio
 	dev-lang/perl
 	sys-devel/bc
 	sys-devel/bison
@@ -26,31 +26,30 @@ BDEPEND="
 	>=sys-libs/ncurses-5.2
 	virtual/libelf
 	virtual/pkgconfig
-        sys-apps/dtc
-        dev-vcs/git"
+	sys-apps/dtc
+	dev-vcs/git"
 
 RDEPEND="${BDEPEND}
-         sys-apps/asahi-scripts"
+	sys-apps/asahi-scripts"
 
 src_unpack() {
-    unpack ${PN}-${PV}.tar.gz || die "Could not unpack sources!"
-    mv u-boot-${MY_P} ${PN}-${PV}
+	unpack ${PN}-${PV}.tar.gz || die "Could not unpack sources!"
+	mv u-boot-${MY_P} ${PN}-${PV}
 }
 
 src_configure() {
-    emake apple_m1_defconfig || die "failed to apply defconfig!"
+	emake apple_m1_defconfig || die "failed to apply defconfig!"
 }
 
 src_compile() {
-    cd "${S}" || die
-    emake || die "emake failed"
+	cd "${S}" || die
+	emake || die "emake failed"
 }
 
 src_install() {
 	dodir /usr/lib/asahi-boot
-	cp ${S}/u-boot-nodtb.bin "${ED%/}"/usr/lib/asahi-boot/u-boot-nodtb.bin || die
+	cp "${S}"/u-boot-nodtb.bin "${ED}"/usr/lib/asahi-boot/u-boot-nodtb.bin || die
 }
-
 
 pkg_postinst() {
 	elog "U-Boot has been installed to /usr/lib/asahi-boot/u-boot-nodtb.bin."
