@@ -1,0 +1,11 @@
+DEFINED_PHASES=install unpack
+DEPEND=>=media-libs/alsa-lib-1.2.1 media-libs/alsa-ucm-conf
+DESCRIPTION=ALSA ucm configuration files for Apple silicon devices
+EAPI=8
+HOMEPAGE=https://alsa-project.org/wiki/Main_Page
+KEYWORDS=arm64
+LICENSE=BSD
+RDEPEND=>=media-libs/alsa-lib-1.2.1
+SLOT=0
+SRC_URI=https://github.com/AsahiLinux/alsa-ucm-conf-asahi/archive/refs/tags/v1.tar.gz -> alsa-ucm-conf-asahi-1.0.tar.gz
+_md5_=0ad419af07587d03ad37f188ee1da7d5

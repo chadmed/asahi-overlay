@@ -1,0 +1,8 @@
+DEFINED_PHASES=install unpack
+DESCRIPTION=Asahi Linux configurations
+EAPI=8
+HOMEPAGE=https://asahilinux.org/
+KEYWORDS=arm64
+LICENSE=MIT
+SLOT=0
+_md5_=a0a16fea00cbc7138a183a92656e9416
