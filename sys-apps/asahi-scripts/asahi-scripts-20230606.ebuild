@@ -1,10 +1,7 @@
 # Copyright 2022 James Calligeros <jcalligeros99@gmail.com>
 # Distributed under the terms of the GNU General Public License v2
 
-EAPI="7"
-PYTHON_COMPAT=( python3_{10..11} )
-
-inherit eutils autotools toolchain-funcs
+EAPI="8"
 
 DESCRIPTION="Apple Silicon support scripts"
 HOMEPAGE="https://asahilinux.org/"
@@ -16,22 +13,20 @@ PATCHES=("${FILESDIR}/makefile.patch"
 	 "${FILESDIR}/update-m1n1-dtbs.patch")
 
 BDEPEND="
-    sys-devel/make"
-
-inherit distutils-r1
+	sys-devel/make"
 
 SRC_URI="https://github.com/AsahiLinux/${PN}/archive/refs/tags/${PV}.tar.gz -> ${PN}-${PV}.tar.gz"
 
 src_prepare() {
-        default
+	default
 }
 
 src_compile() {
-        emake || die "Could not invoke emake"
+	emake || die "Could not invoke emake"
 }
 
 src_install() {
-        default
+	default
 	emake DESTDIR="${D}" SYS_PREFIX="" install-dracut || die "Error installing dracut modules!"
 }
 
