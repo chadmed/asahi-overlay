@@ -8,6 +8,7 @@
 <use>
   <flag name="symlink">Automatically symlink the kernel sources to /usr/src/linux</flag>
   <flag name="rust">Pull in required Rust infrastructure.</flag>
+  <flag name="experimental">Build experimental genpatches</flag>
 </use>
 <upstream>
   <remote-id type="github">AsahiLinux/linux</remote-id>
