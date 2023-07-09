@@ -1,15 +1,14 @@
-BDEPEND=sys-devel/make sys-apps/dtc clang? ( sys-devel/clang ) sys-devel/gnuconfig >=app-portage/elt-patches-20170815 || ( >=sys-devel/automake-1.16.5:1.16 ) >=sys-devel/autoconf-2.71-r5 >=sys-devel/libtool-2.4.7 python_targets_python3_10? ( >=dev-lang/python-3.10.12:3.10 ) python_targets_python3_11? ( >=dev-lang/python-3.11.4:3.11 ) >=dev-python/setuptools-67.7.2[python_targets_python3_10(-)?,python_targets_python3_11(-)?]
-DEFINED_PHASES=compile configure install postinst postrm prepare test
+BDEPEND=sys-devel/make sys-apps/dtc clang? ( sys-devel/clang )
+DEFINED_PHASES=compile install postinst postrm
 DESCRIPTION=Apple Silicon bootloader and experimentation playground
 EAPI=7
 HOMEPAGE=https://asahilinux.org/
-INHERIT=eutils autotools toolchain-funcs distutils-r1
-IUSE=clang python_targets_python3_10 python_targets_python3_11
+INHERIT=toolchain-funcs
+IUSE=clang
 KEYWORDS=arm64
 LICENSE=MIT
-RDEPEND=sys-boot/u-boot sys-kernel/asahi-sources python_targets_python3_10? ( >=dev-lang/python-3.10.12:3.10 ) python_targets_python3_11? ( >=dev-lang/python-3.11.4:3.11 )
-REQUIRED_USE=|| ( python_targets_python3_10 python_targets_python3_11 )
+RDEPEND=sys-boot/u-boot sys-kernel/asahi-sources
 SLOT=0
 SRC_URI=https://github.com/AsahiLinux/m1n1/archive/refs/tags/v1.2.9.tar.gz -> m1n1-1.2.9.tar.gz
-_eclasses_=edos2unix	33e347e171066657f91f8b0c72ec8773	strip-linguas	ac3ee41ee2d31d8c41a77c0838320cc7	wrapper	4a1902f969e5718126434fc35f3a0d9c	eutils	8f942ebdcf04334697649d4a0bf65a32	gnuconfig	b6b3e92f8b8c996400074b5f61a59256	toolchain-funcs	513c31b3346458ed1f3878b57da6d61c	multilib	c19072c3cd7ac5cb21de013f7e9832e0	libtool	9d3a9a889a6fa62ae794f817c156491b	autotools	6ae9a4347149b19a112caa1182d03bde	out-of-source-utils	1a9007554652a6e627edbccb3c25a439	multibuild	bddcb51b74f4a76724ff7cf8e7388869	multiprocessing	b4e253ab22cef7b1085e9b67c7a3b730	ninja-utils	76050953ad5b70d7e09a6ca55558db92	eapi8-dosym	5ac4857ad078256d939c44f7c64197a9	python-utils-r1	a013e16d5d896b3d8be68dd2a0e846ea	python-r1	3c6cd0f418ba702c186a9865b85e704d	distutils-r1	1c9a447ab8b90199e719e0e3a9a5cb00
-_md5_=1e6fd458a6645c6c2ad860c17ed586b8
+_eclasses_=toolchain-funcs	513c31b3346458ed1f3878b57da6d61c	multilib	c19072c3cd7ac5cb21de013f7e9832e0
+_md5_=d4415ffbb9d913659f6dfef20ebec6dc

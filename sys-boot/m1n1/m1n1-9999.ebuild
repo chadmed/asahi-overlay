@@ -2,9 +2,8 @@
 # Distributed under the terms of the GNU General Public License v2
 
 EAPI="7"
-PYTHON_COMPAT=( python3_{10..11} )
 
-inherit eutils autotools toolchain-funcs
+inherit toolchain-funcs
 
 DESCRIPTION="Apple Silicon bootloader and experimentation playground"
 HOMEPAGE="https://asahilinux.org/"
@@ -14,14 +13,14 @@ KEYWORDS=""
 IUSE="clang"
 
 BDEPEND="
-    sys-devel/make
-    sys-apps/dtc"
+	sys-devel/make
+	sys-apps/dtc"
 
 RDEPEND="
-    sys-boot/u-boot
-    sys-kernel/asahi-sources"
+	sys-boot/u-boot
+	sys-kernel/asahi-sources"
 
-inherit git-r3 distutils-r1
+inherit git-r3
 EGIT_REPO_URI="https://github.com/AsahiLinux/m1n1.git"
 EGIT_CLONE_TYPE="shallow"
 EGIT_SUBMODULES=( '*' )
@@ -74,17 +73,15 @@ src_compile() {
 
 src_install() {
 	dodir /usr/lib/asahi-boot
-	cp ${S}/build/m1n1.bin "${ED%/}"/usr/lib/asahi-boot/m1n1.bin || die
-	dosbin ${FILESDIR}/update-m1n1
+	cp "${S}"/build/m1n1.bin "${ED}"/usr/lib/asahi-boot/m1n1.bin || die
 }
-
 
 pkg_postinst() {
 	elog "m1n1 has been installed at /usr/lib/asahi-boot/m1n1.bin"
 	elog "You must run update-m1n1 for the new version to be installed"
 	elog "in the ESP."
 	elog "Please see the Asahi Linux Wiki for more information."
-	if [ -e ${ROOT}/bin/update-m1n1 ]; then
+	if [ -e "${ROOT}"/bin/update-m1n1 ]; then
 		ewarn "You must remove /bin/update-m1n1."
 	fi
 }
