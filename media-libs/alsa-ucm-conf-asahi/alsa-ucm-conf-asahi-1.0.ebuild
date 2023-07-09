@@ -12,7 +12,7 @@ SLOT="0"
 KEYWORDS="arm64"
 IUSE=""
 
-RDEPEND="!<media-libs/alsa-lib-1.2.1"
+RDEPEND=">=media-libs/alsa-lib-1.2.1"
 DEPEND="${RDEPEND} media-libs/alsa-ucm-conf"
 
 src_unpack() {
