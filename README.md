@@ -3,7 +3,7 @@
 An overlay for Gentoo providing packages to better support Apple Silicon
 devices.
 
-## Installing this overlay
+## Installation
 If you used [asahi-gentoosupport](https://github.com/chadmed/asahi-gentoosupport), you should not need to
 do anything. That script sets up this repo automatically. For all other users:
 
@@ -12,14 +12,13 @@ do anything. That script sets up this repo automatically. For all other users:
 `asahi.conf`
 3. Run `emaint sync -r asahi`.
 
-## Using this overlay
-This overlay takes priority over the main Gentoo ebuild tree, so no
-intervention is necessary to install the correct versions of software
-for Apple Silicon devices. If, however, you wish to use the vanilla
-Gentoo version of any package we override, append `::gentoo` to the
-package atom when calling `emerge`. For example, say we provide a patched
-Mesa that incorporates things not yet found in the upstream repo...
+## Usage
+No manual intervention is required to use this repo correctly as it
+takes precedence over the Gentoo overlay. You can override this
+behaviour and install a vanilla version of a package by appending
+`::gentoo` to the package atom.
 
+### Installing software
 * To install our version of Mesa, you would run:
 ```shell
 emerge -av mesa
@@ -30,4 +29,9 @@ emerge -av mesa
 emerge -av media-libs/mesa::gentoo
 ```
 
-Note the use of the _full_ package atom when specifying a repo.
+### Updating software
+In most cases, updating software involves nothing more than synchronising
+the repo and updating the world set as you would on any other machine.
+
+After updating m1n1, U-Boot or the kernel, it is important to run `update-m1n1`
+as root to ensure that m1n1, U-Boot and the DTBs are installed to the ESP.
