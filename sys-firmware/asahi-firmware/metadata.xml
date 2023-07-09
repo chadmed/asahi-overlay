@@ -5,8 +5,6 @@
   <email>jcalligeros99@gmail.com</email>
   <name>James Calligeros</name>
 </maintainer>
-<use>
-</use>
 <upstream>
   <remote-id type="github">AsahiLinux/asahi-installer</remote-id>
 </upstream>
