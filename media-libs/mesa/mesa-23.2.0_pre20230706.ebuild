@@ -3,7 +3,7 @@
 
 EAPI=8
 
-PYTHON_COMPAT=( python3_{10..11} )
+PYTHON_COMPAT=( python3_{10..12} )
 
 inherit llvm meson-multilib python-any-r1 linux-info
 
@@ -15,7 +15,7 @@ MY_PV="$(ver_cut 5)"
 DESCRIPTION="OpenGL-like graphic library for Linux"
 HOMEPAGE="https://www.mesa3d.org/ https://mesa.freedesktop.org/"
 
-SRC_URI="https://gitlab.freedesktop.org/asahi/mesa/-/archive/asahi-${MY_PV}/mesa-asahi-${MY_PV}.tar.gz"
+SRC_URI="https://gitlab.freedesktop.org/asahi/mesa/-/archive/asahi-${MY_PV}/mesa-asahi-${MY_PV}.tar.bz2"
 S="${WORKDIR}/mesa-asahi-${MY_PV}"
 
 KEYWORDS="arm64"
@@ -37,7 +37,16 @@ IUSE="${IUSE_VIDEO_CARDS}
 	vulkan-overlay wayland +X xa zink +zstd"
 
 REQUIRED_USE="
-	d3d9?   ( || ( video_cards_intel video_cards_r300 video_cards_r600 video_cards_radeonsi video_cards_nouveau video_cards_vmware ) )
+	d3d9? (
+		|| (
+			video_cards_intel
+			video_cards_r300
+			video_cards_r600
+			video_cards_radeonsi
+			video_cards_nouveau
+			video_cards_vmware
+		)
+	)
 	vulkan? ( video_cards_radeonsi? ( llvm ) )
 	vulkan-overlay? ( vulkan )
 	video_cards_radeon? ( x86? ( llvm ) amd64? ( llvm ) )
@@ -111,7 +120,6 @@ LLVM_DEPSTR="
 		sys-devel/llvm:16[${MULTILIB_USEDEP}]
 		sys-devel/llvm:15[${MULTILIB_USEDEP}]
 		sys-devel/llvm:14[${MULTILIB_USEDEP}]
-		sys-devel/llvm:13[${MULTILIB_USEDEP}]
 	)
 	<sys-devel/llvm-$((LLVM_MAX_SLOT + 1)):=[${MULTILIB_USEDEP}]
 "
@@ -220,8 +228,8 @@ llvm_check_deps() {
 }
 
 PATCHES=(
-        # none
-        #"${FILESDIR}/.patch"
+		# none
+		#"${FILESDIR}/.patch"
 )
 
 pkg_pretend() {
@@ -231,14 +239,14 @@ pkg_pretend() {
 		   ! use video_cards_intel &&
 		   ! use video_cards_radeonsi &&
 		   ! use video_cards_v3d; then
-			ewarn "Ignoring USE=vulkan     since VIDEO_CARDS does not contain d3d12, freedreno, intel, radeonsi, or v3d"
+			ewarn "Ignoring USE=vulkan	 since VIDEO_CARDS does not contain d3d12, freedreno, intel, radeonsi, or v3d"
 		fi
 	fi
 
 	if use opencl; then
 		if ! use video_cards_r600 &&
 		   ! use video_cards_radeonsi; then
-			ewarn "Ignoring USE=opencl     since VIDEO_CARDS does not contain r600 or radeonsi"
+			ewarn "Ignoring USE=opencl	 since VIDEO_CARDS does not contain r600 or radeonsi"
 		fi
 	fi
 
@@ -247,7 +255,7 @@ pkg_pretend() {
 		   ! use video_cards_r600 &&
 		   ! use video_cards_radeonsi &&
 		   ! use video_cards_nouveau; then
-			ewarn "Ignoring USE=vaapi      since VIDEO_CARDS does not contain d3d12, r600, radeonsi, or nouveau"
+			ewarn "Ignoring USE=vaapi	  since VIDEO_CARDS does not contain d3d12, r600, radeonsi, or nouveau"
 		fi
 	fi
 
@@ -257,7 +265,7 @@ pkg_pretend() {
 		   ! use video_cards_r600 &&
 		   ! use video_cards_radeonsi &&
 		   ! use video_cards_nouveau; then
-			ewarn "Ignoring USE=vdpau      since VIDEO_CARDS does not contain d3d12, r300, r600, radeonsi, or nouveau"
+			ewarn "Ignoring USE=vdpau	  since VIDEO_CARDS does not contain d3d12, r300, r600, radeonsi, or nouveau"
 		fi
 	fi
 
@@ -265,12 +273,12 @@ pkg_pretend() {
 		if ! use video_cards_freedreno &&
 		   ! use video_cards_nouveau &&
 		   ! use video_cards_vmware; then
-			ewarn "Ignoring USE=xa         since VIDEO_CARDS does not contain freedreno, nouveau, or vmware"
+			ewarn "Ignoring USE=xa		 since VIDEO_CARDS does not contain freedreno, nouveau, or vmware"
 		fi
 	fi
 
 	if ! use llvm; then
-		use opencl     && ewarn "Ignoring USE=opencl     since USE does not contain llvm"
+		use opencl	 && ewarn "Ignoring USE=opencl	 since USE does not contain llvm"
 	fi
 
 	if use osmesa && ! use llvm; then
