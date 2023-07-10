@@ -1,0 +1,14 @@
+Title: Major changes to the Asahi Gentoo repo
+Author: James Calligeros <jcalligeros99@gmail.com>
+Posted: 2023-07-10
+Revision: 1
+News-Item-Format: 2.0
+
+You may notice some rather large changes to some packages and ebuilds
+inside this repo. This is in an attempt to improve the integration
+of the repo with upstream Portage tools such as equery, and perhaps
+even attain "official" status on overlays.g.o.
+
+All reasonable efforts have been made to ensure that packages still
+build and install correctly. If, however, something is broken, pleaase
+drop by #asahi-alt on OFTC and ping me (@chadmed).
