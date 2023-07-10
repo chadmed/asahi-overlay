@@ -21,7 +21,6 @@
     <flag name="wayland">Enable support for <pkg>dev-libs/wayland</pkg></flag>
     <flag name="xa">Enable the XA (X Acceleration) API for Gallium3D.</flag>
     <flag name="zink">Enable the Zink OpenGL-over-Vulkan Gallium driver</flag>
-    <flag name="video_cards_asahi">Build the Asahi Gallium driver</flag>
   </use>
   <upstream>
     <remote-id type="freedesktop-gitlab">asahi/mesa</remote-id>
