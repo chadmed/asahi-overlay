@@ -1,0 +1,13 @@
+Title: asahi-meta package now available
+Author: James Calligeros <jcalligeros99@gmail.com>
+Posted: 2023-07-10
+Revision: 1
+News-Item-Format: 2.0
+
+A new metapackage is now available to simplify installation
+and dependency resolution. Steps to transition to it are
+as follows:
+
+	1) Deselect any Asahi-related packages
+	2) emerge -av asahi-meta
+	3) emerge --depclean
