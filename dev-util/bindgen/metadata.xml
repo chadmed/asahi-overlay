@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE pkgmetadata SYSTEM "http://www.gentoo.org/dtd/metadata.dtd">
+<pkgmetadata>
+    <upstream>
+        <remote-id type="github">rust-lang/rust-bindgen</remote-id>
+        <changelog>https://github.com/rust-lang/rust-bindgen/blob/master/CHANGELOG.md</changelog>
+    </upstream>
+</pkgmetadata>
