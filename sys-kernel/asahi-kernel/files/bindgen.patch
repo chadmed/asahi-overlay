@@ -1,0 +1,80 @@
+diff --git a/rust/Makefile b/rust/Makefile
+index f88d108fbef0..c187c6f3a384 100644
+--- a/rust/Makefile
++++ b/rust/Makefile
+@@ -279,7 +279,7 @@ quiet_cmd_bindgen = BINDGEN $@
+ 	$(BINDGEN) $< $(bindgen_target_flags) \
+ 		--use-core --with-derive-default --ctypes-prefix core::ffi --no-layout-tests \
+ 		--no-debug '.*' \
+-		--size_t-is-usize -o $@ -- $(bindgen_c_flags_final) -DMODULE \
++		-o $@ -- $(bindgen_c_flags_final) -DMODULE \
+ 		$(bindgen_target_cflags) $(bindgen_target_extra)
+
+ $(obj)/bindings/bindings_generated.rs: private bindgen_target_flags = \
+@@ -293,8 +293,8 @@ $(obj)/bindings/bindings_generated.rs: $(src)/bindings/bindings_helper.h \
+ # given it is `libclang`; but for consistency, future Clang changes and/or
+ # a potential future GCC backend for `bindgen`, we disable it too.
+ $(obj)/bindings/bindings_helpers_generated.rs: private bindgen_target_flags = \
+-    --blacklist-type '.*' --whitelist-var '' \
+-    --whitelist-function 'rust_helper_.*'
++    --blocklist-type '.*' --allowlist-var '' \
++    --allowlist-function 'rust_helper_.*'
+ $(obj)/bindings/bindings_helpers_generated.rs: private bindgen_target_cflags = \
+     -I$(objtree)/$(obj) -Wno-missing-prototypes -Wno-missing-declarations
+ $(obj)/bindings/bindings_helpers_generated.rs: private bindgen_target_extra = ; \
+diff --git a/rust/helpers.c b/rust/helpers.c
+index 121583282976..98d9ef47225b 100644
+--- a/rust/helpers.c
++++ b/rust/helpers.c
+@@ -122,19 +122,18 @@ void rust_helper_put_task_struct(struct task_struct *t)
+ EXPORT_SYMBOL_GPL(rust_helper_put_task_struct);
+
+ /*
+- * We use `bindgen`'s `--size_t-is-usize` option to bind the C `size_t` type
+- * as the Rust `usize` type, so we can use it in contexts where Rust
+- * expects a `usize` like slice (array) indices. `usize` is defined to be
+- * the same as C's `uintptr_t` type (can hold any pointer) but not
+- * necessarily the same as `size_t` (can hold the size of any single
++ * `bindgen` binds the C `size_t` type the Rust `usize` type, so we can
++ * use it in contexts where Rust expects a `usize` like slice (array) indices.
++ * `usize` is defined to be the same as C's `uintptr_t` type (can hold any pointer)
++ * but not necessarily the same as `size_t` (can hold the size of any single
+  * object). Most modern platforms use the same concrete integer type for
+  * both of them, but in case we find ourselves on a platform where
+  * that's not true, fail early instead of risking ABI or
+  * integer-overflow issues.
+  *
+  * If your platform fails this assertion, it means that you are in
+- * danger of integer-overflow bugs (even if you attempt to remove
+- * `--size_t-is-usize`). It may be easiest to change the kernel ABI on
++ * danger of integer-overflow bugs (even if you attempt to add
++ * `--no-size_t-is-usize`). It may be easiest to change the kernel ABI on
+  * your platform such that `size_t` matches `uintptr_t` (i.e., to increase
+  * `size_t`, because `uintptr_t` has to be at least as big as `size_t`).
+  */
+diff --git a/rust/kernel/lib.rs b/rust/kernel/lib.rs
+index ee27e10da479..1b0dcf03b9c2 100644
+--- a/rust/kernel/lib.rs
++++ b/rust/kernel/lib.rs
+@@ -95,7 +95,4 @@ fn panic(info: &core::panic::PanicInfo<'_>) -> ! {
+     pr_emerg!("{}\n", info);
+     // SAFETY: FFI call.
+     unsafe { bindings::BUG() };
+-    // Bindgen currently does not recognize `__noreturn` so `BUG` returns `()`
+-    // instead of `!`. See <https://github.com/rust-lang/rust-bindgen/issues/2094>.
+-    loop {}
+ }
+diff --git a/scripts/min-tool-version.sh b/scripts/min-tool-version.sh
+index 20d483ec6f5f..5b80c5d3a9f8 100755
+--- a/scripts/min-tool-version.sh
++++ b/scripts/min-tool-version.sh
+@@ -30,7 +30,7 @@ rustc)
+ 	echo 1.62.0
+ 	;;
+ bindgen)
+-	echo 0.56.0
++	echo 0.65.1
+ 	;;
+ *)
+ 	echo "$1: unknown tool" >&2
+

@@ -1,0 +1,18 @@
+This patch fixes a situation with the bindgen libclang version detector
+where `bindgen` stderr outputs something like this:
+`/dir/6.4.0/: clang version 16.0.7`
+and the grep would pick the '6.4.0' and think rust isn't available
+diff --git a/scripts/rust_is_available.sh b/scripts/rust_is_available.sh
+index aebbf1913..9a3b708dd 100755
+--- a/scripts/rust_is_available.sh
++++ b/scripts/rust_is_available.sh
+@@ -102,8 +102,8 @@ fi
+ # Check that the `libclang` used by the Rust bindings generator is suitable.
+ bindgen_libclang_version=$( \
+ 	LC_ALL=C "$BINDGEN" $(dirname $0)/rust_is_available_bindgen_libclang.h 2>&1 >/dev/null \
+ 		| grep -F 'clang version ' \
+-		| grep -oE '[0-9]+\.[0-9]+\.[0-9]+' \
++		| sed -n 's/.*clang version \([0-9]\+\.[0-9]\+\.[0-9]\+\).*/\1/p' \
+ 		| head -n 1 \
+ )
+ bindgen_libclang_min_version=$($min_tool_version llvm)

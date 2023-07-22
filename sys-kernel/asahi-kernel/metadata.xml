@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE pkgmetadata SYSTEM "https://www.gentoo.org/dtd/metadata.dtd">
+<pkgmetadata>
+<use>
+  <flag name="experimental">Build experimental kernel configs</flag>
+  <flag name="initramfs">Build initramfs using dracut</flag>
+</use>
+<upstream>
+  <remote-id type="github">AsahiLinux/linux</remote-id>
+</upstream>
+</pkgmetadata>
