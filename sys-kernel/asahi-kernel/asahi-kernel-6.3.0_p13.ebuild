@@ -3,7 +3,7 @@
 
 EAPI=8
 
-inherit kernel-build
+inherit kernel-build toolchain-funcs
 
 MY_TAG="$(ver_cut 5)"
 MY_P="asahi-$(ver_cut 1-2)-${MY_TAG}"
@@ -20,24 +20,43 @@ S=${WORKDIR}/linux-${MY_P}
 
 PATCHES=(
 	"${FILESDIR}"/rust_is_available.patch
-	"${FILESDIR}"/bindgen.patch
 )
 
 KEYWORDS="arm64"
 IUSE="debug experimental"
 
-#BDEPEND="
+# NOTE: the two rust version configurations are the ones that I have tested:
+# * (clang as cc) llvm-16 + rust-1.70 + bindgen-0.65.1 + bindgen patch
+# * (clang as cc) llvm-15 + rust-1.69 + bindgen-0.56.0
+# I'm sure there are a lot more that could work
+
 #	debug? ( dev-util/pahole )
-#"
-#PDEPEND="
-#	>=virtual/dist-kernel-${PV}
-#"
+BDEPEND="
+	experimental? (
+		|| (
+			(
+				virtual/rust:0/llvm-16
+				=dev-util/bindgen-0.65.1
+			)
+			(
+				virtual/rust:0/llvm-15
+				=dev-util/bindgen-0.56.0
+			)
+		)
+		|| ( dev-lang/rust[rust-src] dev-lang/rust-bin[rust-src] )
+	)
+"
 
 src_unpack() {
 	unpack ${MY_P}.tar.gz
 }
 
 src_prepare() {
+	# Is there an easy way to get the tag of a satisfied dependency?
+	# (see whether the 0/llvm-16 or 0/llvm-15 rust was installed)
+	# right now just using clang version as placeholder for llvm version until I figure that out
+	[ $(clang-major-version) == 16 ] && PATCHES+=("${FILESDIR}"/bindgen.patch)
+
 	default
 
 	cp "${DISTDIR}/config" .config || die
