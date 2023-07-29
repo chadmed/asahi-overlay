@@ -45,6 +45,7 @@ BDEPEND="
 		)
 		|| ( dev-lang/rust[rust-src] dev-lang/rust-bin[rust-src] )
 	)
+	sys-apps/asahi-scripts
 "
 
 src_unpack() {
@@ -82,6 +83,15 @@ src_configure() {
 	kernel-build_src_configure
 }
 
+src_install() {
+	# install dtbs for `update-m1n1`
+	local kernel_dir=/usr/src/linux-${PV}${KV_LOCALVERSION}
+	insinto ${kernel_dir}/arch/arm64/boot/dts/apple/
+	doins "${WORKDIR}"/build/arch/arm64/boot/dts/apple/*.dtb
+
+	kernel-build_src_install
+}
+
 # TODO: look into QA pre-stripped warnings
 # they look like files that should not be installed anyway
 # maybe do a `make clean` before the sources are installed
@@ -112,4 +122,10 @@ src_configure() {
 # 	- (adjusting symlinks for merged-usr)
 pkg_preinst() {
 	echo "tests"
+}
+
+pkg_postinst() {
+	kernel-install_pkg_postinst
+
+	update-m1n1
 }
