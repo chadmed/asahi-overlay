@@ -9,7 +9,7 @@ DESCRIPTION="Apple Silicon bootloader and experimentation playground"
 HOMEPAGE="https://asahilinux.org/"
 LICENSE="MIT"
 SLOT="0"
-KEYWORDS="arm64"
+KEYWORDS="~arm64"
 IUSE="clang"
 
 BDEPEND="
