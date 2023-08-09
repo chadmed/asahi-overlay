@@ -62,9 +62,9 @@ src_prepare() {
 
 	cp "${DISTDIR}/config" .config || die
 
-	local myversion="-${MY_TAG}-dist"
-	use experimental && myversion+="-edge"
-	echo "CONFIG_LOCALVERSION=\"${myversion}\"" > "${T}"/version.config || die
+	MYVERSION="-${MY_TAG}-dist$(use experimental && echo "-edge")"
+	echo "CONFIG_LOCALVERSION=\"${MYVERSION}\"" > "${T}"/version.config || die
+	KV_LOCALVERSION="-asahi-dist$(use experimental && echo "-edge")"
 
 	local merge_configs=()
 	use experimental && merge_configs+=("${DISTDIR}/config.edge")
@@ -92,36 +92,18 @@ src_install() {
 	kernel-build_src_install
 }
 
-# TODO: look into QA pre-stripped warnings
-# they look like files that should not be installed anyway
-# maybe do a `make clean` before the sources are installed
-# (though that might require a kernel-build eclass change)
-# FILES (for reference):
-# * arch/arm64/kernel/vdso/vdso.so
-# * scripts/sorttable
-# * scripts/kallsyms
-# * scripts/kconfig/conf
-# * scripts/basic/fixdep
-# * scripts/asn1_compiler
-# * rust/libmacros.so
-# * arch/arm64/kernel/vdso/vdso.so.dbg
-# * scripts/generate_rust_target
-# * scripts/dtc/fdtoverlay
-# * scripts/mod/mk_elfconfig
-# * scripts/dtc/dtc
-# * scripts/mod/modpost
-
 # NOTE: this is for bypassing kernel-install version checking stuff
 # it wants kernel version to be: ${PV} (so x.x.x_p$tag*)
 # asahi-sources looks like this: (x.x.x-$tag*)
-# PROS:
-# * same versioning scheme as upstream asahi-overlay
-# CONS:
-# * bypassing upstream gentoo eclasses is kind of iffy
-# * misses the rest of kernel-install_pkg_preinst
-# 	- (adjusting symlinks for merged-usr)
 pkg_preinst() {
-	echo "tests"
+	local release="$(ver_cut 1-3)-asahi${MYVERSION}"
+	# code from kernel-install_pkg_preinst
+	if [[ -L ${EROOT}/lib && ${EROOT}/lib -ef ${EROOT}/usr/lib ]]; then
+		# Adjust symlinks for merged-usr.
+		rm "${ED}/lib/modules/${release}"/{build,source} || die
+		dosym "../../../src/linux-${PV}${KV_LOCALVERSION}" "/usr/lib/modules/${release}/build"
+		dosym "../../../src/linux-${PV}${KV_LOCALVERSION}" "/usr/lib/modules/${release}/source"
+	fi
 }
 
 pkg_postinst() {
