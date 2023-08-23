@@ -1,4 +1,4 @@
-# Copyright 1999-2022 Gentoo Authors
+# Copyright 1999-2023 Gentoo Authors
 # Distributed under the terms of the GNU General Public License v2
 
 EAPI=8
@@ -59,7 +59,7 @@ REQUIRED_USE="
 LIBDRM_DEPSTRING=">=x11-libs/libdrm-2.4.110"
 RDEPEND="
 	video_cards_asahi? (
-		>=sys-kernel/asahi-sources-6.4.0_p9
+		!<sys-kernel/asahi-sources-6.4.0_p9
 	)
 	>=dev-libs/expat-2.1.0-r3[${MULTILIB_USEDEP}]
 	>=media-libs/libglvnd-1.3.2[X?,${MULTILIB_USEDEP}]
@@ -251,7 +251,7 @@ pkg_pretend() {
 	fi
 
 	if ! use llvm; then
-		use opencl	 && ewarn "Ignoring USE=opencl since USE does not contain llvm"
+		use opencl   && ewarn "Ignoring USE=opencl since USE does not contain llvm"
 	fi
 
 	if use osmesa && ! use llvm; then
