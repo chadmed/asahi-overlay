@@ -1,0 +1,14 @@
+BDEPEND=sys-devel/make sys-apps/dtc clang? ( sys-devel/clang )
+DEFINED_PHASES=compile install postinst postrm
+DESCRIPTION=Apple Silicon bootloader and experimentation playground
+EAPI=7
+HOMEPAGE=https://asahilinux.org/
+INHERIT=toolchain-funcs
+IUSE=clang
+KEYWORDS=arm64
+LICENSE=MIT
+RDEPEND=sys-boot/u-boot sys-kernel/asahi-sources
+SLOT=0
+SRC_URI=https://github.com/AsahiLinux/m1n1/archive/refs/tags/v1.4.1.tar.gz -> m1n1-1.4.1.tar.gz
+_eclasses_=toolchain-funcs	fbbbc99d10168de2926e06da7169b8dc	multilib	c19072c3cd7ac5cb21de013f7e9832e0
+_md5_=e242cc270c3372a25ae9424615664898
