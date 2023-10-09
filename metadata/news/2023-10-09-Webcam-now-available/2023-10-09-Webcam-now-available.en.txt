@@ -1,0 +1,26 @@
+Title: Webcam now available on Asahi
+Author: James Calligeros <jcalligeros99@gmail.com>
+Posted: 2023-10-9
+Revision: 1
+News-Item-Format: 2.0
+
+Webcam support has finally been merged into the Asahi kernel! All users of
+machines equipped with a webcam can begin enjoying this functionality by upgrading
+to asahi-sources-6.5.0_p11.
+
+IMPORTANT: If your install predates 18 August 2023, some additional work will be required
+for you to get the maximum possible quality out of your webcam. To retrieve the calibration
+blobs for your machine, please follow these steps after updating your @world set:
+
+1. Boot into macOS
+2. Mount your ESP to /Volumes/EFI
+3. cp /usr/sbin/appleh13camerad /Volumes/EFI/
+4. Reboot into Linux and mount the ESP to /boot/efi/
+5. mkdir /tmp/firmware
+6. mv /boot/efi/appleh13camerad .
+7. sudo tar xzf /boot/efi/asahi/all_firmware.tar.gz
+8. sudo tar czf /boot/efi/asahi/all_firmware.tar.gz .
+9. sudo asahi-fwupdate
+
+You should now be able to enjoy your webcam at full quality. Note that your webcam will still work
+even without completing these steps, however it will produce a much lower quality image.
