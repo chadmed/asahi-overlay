@@ -3,8 +3,6 @@
 
 EAPI="7"
 
-inherit toolchain-funcs
-
 DESCRIPTION="Apple Silicon bootloader and experimentation playground"
 HOMEPAGE="https://asahilinux.org/"
 LICENSE="MIT"
@@ -28,28 +26,13 @@ BDEPEND="${BDEPEND}
 src_compile() {
 	cd "${S}" || die
 	if use clang; then
-		emake CC="clang" \
-			USE_CLANG=1 \
-			CXX="clang++" \
-			LD="ld.lld" \
-			AR="$(tc-getAR)" \
-			NM="$(tc-getNM)" \
-			RANLIB="$(tc-getRANLIB)" \
-			OBJCOPY="$(tc-getOBJCOPY)" \
+		emake USE_CLANG=1 \
 			RELEASE=1 \
-			EXTRA_CFLAGS="" \
 			ARCH="aarch64-unknown-linux-gnu-" \
 			|| die "emake failed"
 	else
-		emake CC="$(tc-getCC)" \
-			CXX="$(tc-getCXX)" \
-			LD="$(tc-getLD)" \
-			AR="$(tc-getAR)" \
-			NM="$(tc-getNM)" \
-			RANLIB="$(tc-getRANLIB)" \
-			OBJCOPY="$(tc-getOBJCOPY)" \
+		emake USE_CLANG=0 \
 			RELEASE=1 \
-			EXTRA_CFLAGS="" \
 			ARCH="aarch64-unknown-linux-gnu-" \
 			|| die "emake failed"
 	fi
