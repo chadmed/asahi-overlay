@@ -1,14 +1,21 @@
 Title: Webcam now available on Asahi
 Author: James Calligeros <jcalligeros99@gmail.com>
 Posted: 2023-10-9
-Revision: 2
+Revision: 3
 News-Item-Format: 2.0
 
 Webcam support has finally been merged into the Asahi kernel! All users of
 machines equipped with a webcam can begin enjoying this functionality by upgrading
-to asahi-sources-6.5.0_p11.
+to asahi-sources-6.5.0_p11. 
 
-IMPORTANT: If your install predates 21 August 2023, some additional work will be required
+Requirements:
+    - asahi-sources-6.5.0_p11 or later
+    - asahi-firmware-0.6.8 or later
+
+If you installed Asahi on 21 August 2023 or later, simply update @world run
+asahi-fwupdate as root, then reboot. No further action is necessary.
+
+If your install predates 21 August 2023, some additional work will be required
 for you to get the maximum possible quality out of your webcam. To retrieve the calibration
 blobs for your machine, please follow these steps after updating your @world set:
 
@@ -22,6 +29,7 @@ blobs for your machine, please follow these steps after updating your @world set
 8.  sudo tar xzf /boot/efi/asahi/all_firmware.tar.gz
 9.  sudo tar czf /boot/efi/asahi/all_firmware.tar.gz .
 10. sudo asahi-fwupdate
+11. Reboot for the firmware loading script to pick up the changes
 
 You should now be able to enjoy your webcam at full quality. Note that your webcam will still work
 even without completing these steps, however it will produce a much lower quality image.
