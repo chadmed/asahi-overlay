@@ -1,0 +1,13 @@
+diff --git a/widevine-installer b/widevine-installer
+index 2feb4b2..b1d93e9 100755
+--- a/widevine-installer
++++ b/widevine-installer
+@@ -4,7 +4,7 @@
+ set -e
+ 
+ # Set to 0 if packaged and the configs are pre-installed
+-: ${COPY_CONFIGS=1}
++: ${COPY_CONFIGS=0}
+ : ${DESTDIR:=/}
+ : ${CONFDIR:=/etc}
+ : ${LIBDIR:=/usr/lib64}
