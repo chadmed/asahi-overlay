@@ -1,0 +1,27 @@
+Title: Limited speaker support now available
+Author: James Calligeros <jcalligeros99@gmail.com>
+Posted: 2023-10-9
+Revision: 1
+News-Item-Format: 2.0
+
+It's finally here! Speaker support has started rolling out, beginning
+with the 13" M1 MacBook Pro. More machines are coming soon.
+
+Enabling/preparing for speaker support is quite simple:
+1. Update your @world set, kernel and m1n1.
+2. Emerge asahi-audio, which will pull in speakersafetyd
+3. Enable speakersafetyd (standard OpenRC/systemd methods apply here)
+4. Reboot
+
+This only has to be done once. Any enabling of future machines will be
+handled with a simple update of the asahi-audio and speakersafetyd packages.
+
+Both asahi-audio and speakersafetyd are gated behind ~arm64 as they depend
+on upstream packages which are also ~arm64.
+
+Note that asahi-audio depends on Pipewire and Wireplumber. If you are
+not using Pipewire for audio, emerge speakersafetyd directly instead. Understand that
+this setup will result in extremely low sound quality and is entirely unsupported.
+You will not be given assistance unless you are using the DSP graphs through
+Pipewire/Wireplumber.
+
