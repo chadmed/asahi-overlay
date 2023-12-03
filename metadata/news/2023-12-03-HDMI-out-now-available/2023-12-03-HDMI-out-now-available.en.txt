@@ -1,0 +1,23 @@
+Title: HDMI out now available
+Author: James Calligeros <jcalligeros99@gmail.com>
+Posted: 2023-12-03
+Revision: 1
+News-Item-Format: 2.0
+
+HDMI out is now available on MacBooks with a physical HDMI port 
+(14" and 16" MacBook Pros), as well as on the M2 series Mac mini and Mac Studio!
+
+Enabling this support is simple:
+1. emerge -auvDN @world
+2. Build and install the new kernel as usual
+3. Run update-m1n1
+4. Reboot
+
+Your APFS stub must have the 13.5 firmware package or newer for HDMI
+out to work. If your installation is old, please follow these steps
+to upgrade:
+1. Reboot into macOS
+3. Run the Asahi installer again
+4. Do a "UEFI only" installation into the APFS stub corresponding to
+   your install, but stop before it asks you to shut down
+6. Follow the Asahi installer's instructions to reboot into the second stage
