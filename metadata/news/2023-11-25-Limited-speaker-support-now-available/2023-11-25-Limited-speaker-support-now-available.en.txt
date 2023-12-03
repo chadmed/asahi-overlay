@@ -1,7 +1,7 @@
 Title: Limited speaker support now available
 Author: James Calligeros <jcalligeros99@gmail.com>
-Posted: 2023-10-9
-Revision: 1
+Posted: 2023-11-25
+Revision: 2
 News-Item-Format: 2.0
 
 It's finally here! Speaker support has started rolling out, beginning
