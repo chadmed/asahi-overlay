@@ -1,7 +1,7 @@
 Title: HDMI out now available
 Author: James Calligeros <jcalligeros99@gmail.com>
 Posted: 2023-12-03
-Revision: 2
+Revision: 3
 News-Item-Format: 2.0
 
 HDMI out is now available on MacBooks with a physical HDMI port 
@@ -14,10 +14,6 @@ Enabling this support is simple:
 4. Reboot
 
 Your APFS stub must have the 13.5 firmware package or newer for HDMI
-out to work. If your installation is old, please follow these steps
-to upgrade:
-1. Reboot into macOS
-3. Run the Asahi installer again
-4. Do a "UEFI only" installation into the APFS stub corresponding to
-   your install, but stop before it asks you to shut down
-5. Follow the Asahi installer's instructions to reboot into the second stage
+out to work. If your installation is older than August this year, please wait until
+the Asahi installer is capable of in-place firmware upgrades. This is being
+worked on now.
