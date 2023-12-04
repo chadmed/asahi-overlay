@@ -1,11 +1,11 @@
 Title: Limited speaker support now available
 Author: James Calligeros <jcalligeros99@gmail.com>
 Posted: 2023-11-25
-Revision: 2
+Revision: 3
 News-Item-Format: 2.0
 
 It's finally here! Speaker support has started rolling out, beginning
-with the 13" M1 MacBook Pro. More machines are coming soon.
+with the 13" M1 MacBook Air. More machines are coming soon.
 
 Enabling/preparing for speaker support is quite simple:
 1. Update your @world set, kernel and m1n1.
