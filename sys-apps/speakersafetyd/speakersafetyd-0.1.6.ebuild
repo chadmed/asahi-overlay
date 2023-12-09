@@ -101,7 +101,7 @@ ${CARGO_CRATE_URIS}"
 
 LICENSE="MIT"
 SLOT="0"
-KEYWORDS="~arm64"
+KEYWORDS="arm64"
 
 IUSE="systemd"
 
