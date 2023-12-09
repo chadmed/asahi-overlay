@@ -23,22 +23,25 @@ CRATES="
 	clap_derive@4.1.0
 	clap_lex@0.3.1
 	colored@1.9.4
-	configparser@2.1.0
+	configparser@3.0.3
 	core-foundation-sys@0.8.4
+	equivalent@1.0.1
 	errno@0.2.8
 	errno-dragonfly@0.1.2
+	hashbrown@0.14.3
 	heck@0.4.1
 	hermit-abi@0.1.19
 	hermit-abi@0.3.1
 	iana-time-zone@0.1.58
 	iana-time-zone-haiku@0.1.2
+	indexmap@2.1.0
 	io-lifetimes@1.0.5
 	is-terminal@0.4.3
 	itoa@1.0.5
 	js-sys@0.3.64
 	json@0.12.4
 	lazy_static@1.4.0
-	libc@0.2.137
+	libc@0.2.150
 	linux-raw-sys@0.1.4
 	log@0.4.17
 	nix@0.26.4
@@ -53,6 +56,8 @@ CRATES="
 	quote@1.0.33
 	rustix@0.36.8
 	serde@1.0.152
+	signal-hook@0.3.17
+	signal-hook-registry@1.4.1
 	simple_logger@1.16.0
 	strsim@0.10.0
 	syn@1.0.108
