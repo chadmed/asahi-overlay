@@ -1,0 +1,10 @@
+DEFINED_PHASES=install postinst unpack
+DESCRIPTION=Widevine installer for AArch64 systems
+EAPI=8
+HOMEPAGE=https://asahilinux.org/
+KEYWORDS=~arm64
+LICENSE=MIT
+RDEPEND=>=sys-libs/glibc-2.36 sys-fs/squashfs-tools[zstd]
+SLOT=0
+SRC_URI=https://github.com/AsahiLinux/widevine-installer/archive/8fa12dd2d81c4b5d2a713e169cac70898512322e.tar.gz -> widevine-installer-0.1.tar.gz
+_md5_=f6fd870b413abf52fd65e693f9fd6a21
