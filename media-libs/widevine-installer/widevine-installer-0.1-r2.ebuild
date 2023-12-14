@@ -33,7 +33,7 @@ src_install() {
 	insinto /usr/"$(get_libdir)"/chromium-browser/
 	dosym -r /opt/widevine/WidevineCdm/ /usr/lib64/chromium-browser/WidevineCdm
 
-	exeinto /etc/profile.d/
+	insinto /etc/profile.d/
 	doins "${S}"/conf/gmpwidevine.sh
 
 	insinto /usr/"$(get_libdir)"/firefox/defaults/pref/
