@@ -12,12 +12,12 @@ SLOT="0"
 KEYWORDS="~arm64"
 
 RDEPEND="
-	>=media-video/pipewire-0.3.81[extra,lv2,sound-server]
-	>=media-video/wireplumber-0.4.14
-	>=sys-kernel/asahi-sources-6.5.0_p17
-	media-libs/alsa-ucm-conf-asahi
+	>=media-video/pipewire-0.3.85[extra,lv2,sound-server]
+	>=media-video/wireplumber-0.4.17
+	>=sys-kernel/asahi-sources-6.6.0_p11
+	>=media-libs/alsa-ucm-conf-asahi-5.0
 	media-libs/lsp-plugins[lv2]
-	media-libs/bankstown-lv2
+	>=media-libs/bankstown-lv2-1.0.3
 	sys-apps/speakersafetyd
 "
 DEPEND="${RDEPEND}"

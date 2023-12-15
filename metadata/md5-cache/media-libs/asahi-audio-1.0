@@ -1,11 +1,11 @@
 DEFINED_PHASES=-
-DEPEND=>=media-video/pipewire-0.3.81[extra,lv2,sound-server] >=media-video/wireplumber-0.4.14 >=sys-kernel/asahi-sources-6.5.0_p17 media-libs/alsa-ucm-conf-asahi media-libs/lsp-plugins[lv2] media-libs/bankstown-lv2 sys-apps/speakersafetyd
+DEPEND=>=media-video/pipewire-0.3.85[extra,lv2,sound-server] >=media-video/wireplumber-0.4.17 >=sys-kernel/asahi-sources-6.6.0_p11 >=media-libs/alsa-ucm-conf-asahi-5.0 media-libs/lsp-plugins[lv2] >=media-libs/bankstown-lv2-1.0.3 sys-apps/speakersafetyd
 DESCRIPTION=Pipewire/Wireplumber configuration files for Apple Silicon
 EAPI=8
 HOMEPAGE=https://github.com/AsahiLinux/asahi-audio
 KEYWORDS=~arm64
 LICENSE=MIT
-RDEPEND=>=media-video/pipewire-0.3.81[extra,lv2,sound-server] >=media-video/wireplumber-0.4.14 >=sys-kernel/asahi-sources-6.5.0_p17 media-libs/alsa-ucm-conf-asahi media-libs/lsp-plugins[lv2] media-libs/bankstown-lv2 sys-apps/speakersafetyd
+RDEPEND=>=media-video/pipewire-0.3.85[extra,lv2,sound-server] >=media-video/wireplumber-0.4.17 >=sys-kernel/asahi-sources-6.6.0_p11 >=media-libs/alsa-ucm-conf-asahi-5.0 media-libs/lsp-plugins[lv2] >=media-libs/bankstown-lv2-1.0.3 sys-apps/speakersafetyd
 SLOT=0
 SRC_URI=https://github.com/AsahiLinux/asahi-audio/archive/refs/tags/v1.0.tar.gz -> asahi-audio-1.0.tar.gz
-_md5_=7e467b8f4701ed86945d99ed3961ecb8
+_md5_=dfc6e809098ace7022af15e5ad8895b1
