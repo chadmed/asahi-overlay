@@ -9,7 +9,7 @@ HOMEPAGE="https://asahilinux.org/"
 LICENSE="metapackage"
 SLOT=0
 KEYWORDS="arm64"
-IUSE="+mesa"
+IUSE="+audio +mesa"
 
 RDEPEND="
 	sys-boot/m1n1
@@ -19,5 +19,6 @@ RDEPEND="
 	sys-firmware/asahi-firmware
 	sys-kernel/asahi-sources
 	media-libs/alsa-ucm-conf-asahi
+	audio? ( media-libs/asahi-audio )
 	mesa? ( media-libs/mesa[video_cards_asahi(+)] )
 "
