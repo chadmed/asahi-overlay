@@ -19,14 +19,16 @@ KEYWORDS="arm64"
 
 DEPEND=">=sys-apps/asahi-scripts-20230606"
 RDEPEND="${DEPEND}
-	app-arch/lzfse"
+	app-arch/lzfse
+	sys-kernel/linux-firmware
+"
 BDEPEND=""
 
 S="${WORKDIR}/${_name}-${PV}"
 
 src_install() {
 	distutils-r1_src_install
-
+	dodir /lib/firmware/vendor/
 }
 
 pkg_postinst() {
