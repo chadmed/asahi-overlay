@@ -31,7 +31,8 @@ IUSE="experimental rust"
 KEYWORDS="arm64"
 
 PATCHES=(
-		"${FILESDIR}/${P}-enable-speakers.patch"
+		"${FILESDIR}/${P}-enable-speakers-stage1.patch"
+		"${FILESDIR}/${P}-enable-speakers-stage2.patch"
 )
 
 src_unpack() {
