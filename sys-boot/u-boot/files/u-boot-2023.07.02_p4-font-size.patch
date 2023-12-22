@@ -1,0 +1,10 @@
+diff --git a/configs/apple_m1_defconfig b/configs/apple_m1_defconfig
+index 3fa38502f9..f86f5eff3f 100644
+--- a/configs/apple_m1_defconfig
++++ b/configs/apple_m1_defconfig
+@@ -28,3 +28,5 @@ CONFIG_LMB_MAX_REGIONS=64
+ # CONFIG_EFI_VARIABLE_FILE_STORE is not set
+ CONFIG_EFI_VARIABLE_NO_STORE=y
+ CONFIG_SYS_64BIT_LBA=y
++CONFIG_VIDEO_FONT_16X32=y
++CONFIG_VIDEO_FONT_8X16=n

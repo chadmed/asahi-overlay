@@ -1,0 +1,11 @@
+BDEPEND=app-arch/cpio dev-lang/perl sys-devel/bc sys-devel/bison sys-devel/flex sys-devel/make >=sys-libs/ncurses-5.2 virtual/libelf virtual/pkgconfig sys-apps/dtc dev-vcs/git
+DEFINED_PHASES=compile configure install postinst postrm unpack
+DESCRIPTION=Asahi Linux fork of Das U-Boot
+EAPI=8
+HOMEPAGE=https://asahilinux.org/
+KEYWORDS=arm64
+LICENSE=GPL-2
+RDEPEND=app-arch/cpio dev-lang/perl sys-devel/bc sys-devel/bison sys-devel/flex sys-devel/make >=sys-libs/ncurses-5.2 virtual/libelf virtual/pkgconfig sys-apps/dtc dev-vcs/git sys-apps/asahi-scripts
+SLOT=0
+SRC_URI=https://github.com/AsahiLinux/u-boot/archive/refs/tags/asahi-v2023.07.02-4.tar.gz -> u-boot-2023.07.02_p4.tar.gz
+_md5_=eaf819646e3dfa862d54958297222098
