@@ -1,0 +1,11 @@
+BDEPEND=dev-python/pyelftools
+DEFINED_PHASES=compile install prepare unpack
+DESCRIPTION=Linux kernel shared object for libkrun
+EAPI=8
+HOMEPAGE=https://github.com/containers/libkrunfw
+IUSE=asahi
+KEYWORDS=arm64
+LICENSE=LGPL-2.1
+SLOT=0
+SRC_URI=https://github.com/containers/libkrunfw/archive/refs/tags/v4.0.0.tar.gz -> libkrunfw-4.0.0.tar.gz https://cdn.kernel.org/pub/linux/kernel/v6.x/linux-6.4.7.tar.xz
+_md5_=14fb4d915d1698bc85f626043afebde2

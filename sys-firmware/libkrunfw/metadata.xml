@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE pkgmetadata SYSTEM "https://www.gentoo.org/dtd/metadata.dtd">
+<pkgmetadata>
+<maintainer type="person">
+  <email>jcalligeros99@gmail.com</email>
+  <name>James Calligeros</name>
+</maintainer>
+<use>
+  <flag name="asahi">Use the experimental Asahi kernel config</flag>
+</use>
+<upstream>
+  <remote-id type="github">containers/libkrunfw</remote-id>
+</upstream>
+</pkgmetadata>
