@@ -1,0 +1,13 @@
+diff --git a/src/devices/Cargo.toml b/src/devices/Cargo.toml
+index c0bb04b..d31f15b 100644
+--- a/src/devices/Cargo.toml
++++ b/src/devices/Cargo.toml
+@@ -18,7 +18,7 @@ env_logger = "0.9.0"
+ libc = ">=0.2.39"
+ log = "0.4.0"
+ nix = "0.26.1"
+-pw = { package = "pipewire", git = "https://gitlab.freedesktop.org/pipewire/pipewire-rs.git", rev = "068f16e4bcc2a58657ceb53bd134acb5b00a5391" }
++pw = { package = "pipewire", path = "../pipewire-rs/pipewire" }
+ rand = "0.8.5"
+ thiserror = { version = "1.0", optional = true }
+ virtio-bindings = "0.2.0"
