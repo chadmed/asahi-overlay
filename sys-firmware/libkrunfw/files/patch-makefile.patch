@@ -1,5 +1,5 @@
 diff --git a/Makefile b/Makefile
-index 5ab5d2b..b9d2bef 100644
+index 5ab5d2b..c5ef712 100644
 --- a/Makefile
 +++ b/Makefile
 @@ -51,22 +51,17 @@ ifeq ($(SEV),1)
@@ -29,3 +29,15 @@ index 5ab5d2b..b9d2bef 100644
  
  ifeq ($(OS),Darwin)
  $(KERNEL_C_BUNDLE):
+@@ -89,10 +84,7 @@ $(INITRD_C_BUNDLE): $(INITRD_BINARY)
+ endif
+ 
+ $(KRUNFW_BINARY_$(OS)): $(KERNEL_C_BUNDLE) $(QBOOT_C_BUNDLE) $(INITRD_C_BUNDLE)
+-	$(CC) -fPIC -DABI_VERSION=$(ABI_VERSION) -shared $(SONAME_$(OS)) -o $@ $(KERNEL_C_BUNDLE) $(QBOOT_C_BUNDLE) $(INITRD_C_BUNDLE)
+-ifeq ($(OS),Linux)
+-	strip $(KRUNFW_BINARY_$(OS))
+-endif
++	$(CC) $(CFLAGS) $(LDFLAGS) -fPIC -DABI_VERSION=$(ABI_VERSION) -shared $(SONAME_$(OS)) -o $@ $(KERNEL_C_BUNDLE) $(QBOOT_C_BUNDLE) $(INITRD_C_BUNDLE)
+ 
+ install:
+ 	install -d $(DESTDIR)$(PREFIX)/$(LIBDIR_$(OS))/
