@@ -174,7 +174,9 @@ KEYWORDS="~arm64"
 RDEPEND="
 	>=sys-firmware/libkrunfw-4.0.0
 "
-DEPEND="${RDEPEND}"
+DEPEND="${RDEPEND}
+	>=media-libs/virglrenderer-0.10.4-r1[native-context]
+"
 BDEPEND="
 	>=virtual/rust-1.74.0
 	>=dev-util/patchelf-0.18.0
