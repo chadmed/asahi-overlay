@@ -165,7 +165,7 @@ SRC_URI="
 
 S="${WORKDIR}/${PN}-2f3a8c81b5e0d1a53498373bcd31836e14ef8577"
 
-IUSE="gpu +net"
+IUSE="+gpu +net"
 
 LICENSE="Apache-2.0"
 SLOT="0"
@@ -173,9 +173,10 @@ KEYWORDS="~arm64"
 
 RDEPEND="
 	>=sys-firmware/libkrunfw-4.0.0
+	>=media-video/pipewire-1.0.0
 "
 DEPEND="${RDEPEND}
-	>=media-libs/virglrenderer-0.10.4-r1[native-context]
+	gpu? ( >=media-libs/virglrenderer-0.10.4-r1[native-context] )
 "
 BDEPEND="
 	>=virtual/rust-1.74.0
