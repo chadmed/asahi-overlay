@@ -10,7 +10,7 @@ if [[ ${PV} == "9999" ]] ; then
 	inherit git-r3
 else
 	MY_P="${PN}-cacafff69205a62758a22ef73c1334057f72e5d6"
-	SRC_URI="https://gitlab.freedesktop.org/slp/virglrenderer/-/archive/cacafff69205a62758a22ef73c1334057f72e5d6/virglrenderer-cacafff69205a62758a22ef73c1334057f72e5d6.tar.gz -> ${P}.tar.gz"
+	SRC_URI="https://gitlab.freedesktop.org/slp/virglrenderer/-/archive/cacafff69205a62758a22ef73c1334057f72e5d6/virglrenderer-cacafff69205a62758a22ef73c1334057f72e5d6.tar.gz -> ${P}-slp.tar.gz"
 	S="${WORKDIR}/${MY_P}"
 
 	KEYWORDS="~arm64"
@@ -21,7 +21,7 @@ HOMEPAGE="https://virgil3d.github.io/"
 
 LICENSE="MIT"
 SLOT="0"
-IUSE="static-libs native-context"
+IUSE="static-libs +native-context"
 
 RDEPEND="
 	>=x11-libs/libdrm-2.4.50
