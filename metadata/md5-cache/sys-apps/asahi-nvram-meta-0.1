@@ -1,0 +1,10 @@
+DEFINED_PHASES=-
+DESCRIPTION=Metapackage for asahi-nvram modules
+EAPI=8
+HOMEPAGE=https://github.com/WhatAmISupposedToPutHere/asahi-nvram
+IUSE=+bless bluetooth raw wifi
+KEYWORDS=~arm64
+LICENSE=MIT
+RDEPEND=bless? ( sys-apps/asahi-bless ) bluetooth? ( net-misc/asahi-btsync ) raw? ( sys-apps/asahi-nvram ) wifi? ( net-misc/asahi-wifisync )
+SLOT=0
+_md5_=6d79b3b371ef5d89340085c01fa28413

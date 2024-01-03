@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE pkgmetadata SYSTEM "https://www.gentoo.org/dtd/metadata.dtd">
+<pkgmetadata>
+	<maintainer type="person">
+		<email>jcalligeros99@gmail.com</email>
+		<name>James Calligeros</name>
+	</maintainer>
+	<use>
+		<flag name="bless">Pull in <pkg>sys-apps/asahi-bless</pkg></flag>
+		<flag name="bluetooth">Pull in <pkg>net-misc/asahi-btsync</pkg></flag>
+		<flag name="raw">Enable raw NVRAM reading with <pkg>sys-apps/asahi-nvram</pkg></flag>
+		<flag name="wifi">Pull in <pkg>net-misc/asahi-wifisync</pkg></flag>
+	</use>
+	<upstream>
+		<remote-id type="github">WhatAmISupposedToPutHere/asahi-nvram</remote-id>
+	</upstream>
+</pkgmetadata>
