@@ -1,0 +1,27 @@
+Title: krunvm support has been removed
+Author: James Calligeros <jcalligeros99@gmail.com>
+Posted: 2024-01-04
+Revision: 1
+News-Item-Format: 2.0
+
+We have unfortunately had to remove support for krunvm/libkrun. This is due to
+the fact that many of the pieces required to make this work for the Asahi use
+case are actually hidden in private branches and repos, which are manually
+packaged into tarballs for the Fedora build infrastructure to pick up, rather
+than the usual paradigm of specifying a public repository of sources in the RPM
+spec file.
+
+If you have installed krunvm, please uninstall it by following these steps:
+
+1. $ buildah unshare
+2. $ krunvm delete [asahi vm name]
+3. $ exit
+4. # emerge -c app-containers/krunvm
+
+If you added libkrunfw, libkrun or virglrenderer to @world, remember to deselect
+and depclean them too.
+
+Until the branches used for the Fedora COPR are made public, we cannot support
+krunvm in Gentoo for the Asahi use case. It is possible that the upstream
+versions will land in ::gentoo soon if you are interested in using krunvm
+for other things.
