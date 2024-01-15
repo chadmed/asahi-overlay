@@ -1,4 +1,4 @@
-BDEPEND=sys-devel/make sys-apps/dtc clang? ( sys-devel/clang )
+BDEPEND=dev-build/make sys-apps/dtc clang? ( sys-devel/clang )
 DEFINED_PHASES=compile install postinst postrm
 DESCRIPTION=Apple Silicon bootloader and experimentation playground
 EAPI=7
