@@ -6,7 +6,7 @@ INHERIT=kernel-2
 IUSE=experimental rust symlink build
 KEYWORDS=arm64
 LICENSE=GPL-2
-RDEPEND=!build? ( app-arch/cpio dev-lang/perl sys-devel/bc sys-devel/bison sys-devel/flex sys-devel/make >=sys-libs/ncurses-5.2 virtual/libelf virtual/pkgconfig )
+RDEPEND=!build? ( app-arch/cpio dev-lang/perl sys-devel/bc sys-devel/bison sys-devel/flex dev-build/make >=sys-libs/ncurses-5.2 virtual/libelf virtual/pkgconfig )
 RESTRICT=binchecks strip
 SLOT=6.3.0_p13
 SRC_URI=https://github.com/AsahiLinux/linux/archive/refs/tags/asahi-6.3-13.tar.gz -> asahi-sources-6.3.0_p13.tar.gz

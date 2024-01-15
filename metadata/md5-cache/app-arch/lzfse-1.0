@@ -1,4 +1,4 @@
-BDEPEND=sys-devel/make >=dev-util/cmake-3.20.5
+BDEPEND=dev-build/make >=dev-build/cmake-3.20.5
 DEFINED_PHASES=compile configure install prepare test
 DESCRIPTION=LZFSE compression utilities
 EAPI=8

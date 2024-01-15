@@ -13,7 +13,7 @@ PATCHES=("${FILESDIR}/makefile.patch"
 	 "${FILESDIR}/update-m1n1-dtbs.patch")
 
 BDEPEND="
-	sys-devel/make"
+	dev-build/make"
 
 SRC_URI="https://github.com/AsahiLinux/${PN}/archive/refs/tags/${PV}.tar.gz -> ${PN}-${PV}.tar.gz"
 

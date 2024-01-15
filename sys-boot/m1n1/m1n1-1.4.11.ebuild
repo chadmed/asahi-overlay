@@ -13,7 +13,7 @@ KEYWORDS="arm64"
 IUSE="clang"
 
 BDEPEND="
-	sys-devel/make
+	dev-build/make
 	sys-apps/dtc"
 
 RDEPEND="
