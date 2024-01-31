@@ -1,0 +1,22 @@
+Title: Upstreaming efforts have begun!
+Author: James Calligeros <jcalligeros99@gmail.com>
+Posted: 2024-01-31
+Revision: 1
+News-Item-Format: 2.0
+
+Good news everyone! Upstreaming efforts have now begun in earnest! Starting
+with easy packages like tiny-dfr and the asahi-nvram suite, we hope to get even more
+packages out of this overlay and into ::gentoo in the coming months. The
+current focus is to get Apple Silicon-friendly install media up and running.
+This will take the form of a Gentoo-flavoured Asahi Installer, as well as a
+bootable LiveCD image for more adventurous users.
+
+User Action Required:
+    The asahi-nvram-meta package has been deprecated as it was deemed to be
+    superfluous and unable to be upstreamed. Please add the set of
+    asahi-nvram packages you use to @world. The asahi-nvram-meta package
+    will be dropped from the overlay on or after February 9, 2024.
+
+We have also set up an Official(tm) Gentoo project to better facilitate
+integration efforts and provide representation on official Gentoo infrastructure.
+More information is available at https://wiki.gentoo.org/wiki/Project:Asahi.
