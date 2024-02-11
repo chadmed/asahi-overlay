@@ -1,0 +1,24 @@
+Title: asahi-kernel is now available
+Author: James Calligeros <jcalligeros99@gmail.com>
+Posted: 2024-02-11
+Revision: 1
+News-Item-Format: 2.0
+
+The asahi-kernel dist-kernel is now available for use in unstable.
+It uses the config from the upstream ALARM PKGBUILD, which should cover
+virtually all use cases in terms of hardware features. Eventually, we
+will need to move to the Fedora config, but there's still work to be
+done before that can be viable.
+
+This is the final piece of the puzzle for creating completely vanilla
+boot media. Of course, the overlay will still be required for a properly
+useable system for quite some time. This merely enables us to offer
+LiveCDs bootable on Apple Silicon Macs as well as packaged stage4s for
+integration into the Asahi Installer.
+
+If you wish to use the dist-kernel now, please follow these steps:
+    1. emerge --deselect sys-kernel/asahi-sources
+    2. emerge -av asahi-kernel
+    3. Regenerate your GRUB config
+    4. emerge -c
+
