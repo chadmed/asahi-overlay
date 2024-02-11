@@ -1,7 +1,7 @@
 Title: asahi-kernel is now available
 Author: James Calligeros <jcalligeros99@gmail.com>
 Posted: 2024-02-11
-Revision: 1
+Revision: 2
 News-Item-Format: 2.0
 
 The asahi-kernel dist-kernel is now available for use in unstable.
@@ -17,8 +17,9 @@ LiveCDs bootable on Apple Silicon Macs as well as packaged stage4s for
 integration into the Asahi Installer.
 
 If you wish to use the dist-kernel now, please follow these steps:
-    1. emerge --deselect sys-kernel/asahi-sources
-    2. emerge -av asahi-kernel
-    3. Regenerate your GRUB config
-    4. emerge -c
+    1. Mask off virtual/dist-kernel::gentoo
+    2. emerge --deselect sys-kernel/asahi-sources
+    3. emerge -av asahi-kernel
+    4. Regenerate your GRUB config
+    5. emerge -c
 
