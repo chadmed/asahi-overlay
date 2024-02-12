@@ -23,10 +23,7 @@ fi
 DESCRIPTION="Asahi Linux kernel sources"
 HOMEPAGE="https://asahilinux.org"
 KERNEL_URI="https://github.com/AsahiLinux/linux/archive/refs/tags/${MY_P}.tar.gz -> ${PN}-${PV}.tar.gz"
-SRC_URI="${KERNEL_URI}
-	https://raw.githubusercontent.com/AsahiLinux/PKGBUILDs/main/linux-asahi/config
-	https://raw.githubusercontent.com/AsahiLinux/PKGBUILDs/main/linux-asahi/config.edge
-"
+SRC_URI="${KERNEL_URI}"
 
 S="${WORKDIR}/linux-${MY_P}"
 
@@ -56,10 +53,7 @@ PATCHES=(
 src_prepare() {
 	default
 	echo "-${MY_TAG}-dist" > localversion.10-pkgrel || die
-	cp "${DISTDIR}/config" ".config" || die
-	kernel-build_merge_configs "${DISTDIR}/config.edge"
-	echo 'CONFIG_LOCALVERSION=""' > "${T}/fakeversion.config"
-	kernel-build_merge_configs "${T}/fakeversion.config"
+	cp "${FILESDIR}/${P}-gentoo-config" ".config" || die
 }
 
 # Override kernel-install_pkg_preinst() to avoid ${PV}-as-release check
