@@ -1,0 +1,79 @@
+diff --git a/dracut/dracut.conf.d/10-asahi.conf b/dracut/dracut.conf.d/10-asahi.conf
+index 0e57dd8..887d659 100644
+--- a/dracut/dracut.conf.d/10-asahi.conf
++++ b/dracut/dracut.conf.d/10-asahi.conf
+@@ -1,28 +1,10 @@
+ # Modules necessary for using Linux on Apple Silicon Macs
+ 
+-# For NVMe & SMC
+-add_drivers+=" apple-mailbox "
+-
+-# For NVMe
+-add_drivers+=" nvme_apple "
+-
+-# For USB and HID
+-add_drivers+=" pinctrl-apple-gpio "
+-
+-# SMC core
+-add_drivers+=" macsmc macsmc-rtkit "
+-
+ # For USB
+-add_drivers+=" i2c-apple tps6598x apple-dart dwc3 dwc3-of-simple nvmem-apple-efuses phy-apple-atc xhci-plat-hcd xhci-pci pcie-apple gpio_macsmc "
+-
+-# For HID
+-add_drivers+=" spi-apple spi-hid-apple spi-hid-apple-of "
+-
+-# For RTC
+-add_drivers+=" rtc-macsmc simple-mfd-spmi spmi-apple-controller nvmem_spmi_mfd "
++add_drivers+=" dwc3-of-simple phy-apple-atc xhci-plat-hcd xhci-pci "
+ 
+ # For MTP HID
+-add_drivers+=" apple-dockchannel dockchannel-hid apple-rtkit-helper "
++add_drivers+=" dockchannel-hid "
+ 
+ # dwc3 instantiates xHCI asynchronously. To make things like init=/bin/sh work where udev is no longer running, force load this one.
+ force_drivers+=" xhci-plat-hcd "
+diff --git a/dracut/modules.d/99asahi-firmware/module-setup.sh b/dracut/modules.d/99asahi-firmware/module-setup.sh
+index 9018db5..b3abe02 100755
+--- a/dracut/modules.d/99asahi-firmware/module-setup.sh
++++ b/dracut/modules.d/99asahi-firmware/module-setup.sh
+@@ -20,7 +20,10 @@ depends() {
+ 
+ # called by dracut
+ installkernel() {
+-    instmods apple-mailbox nvme-apple vfat
++    # we now build this code in-kernel, not as modules...
++    # ...so we comment out the next line
++    # instmods apple-mailbox nvme-apple vfat
++    echo "instmods in installkernel() skipped"
+ }
+ 
+ # called by dracut
+diff --git a/initcpio/hooks/asahi b/initcpio/hooks/asahi
+index 50e017b..e985acd 100644
+--- a/initcpio/hooks/asahi
++++ b/initcpio/hooks/asahi
+@@ -13,8 +13,8 @@ run_earlyhook() {
+     fi
+ 
+     msg ":: Asahi: Triggering early load of NVMe modules..."
+-    modprobe apple-mailbox
+-    modprobe nvme-apple
++    # modprobe apple-mailbox
++    # modprobe nvme-apple
+     modprobe xhci-plat-hcd
+ 
+     for i in $(seq 0 50); do
+diff --git a/update-grub b/update-grub
+index 65421b7..4b7b9f6 100755
+--- a/update-grub
++++ b/update-grub
+@@ -71,7 +71,7 @@ grub-mkimage \
+     --prefix "$part/boot/grub" \
+     --output "$GRUB_DIR"/arm64-efi/core.efi \
+     --format arm64-efi \
+-    --compression auto \
++    --compression xz \
+     $MODULES
+ 
+ cp "$GRUB_DIR"/arm64-efi/core.efi "$TARGET"
