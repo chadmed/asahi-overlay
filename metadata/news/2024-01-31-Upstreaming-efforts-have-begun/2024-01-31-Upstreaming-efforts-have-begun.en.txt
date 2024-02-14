@@ -19,4 +19,4 @@ User Action Required:
 
 We have also set up an Official(tm) Gentoo project to better facilitate
 integration efforts and provide representation on official Gentoo infrastructure.
-More information is available at https://wiki.gentoo.org/wiki/Project:Asahi.
+More information is available at https://wiki.gentoo.org/wiki/Project:Asahi​.
