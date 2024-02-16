@@ -10,7 +10,8 @@ SLOT="0"
 KEYWORDS="arm64"
 
 PATCHES=("${FILESDIR}/makefile.patch"
-	 "${FILESDIR}/update-m1n1-dtbs.patch")
+	 "${FILESDIR}/update-m1n1-dtbs.patch"
+	 "${FILESDIR}/dracut.patch")
 
 BDEPEND="
 	dev-build/make"
