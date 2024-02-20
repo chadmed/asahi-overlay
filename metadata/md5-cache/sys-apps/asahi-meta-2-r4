@@ -1,0 +1,10 @@
+DEFINED_PHASES=-
+DESCRIPTION=Metapackage for the Asahi support packages
+EAPI=8
+HOMEPAGE=https://asahilinux.org/
+IUSE=+audio +mesa
+KEYWORDS=~arm64
+LICENSE=metapackage
+RDEPEND=sys-boot/m1n1 sys-boot/u-boot sys-apps/asahi-scripts sys-apps/asahi-configs sys-firmware/asahi-firmware sys-kernel/asahi-sources media-libs/alsa-ucm-conf-asahi audio? ( media-libs/asahi-audio ) mesa? ( =media-libs/mesa-24.1.0_pre20240218[video_cards_asahi(+)] )
+SLOT=0
+_md5_=6a66d371e077d14a009830fc85c2b36b

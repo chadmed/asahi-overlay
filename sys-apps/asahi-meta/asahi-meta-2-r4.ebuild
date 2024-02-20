@@ -20,5 +20,5 @@ RDEPEND="
 	sys-kernel/asahi-sources
 	media-libs/alsa-ucm-conf-asahi
 	audio? ( media-libs/asahi-audio )
-	mesa? ( =media-libs/mesa-24.0.0_pre20240214[video_cards_asahi(+)] )
+	mesa? ( =media-libs/mesa-24.1.0_pre20240218[video_cards_asahi(+)] )
 "
