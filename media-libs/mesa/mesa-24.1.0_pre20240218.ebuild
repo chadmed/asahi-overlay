@@ -289,6 +289,8 @@ src_prepare() {
 	default
 	sed -i -e "/^PLATFORM_SYMBOLS/a '__gentoo_check_ldflags__'," \
 		bin/symbols-check.py || die # bug #830728
+	# patch version string
+	sed -i -e "s/devel/asahi${MY_PV}/" VERSION
 }
 
 multilib_src_configure() {
