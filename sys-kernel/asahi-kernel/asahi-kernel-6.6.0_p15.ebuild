@@ -62,6 +62,12 @@ src_prepare() {
 	kernel-build_merge_configs "${T}/fakeversion.config"
 }
 
+src_install() {
+	# Override DTBs installation path for sys-apps/asahi-scripts::asahi
+	export INSTALL_DTBS_PATH="${ED}/usr/src/linux-${PV}${KV_LOCALVERSION}/arch/$(tc-arch-kernel)/boot/dts"
+	kernel-build_src_install
+}
+
 # Override kernel-install_pkg_preinst() to avoid ${PV}-as-release check
 pkg_preinst() {
 	true
