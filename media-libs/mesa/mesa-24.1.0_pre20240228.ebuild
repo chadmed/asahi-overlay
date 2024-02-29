@@ -412,7 +412,7 @@ multilib_src_configure() {
 	if use llvm && use vulkan && use video_cards_intel && use amd64; then
 		emesonargs+=(-Dintel-clc=system)
 	else
-		emesonargs+=(-Dintel-clc=disabled)
+		emesonargs+=(-Dintel-clc=auto)
 	fi
 
 	emesonargs+=(
