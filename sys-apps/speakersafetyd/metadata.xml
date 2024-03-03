@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE pkgmetadata SYSTEM "https://www.gentoo.org/dtd/metadata.dtd">
 <pkgmetadata>
-<maintainer type="person">
-  <email>jcalligeros99@gmail.com</email>
-  <name>James Calligeros</name>
-</maintainer>
-<use>
-  <flag name="systemd">Ignore OpenRC init script</flag>
-</use>
-<upstream>
-  <remote-id type="github">AsahiLinux/speakersafetyd</remote-id>
-</upstream>
+    <maintainer type="person">
+        <email>jcalligeros99@gmail.com</email>
+        <name>James Calligeros</name>
+    </maintainer>
+    <use>
+        <flag name="systemd">Ignore OpenRC init script</flag>
+    </use>
+    <upstream>
+        <remote-id type="github">AsahiLinux/speakersafetyd</remote-id>
+    </upstream>
 </pkgmetadata>
