@@ -1,0 +1,10 @@
+Title: startup-disk has been upstreamed
+Author: James Calligeros <jcalligeros99@gmail.com>
+Posted: 2024-03-03
+Revision: 1
+News-Item-Format: 2.0
+
+The GTK4 frontend for asahi-bless, previously just called startup-disk, has
+been upstreamed into ::gentoo as asahi-startup-disk. As the name of the package
+has changed, you will need to manually uninstall sys-apps/startup-disk::asahi
+and install sys-apps/asahi-startup-disk::gentoo in its stead.
