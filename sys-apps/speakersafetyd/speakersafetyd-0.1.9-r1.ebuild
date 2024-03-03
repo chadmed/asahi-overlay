@@ -108,8 +108,6 @@ LICENSE="MIT"
 SLOT="0"
 KEYWORDS="arm64"
 
-IUSE="systemd"
-
 DEPEND="
 	virtual/rust
 	media-libs/alsa-ucm-conf-asahi
@@ -120,7 +118,7 @@ QA_FLAGS_IGNORED="usr/bin/${PN}"
 
 src_install() {
 	emake DESTDIR="${D}" install || die
-	use systemd || doinitd "${FILESDIR}/speakersafetyd"
+	doinitd "${FILESDIR}/speakersafetyd"
 }
 
 src_postinst() {

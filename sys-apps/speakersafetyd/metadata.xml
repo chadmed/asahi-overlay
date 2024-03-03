@@ -5,9 +5,6 @@
         <email>jcalligeros99@gmail.com</email>
         <name>James Calligeros</name>
     </maintainer>
-    <use>
-        <flag name="systemd">Ignore OpenRC init script</flag>
-    </use>
     <upstream>
         <remote-id type="github">AsahiLinux/speakersafetyd</remote-id>
     </upstream>
