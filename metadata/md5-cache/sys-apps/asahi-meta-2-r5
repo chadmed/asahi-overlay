@@ -5,6 +5,6 @@ HOMEPAGE=https://asahilinux.org/
 IUSE=+audio +mesa
 KEYWORDS=arm64
 LICENSE=metapackage
-RDEPEND=sys-boot/m1n1 sys-boot/u-boot sys-apps/asahi-scripts sys-apps/asahi-configs sys-firmware/asahi-firmware sys-kernel/asahi-sources media-libs/alsa-ucm-conf-asahi audio? ( media-libs/asahi-audio ) mesa? ( >=media-libs/mesa-24.1.0_pre20240228[video_cards_asahi(-)] )
+RDEPEND=sys-boot/m1n1 sys-boot/u-boot sys-apps/asahi-scripts sys-apps/asahi-configs sys-firmware/asahi-firmware sys-kernel/asahi-kernel media-libs/alsa-ucm-conf-asahi audio? ( media-libs/asahi-audio ) mesa? ( >=media-libs/mesa-24.1.0_pre20240228[video_cards_asahi(-)] ) mesa? ( >=sys-kernel/asahi-kernel-6.6.0_p15 )
 SLOT=0
-_md5_=252cbec369492746e5fa2ddadd29ec9f
+_md5_=69c713c0399d290ba1bc7cda341f3ba3

@@ -17,8 +17,9 @@ RDEPEND="
 	sys-apps/asahi-scripts
 	sys-apps/asahi-configs
 	sys-firmware/asahi-firmware
-	sys-kernel/asahi-sources
+	sys-kernel/asahi-kernel
 	media-libs/alsa-ucm-conf-asahi
 	audio? ( media-libs/asahi-audio )
 	mesa? ( >=media-libs/mesa-24.1.0_pre20240228[video_cards_asahi(-)] )
+	mesa? ( >=sys-kernel/asahi-kernel-6.6.0_p15 )
 "
