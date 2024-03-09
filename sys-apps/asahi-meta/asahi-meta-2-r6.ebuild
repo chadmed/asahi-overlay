@@ -9,7 +9,12 @@ HOMEPAGE="https://asahilinux.org/"
 LICENSE="metapackage"
 SLOT=0
 KEYWORDS="arm64"
-IUSE="+audio +mesa"
+IUSE="+audio +mesa +sources kernel"
+
+REQUIRED_USE="
+	sources? ( !kernel )
+	kernel? ( !sources )
+"
 
 RDEPEND="
 	sys-boot/m1n1
@@ -17,9 +22,13 @@ RDEPEND="
 	sys-apps/asahi-scripts
 	sys-apps/asahi-configs
 	sys-firmware/asahi-firmware
-	sys-kernel/asahi-kernel
+	kernel? ( sys-kernel/asahi-kernel )
+	sources? ( sys-kernel/asahi-sources )
 	media-libs/alsa-ucm-conf-asahi
 	audio? ( media-libs/asahi-audio )
-	mesa? ( >=media-libs/mesa-24.1.0_pre20240228[video_cards_asahi(-)] )
-	mesa? ( >=sys-kernel/asahi-kernel-6.6.0_p15 )
+	mesa? (
+		>=media-libs/mesa-24.1.0_pre20240228-r1[video_cards_asahi(-)]
+		kernel? ( >=sys-kernel/asahi-kernel-6.6.0_p15 )
+		sources? ( >=sys-kernel/asahi-sources-6.6.0_p15 )
+	)
 "
