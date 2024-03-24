@@ -45,7 +45,7 @@ DEPEND="
 "
 
 PDEPEND="
-	virtual/dist-kernel
+	=virtual/dist-kernel-${PV}
 "
 
 PATCHES=(
