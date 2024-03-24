@@ -24,8 +24,7 @@ DESCRIPTION="Asahi Linux kernel sources"
 HOMEPAGE="https://asahilinux.org"
 KERNEL_URI="https://github.com/AsahiLinux/linux/archive/refs/tags/${MY_P}.tar.gz -> ${PN}-${PV}.tar.gz"
 SRC_URI="${KERNEL_URI}
-	https://raw.githubusercontent.com/AsahiLinux/PKGBUILDs/main/linux-asahi/config
-	https://raw.githubusercontent.com/AsahiLinux/PKGBUILDs/main/linux-asahi/config.edge
+	https://copr-dist-git.fedorainfracloud.org/cgit/@asahi/kernel/kernel.git/tree/kernel-aarch64-16k-fedora.config?id=be420b20d9a73b16a6ee7b6cdb34194efd89bb91 -> kernel-aarch64-16k-fedora.config-${PV}
 "
 
 S="${WORKDIR}/linux-${MY_P}"
@@ -57,8 +56,7 @@ PATCHES=(
 src_prepare() {
 	default
 	echo "-${MY_TAG}-dist" > localversion.10-pkgrel || die
-	cp "${DISTDIR}/config" ".config" || die
-	kernel-build_merge_configs "${DISTDIR}/config.edge"
+	cp "${DISTDIR}/kernel-aarch64-16k-fedora.config-${PV}" ".config" || die
 	echo 'CONFIG_LOCALVERSION=""' > "${T}/fakeversion.config"
 	kernel-build_merge_configs "${T}/fakeversion.config"
 }
