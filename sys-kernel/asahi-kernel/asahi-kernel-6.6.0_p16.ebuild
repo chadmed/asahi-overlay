@@ -24,7 +24,7 @@ DESCRIPTION="Asahi Linux kernel sources"
 HOMEPAGE="https://asahilinux.org"
 KERNEL_URI="https://github.com/AsahiLinux/linux/archive/refs/tags/${MY_P}.tar.gz -> ${PN}-${PV}.tar.gz"
 SRC_URI="${KERNEL_URI}
-	https://copr-dist-git.fedorainfracloud.org/cgit/@asahi/kernel/kernel.git/tree/kernel-aarch64-16k-fedora.config?id=be420b20d9a73b16a6ee7b6cdb34194efd89bb91 -> kernel-aarch64-16k-fedora.config-${PV}
+	https://copr-dist-git.fedorainfracloud.org/cgit/@asahi/kernel/kernel.git/plain/kernel-aarch64-16k-fedora.config?id=be420b20d9a73b16a6ee7b6cdb34194efd89bb91 -> kernel-aarch64-16k-fedora.config-${PV}
 "
 
 S="${WORKDIR}/linux-${MY_P}"
