@@ -19,12 +19,17 @@ else
 	MY_TAG="$(ver_cut 5)"
 	MY_P="asahi-$(ver_cut 1-2)-${MY_TAG}"
 fi
+CONFIG_VER=6.6.3-414-gentoo
+GENTOO_CONFIG_VER=g11
 
 DESCRIPTION="Asahi Linux kernel sources"
 HOMEPAGE="https://asahilinux.org"
 KERNEL_URI="https://github.com/AsahiLinux/linux/archive/refs/tags/${MY_P}.tar.gz -> ${PN}-${PV}.tar.gz"
 SRC_URI="${KERNEL_URI}
-	https://copr-dist-git.fedorainfracloud.org/cgit/@asahi/kernel/kernel.git/plain/kernel-aarch64-16k-fedora.config?id=be420b20d9a73b16a6ee7b6cdb34194efd89bb91 -> kernel-aarch64-16k-fedora.config-${PV}
+	https://github.com/projg2/gentoo-kernel-config/archive/${GENTOO_CONFIG_VER}.tar.gz
+		-> gentoo-kernel-config-${GENTOO_CONFIG_VER}.tar.gz
+	https://copr-dist-git.fedorainfracloud.org/cgit/@asahi/kernel/kernel.git/plain/kernel-aarch64-16k-fedora.config?id=be420b20d9a73b16a6ee7b6cdb34194efd89bb91
+		-> kernel-aarch64-16k-fedora.config-${CONFIG_VER}
 "
 
 S="${WORKDIR}/linux-${MY_P}"
@@ -41,11 +46,17 @@ DEPEND="
 		 >=dev-lang/rust-bin-1.72.0[rust-src,rustfmt]
 	   )
 	dev-util/bindgen
-	dev-util/pahole
+	debug? ( dev-util/pahole )
 "
 
 PDEPEND="
 	=virtual/dist-kernel-${PV}
+"
+
+QA_FLAGS_IGNORED="
+    usr/src/linux-.*/scripts/gcc-plugins/.*.so
+    usr/src/linux-.*/vmlinux
+    usr/src/linux-.*/arch/powerpc/kernel/vdso.*/vdso.*.so.dbg
 "
 
 PATCHES=(
@@ -56,10 +67,33 @@ PATCHES=(
 
 src_prepare() {
 	default
-	echo "-${MY_TAG}-dist" > localversion.10-pkgrel || die
-	cp "${DISTDIR}/kernel-aarch64-16k-fedora.config-${PV}" ".config" || die
-	echo 'CONFIG_LOCALVERSION=""' > "${T}/fakeversion.config"
-	kernel-build_merge_configs "${T}/fakeversion.config"
+
+	# prepare the default config
+	cp "${DISTDIR}/kernel-aarch64-16k-fedora.config-${CONFIG_VER}" ".config" || die
+
+	# localversion.05-asahi already appends "-asahi"
+	local myversion="-${MY_TAG}-dist"
+	echo "CONFIG_LOCALVERSION=\"${myversion}\"" > "${T}"/version.config || die
+	local dist_conf_path="${WORKDIR}/gentoo-kernel-config-${GENTOO_CONFIG_VER}"
+
+	local merge_configs=(
+		"${T}"/version.config
+		"${dist_conf_path}"/base.config
+	)
+	use debug || merge_configs+=(
+		"${dist_conf_path}"/no-debug.config
+	)
+
+	# deselect all non APPLE arm64 ARCHs
+	merge_configs+=(
+		"${FILESDIR}"/linux-$(ver_cut 1-2)_arm64_deselect_non_apple_arch.config
+	)
+	# adjust base config for Apple silicon systems
+	merge_configs+=(
+		"${FILESDIR}"/linux-$(ver_cut 1-2)_arch_apple_overrides.config
+	)
+
+	kernel-build_merge_configs "${merge_configs[@]}"
 }
 
 # Override kernel-install_pkg_preinst() to avoid ${PV}-as-release check
