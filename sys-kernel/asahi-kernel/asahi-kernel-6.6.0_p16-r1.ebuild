@@ -42,10 +42,11 @@ IUSE="debug"
 # Rust is non-negotiable for the dist kernel
 DEPEND="
 	${DEPEND}
-	|| ( dev-lang/rust:stable/1.74[rust-src,rustfmt]
+	virtual/rust
+	|| ( ~dev-lang/rust-bin-1.74.0[rust-src,rustfmt]
+		 ~dev-lang/rust-bin-1.75.0[rust-src,rustfmt]
+		 dev-lang/rust:stable/1.74[rust-src,rustfmt]
 		 dev-lang/rust:stable/1.75[rust-src,rustfmt]
-		 ~dev-lang/rust-bin-1.74[rust-src,rustfmt]
-		 ~dev-lang/rust-bin-1.75[rust-src,rustfmt]
 	   )
 	dev-util/bindgen
 	debug? ( dev-util/pahole )
