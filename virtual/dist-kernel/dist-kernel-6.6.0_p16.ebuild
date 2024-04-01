@@ -8,10 +8,5 @@ SLOT="0/${PVR}"
 KEYWORDS="~amd64 ~arm ~arm64 ~hppa ~loong ~ppc ~ppc64 ~riscv ~sparc ~x86"
 
 RDEPEND="
-	|| (
-		~sys-kernel/gentoo-kernel-${PV}
-		~sys-kernel/gentoo-kernel-bin-${PV}
-		~sys-kernel/vanilla-kernel-${PV}
-		~sys-kernel/asahi-kernel-${PV}
-	)
+	~sys-kernel/asahi-kernel-${PV}
 "
