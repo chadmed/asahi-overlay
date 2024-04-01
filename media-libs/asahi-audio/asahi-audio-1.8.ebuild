@@ -9,7 +9,7 @@ SRC_URI="https://github.com/AsahiLinux/${PN}/archive/refs/tags/v${PV}.tar.gz -> 
 LICENSE="MIT"
 SLOT="1.0"
 
-KEYWORDS="arm64"
+KEYWORDS="~arm64"
 
 RDEPEND="
 	>=media-video/pipewire-0.3.85[extra,lv2,sound-server]
@@ -19,7 +19,7 @@ RDEPEND="
 		>=sys-kernel/asahi-kernel-6.6.0_p11
 	   )
 	>=media-libs/alsa-ucm-conf-asahi-5.0
-	media-libs/lsp-plugins[lv2]
+	>=media-libs/lsp-plugins-1.2.6[lv2]
 	>=media-libs/bankstown-lv2-1.0.3
 	sys-apps/speakersafetyd
 "
