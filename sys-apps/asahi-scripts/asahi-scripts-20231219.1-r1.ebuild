@@ -40,10 +40,6 @@ pkg_postinst() {
 	elog "Asahi scripts have been installed to /usr/. For more"
 	elog "information on how to use them, please visit the Wiki."
 
-	if [[ -e ${ROOT}/bin/update-m1n1 ]]; then
-		ewarn "You need to remove /bin/update-m1n1."
-	fi
-
 	if [[ -e ${ROOT}/usr/local/share/asahi-scripts/functions.sh ]]; then
 		ewarn "You have upgraded to a new version of ${PN}. Please"
 		ewarn "remove /usr/local/share/asahi-scripts/,"
