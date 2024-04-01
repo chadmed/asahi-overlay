@@ -6,6 +6,8 @@ EAPI=8
 DESCRIPTION="Widevine installer for AArch64 systems"
 HOMEPAGE="https://asahilinux.org/"
 
+SRC_URI="https://github.com/AsahiLinux/widevine-installer/archive/8fa12dd2d81c4b5d2a713e169cac70898512322e.tar.gz -> ${PN}-${PV}.tar.gz"
+
 LICENSE="MIT"
 SLOT=0
 
@@ -16,8 +18,6 @@ RDEPEND="
 	>=sys-libs/glibc-2.36
 	sys-fs/squashfs-tools[zstd]
 "
-
-SRC_URI="https://github.com/AsahiLinux/widevine-installer/archive/8fa12dd2d81c4b5d2a713e169cac70898512322e.tar.gz -> ${PN}-${PV}.tar.gz"
 
 PATCHES="${FILESDIR}/disable-configs.patch"
 
