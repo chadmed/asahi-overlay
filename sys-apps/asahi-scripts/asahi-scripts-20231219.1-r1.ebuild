@@ -26,7 +26,7 @@ src_compile() {
 
 src_install() {
 	default
-	emake DESTDIR="${D}" SYS_PREFIX="" install-dracut
+	emake DESTDIR="${D}" PREFIX="/usr" SYS_PREFIX="" install-dracut
 }
 
 pkg_postinst() {

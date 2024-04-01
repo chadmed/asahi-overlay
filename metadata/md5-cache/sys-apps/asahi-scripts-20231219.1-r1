@@ -1,0 +1,10 @@
+BDEPEND=dev-build/make
+DEFINED_PHASES=compile install postinst prepare
+DESCRIPTION=Apple Silicon support scripts
+EAPI=8
+HOMEPAGE=https://asahilinux.org/
+KEYWORDS=arm64
+LICENSE=MIT
+SLOT=0
+SRC_URI=https://github.com/AsahiLinux/asahi-scripts/archive/refs/tags/20231219.1.tar.gz -> asahi-scripts-20231219.1.tar.gz
+_md5_=4a4a99bff94e9d0d06fd00f15a67e0da
