@@ -5,6 +5,7 @@ EAPI="8"
 
 DESCRIPTION="Apple Silicon support scripts"
 HOMEPAGE="https://asahilinux.org/"
+SRC_URI="https://github.com/AsahiLinux/${PN}/archive/refs/tags/${PV}.tar.gz -> ${PN}-${PV}.tar.gz"
 LICENSE="MIT"
 SLOT="0"
 KEYWORDS="arm64"
@@ -14,8 +15,6 @@ PATCHES=("${FILESDIR}/makefile.patch"
 
 BDEPEND="
 	dev-build/make"
-
-SRC_URI="https://github.com/AsahiLinux/${PN}/archive/refs/tags/${PV}.tar.gz -> ${PN}-${PV}.tar.gz"
 
 src_prepare() {
 	default
