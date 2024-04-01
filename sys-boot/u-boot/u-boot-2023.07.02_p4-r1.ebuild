@@ -6,9 +6,11 @@ PYTHON_COMPAT=( python3_{10..11} )
 
 DESCRIPTION="Asahi Linux fork of Das U-Boot"
 HOMEPAGE="https://asahilinux.org/"
+SRC_URI="https://github.com/AsahiLinux/u-boot/archive/refs/tags/${MY_P}.tar.gz -> ${PN}-${PV}.tar.gz"
 LICENSE="GPL-2"
-KEYWORDS="arm64"
 SLOT="0"
+
+KEYWORDS="arm64"
 
 PATCHES=(
 	"${FILESDIR}/u-boot-2023.07.02_p4-font-size.patch"
@@ -17,8 +19,6 @@ PATCHES=(
 # $PV is expected to be of following form: 2023.07.02_p2
 MY_TAG="$(ver_cut 5)"
 MY_P="asahi-v$(ver_cut 1-3)-${MY_TAG}"
-
-SRC_URI="https://github.com/AsahiLinux/u-boot/archive/refs/tags/${MY_P}.tar.gz -> ${PN}-${PV}.tar.gz"
 
 BDEPEND="
 	app-arch/cpio
@@ -37,17 +37,17 @@ RDEPEND="${BDEPEND}
 	sys-apps/asahi-scripts"
 
 src_unpack() {
-	unpack ${PN}-${PV}.tar.gz || die "Could not unpack sources!"
+	unpack ${PN}-${PV}.tar.gz
 	mv u-boot-${MY_P} ${PN}-${PV}
 }
 
 src_configure() {
-	emake apple_m1_defconfig || die "failed to apply defconfig!"
+	emake apple_m1_defconfig
 }
 
 src_compile() {
 	cd "${S}" || die
-	emake || die "emake failed"
+	emake
 }
 
 src_install() {
