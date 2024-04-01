@@ -7,7 +7,7 @@ index 0e55ead..f014a52 100755
  : ${U_BOOT:="$SOURCE/u-boot-nodtb.bin"}
  : ${TARGET:="$1"}
 -: ${DTBS:=$(/bin/ls -d /lib/modules/*-ARCH | sort -rV | head -1)/dtbs/*.dtb}
-+: ${DTBS:=/usr/src/linux/arch/arm64/boot/dts/apple/*.dtb}
++: ${DTBS:=$(/bin/ls -d /boot/dtbs/* | sort -rV | head -1)/apple/*.dtb}
  : ${CONFIG:=/etc/m1n1.conf}
  
  umount=false
