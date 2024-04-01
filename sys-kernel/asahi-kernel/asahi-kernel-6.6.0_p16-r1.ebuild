@@ -52,7 +52,7 @@ DEPEND="
 "
 
 PDEPEND="
-	=virtual/dist-kernel-${PV}
+	~virtual/dist-kernel-${PV}
 "
 
 QA_FLAGS_IGNORED="
