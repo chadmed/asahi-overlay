@@ -1,0 +1,18 @@
+BDEPEND=test? ( dev-tcltk/expect sys-apps/coreutils sys-kernel/dracut sys-fs/e2fsprogs amd64? ( app-emulation/qemu[qemu_softmmu_targets_x86_64] ) arm64? ( app-emulation/qemu[qemu_softmmu_targets_aarch64] ) ppc? ( app-emulation/qemu[qemu_softmmu_targets_ppc] ) ppc64? ( app-emulation/qemu[qemu_softmmu_targets_ppc64] ) sparc? ( app-emulation/qemu[qemu_softmmu_targets_sparc,qemu_softmmu_targets_sparc64] ) x86? ( app-emulation/qemu[qemu_softmmu_targets_i386] ) ) || ( dev-lang/python:3.12 dev-lang/python:3.11 dev-lang/python:3.10 ) app-alternatives/cpio app-alternatives/bc sys-devel/bison sys-devel/flex virtual/libelf arm? ( sys-apps/dtc ) arm64? ( sys-apps/dtc ) riscv? ( sys-apps/dtc )
+DEFINED_PHASES=compile config configure install postinst postrm preinst prepare prerm pretend setup test
+DEPEND=virtual/rust || ( ~dev-lang/rust-bin-1.75.0[rust-src,rustfmt] dev-lang/rust:stable/1.75[rust-src,rustfmt] ) dev-util/bindgen debug? ( dev-util/pahole )
+DESCRIPTION=Asahi Linux kernel sources
+EAPI=8
+HOMEPAGE=https://asahilinux.org
+IDEPEND=!initramfs? ( >=sys-kernel/installkernel-14 ) initramfs? ( >=sys-kernel/installkernel-14[dracut(-)] )
+INHERIT=kernel-build
+IUSE=debug savedconfig +initramfs test +strip
+KEYWORDS=arm64
+LICENSE=GPL-2
+PDEPEND=~virtual/dist-kernel-6.6.0_p16
+RDEPEND=virtual/libelf
+RESTRICT=!test? ( test ) test? ( userpriv ) arm? ( test )
+SLOT=6.6.0_p16
+SRC_URI=https://github.com/AsahiLinux/linux/archive/refs/tags/asahi-6.6-16.tar.gz -> asahi-kernel-6.6.0_p16.tar.gz https://github.com/projg2/gentoo-kernel-config/archive/g11.tar.gz -> gentoo-kernel-config-g11.tar.gz https://copr-dist-git.fedorainfracloud.org/cgit/@asahi/kernel/kernel.git/plain/kernel-aarch64-16k-fedora.config?id=be420b20d9a73b16a6ee7b6cdb34194efd89bb91 -> kernel-aarch64-16k-fedora.config-6.6.3-414-gentoo
+_eclasses_=multiprocessing	30ead54fa2e2b5f9cd4e612ffc34d0fe	toolchain-funcs	e56c7649b804f051623c8bc1a1c44084	multilib	c19072c3cd7ac5cb21de013f7e9832e0	python-utils-r1	8904b60325f22500b0c3ad4b68a42448	python-any-r1	f5169813d1619761b459800587005fd2	portability	225656ad6c6594fe3b0187bdd50707fb	savedconfig	8b5f9d995a970e49cd427c55d5840285	dist-kernel-utils	145861da258122cbba5240a850f1a5e8	mount-boot	3945d351ee3192381911f938f4ee527a	kernel-install	8b3f309ac423799839f1fb3253b473b8	kernel-build	99eb00d7450b05352eb000bfb702db53
+_md5_=ea0674ef8d1ddbe68917f133ff1a9b2a

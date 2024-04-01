@@ -8,4 +8,4 @@ LICENSE=BSD
 RDEPEND=>=media-libs/alsa-lib-1.2.1
 SLOT=0
 SRC_URI=https://github.com/AsahiLinux/alsa-ucm-conf-asahi/archive/refs/tags/v4.tar.gz -> alsa-ucm-conf-asahi-5.0.tar.gz
-_md5_=857aa66479c255665b2059d9ff539df7
+_md5_=191bb14b9b4a78813158de386273aaba

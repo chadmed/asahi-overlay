@@ -7,5 +7,5 @@ KEYWORDS=arm64
 LICENSE=GPL-2
 RDEPEND=app-arch/cpio dev-lang/perl sys-devel/bc sys-devel/bison sys-devel/flex dev-build/make >=sys-libs/ncurses-5.2 virtual/libelf virtual/pkgconfig sys-apps/dtc dev-vcs/git sys-apps/asahi-scripts
 SLOT=0
-SRC_URI=https://github.com/AsahiLinux/u-boot/archive/refs/tags/asahi-v2023.07.02-4.tar.gz -> u-boot-2023.07.02_p4.tar.gz
-_md5_=eaf819646e3dfa862d54958297222098
+SRC_URI=https://github.com/AsahiLinux/u-boot/archive/refs/tags/.tar.gz -> u-boot-2023.07.02_p4.tar.gz
+_md5_=67b4901c71926b69842cd002171013b3
