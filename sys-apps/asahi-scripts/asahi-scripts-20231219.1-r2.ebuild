@@ -11,7 +11,9 @@ SLOT="0"
 KEYWORDS="arm64"
 
 PATCHES=("${FILESDIR}/makefile.patch"
-	 "${FILESDIR}/update-m1n1-dtbs.patch")
+	"${FILESDIR}/update-m1n1-dtbs.patch"
+	"${FILESDIR}/20231219.1_dracut_fw_grep_mkdir_deps.patch"
+	)
 
 BDEPEND="
 	dev-build/make"
