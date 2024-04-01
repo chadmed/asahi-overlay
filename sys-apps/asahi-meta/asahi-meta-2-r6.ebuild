@@ -8,7 +8,7 @@ HOMEPAGE="https://asahilinux.org/"
 
 LICENSE="metapackage"
 SLOT=0
-KEYWORDS="arm64"
+KEYWORDS="~arm64"
 IUSE="+audio +mesa +sources kernel"
 
 REQUIRED_USE="
