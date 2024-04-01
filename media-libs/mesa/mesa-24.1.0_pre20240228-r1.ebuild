@@ -18,7 +18,7 @@ HOMEPAGE="https://www.mesa3d.org/ https://mesa.freedesktop.org/"
 SRC_URI="https://gitlab.freedesktop.org/asahi/mesa/-/archive/asahi-${MY_PV}/mesa-asahi-${MY_PV}.tar.gz"
 S="${WORKDIR}/mesa-asahi-${MY_PV}"
 
-KEYWORDS="arm64"
+KEYWORDS="~arm64"
 
 LICENSE="MIT SGI-B-2.0"
 SLOT="0"
