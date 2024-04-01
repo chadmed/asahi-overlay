@@ -3,10 +3,9 @@
 
 EAPI="7"
 
-inherit toolchain-funcs
-
 DESCRIPTION="Apple Silicon bootloader and experimentation playground"
 HOMEPAGE="https://asahilinux.org/"
+SRC_URI="https://github.com/AsahiLinux/m1n1/archive/refs/tags/v${PV}.tar.gz -> ${PN}-${PV}.tar.gz"
 LICENSE="MIT"
 SLOT="0"
 KEYWORDS="arm64"
@@ -20,7 +19,6 @@ RDEPEND="
 	sys-boot/u-boot
 	sys-kernel/asahi-sources"
 
-SRC_URI="https://github.com/AsahiLinux/m1n1/archive/refs/tags/v${PV}.tar.gz -> ${PN}-${PV}.tar.gz"
 BDEPEND="${BDEPEND}
 	clang? ( sys-devel/clang )
 "
@@ -30,13 +28,11 @@ src_compile() {
 	if use clang; then
 		emake USE_CLANG=1 \
 		RELEASE=1 \
-		ARCH="${CHOST}-" \
-		|| die "emake failed"
+		ARCH="${CHOST}-"
 	else
 		emake USE_CLANG=0 \
 		RELEASE=1 \
-		ARCH="${CHOST}-" \
-		|| die "emake failed"
+		ARCH="${CHOST}-"
 	fi
 }
 
