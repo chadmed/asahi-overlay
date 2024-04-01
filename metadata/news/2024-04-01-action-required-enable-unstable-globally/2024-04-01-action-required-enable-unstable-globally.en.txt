@@ -1,0 +1,13 @@
+Title: ACTION REQUIRED: enable unstable globally
+Author: James Calligeros <jcalligeros99@gmail.com>
+Posted: 2024-04-01
+Revision: 1
+News-Item-Format: 2.0
+
+Due to some QA checks required for getting the overlay added to
+api.g.o, we have had to demote some packages back to ~arm64. This was
+necessary to prevent pkgcheck from complaining about unresolvable dependencies.
+
+User Action Required:
+    1. Add ACCEPT_KEYWORDS="~arm64" to your make.conf if you haven't already
+    2. emerge -auvDN @world
