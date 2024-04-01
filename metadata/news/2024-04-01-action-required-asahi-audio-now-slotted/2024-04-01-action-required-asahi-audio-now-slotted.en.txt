@@ -1,0 +1,19 @@
+Title: ACTION REQUIRED: asahi-audio is now SLOTted
+Author: James Calligeros <jcalligeros99@gmail.com>
+Posted: 2024-04-01
+Revision: 1
+News-Item-Format: 2.0
+
+The media-libs/asahi-audio package has been slotted in preparation for
+WirePlumber 0.5 to be released for ~arm64. As we had to make a breaking change
+in asahi-audio to accommodate the API change for WirePlumber 0.5, development
+has diverged into two branches. To reflect this in Gentoo, we have SLOTted
+the two branches. If you try to update, you will notice a hard blocker between
+media-libs/asahi-audio:0 and media-libs/asahi-audio:1.0.
+
+User Action Required:
+    1. emerge -C media-libs/asahi-audio:0
+    2. emerge -1av media-libs/asahi-audio:1.0
+
+As the installed file trees are identical between the old :0 SLOT and :1.0,
+:0 must be manually removed *before* :1.0 can be merged.
