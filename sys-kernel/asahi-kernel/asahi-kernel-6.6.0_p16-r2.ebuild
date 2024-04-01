@@ -98,6 +98,22 @@ src_prepare() {
 	kernel-build_merge_configs "${merge_configs[@]}"
 }
 
+src_install() {
+	# call kernel-build's scr_install
+	kernel-build_src_install
+
+	# symlink installed *.dtbs back into kernel "source" directory
+	local dir_ver=${PV}${KV_LOCALVERSION}
+	local kernel_dir=/usr/src/linux-${dir_ver}
+	local relfile=${ED}${kernel_dir}/include/config/kernel.release
+	local module_ver
+	module_ver=$(<"${relfile}") || die
+
+	for dtb in /boot/dtbs/${module_ver}/apple/*.dtb; do
+		dosym ${dtb} /${kernel_dir}/arch/arm64/boot/dts/apple/$(basename ${dtb})
+	done
+}
+
 # Override kernel-install_pkg_preinst() to avoid ${PV}-as-release check
 pkg_preinst() {
 	true
