@@ -118,7 +118,7 @@ RDEPEND="${RDEPEND}
 # How to use it:
 # 1. Specify LLVM_MAX_SLOT (inclusive), e.g. 16.
 # 2. Specify LLVM_MIN_SLOT (inclusive), e.g. 15.
-LLVM_MAX_SLOT="17"
+LLVM_MAX_SLOT="18"
 LLVM_MIN_SLOT="15"
 LLVM_USE_DEPS="${MULTILIB_USEDEP}"
 PER_SLOT_DEPSTR="
