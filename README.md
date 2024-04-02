@@ -7,12 +7,14 @@ devices.
 If you used [asahi-gentoosupport](https://github.com/chadmed/asahi-gentoosupport), you should not need to
 do anything. That script sets up this repo automatically. For all other users:
 
-1. Add `ACCEPT_KEYWORDS="~arm64"` to `/etc/portage/make.conf`
-2. Go clone asahi-gentoosupport.
-3. Copy `repo.conf` into `/etc/portage/repos.conf/` and rename the file
+1. Go clone asahi-gentoosupport.
+2. Copy `repo.conf` into `/etc/portage/repos.conf/` and rename the file
 `asahi.conf`
-4. Run `emaint sync -r asahi`.
-5. Mask `media-libs/mesa::gentoo`.
+3. Run `emaint sync -r asahi`.
+4. Copy `resources/package.license`, `resources/package.mask` and `resources/package.accept_keywords`
+   to their respective homes (note: the `package.*` nodes in `/etc/portage/` should be folders)
+
+Enjoy!
 
 ## Usage
 No manual intervention is required to use this repo correctly as it
