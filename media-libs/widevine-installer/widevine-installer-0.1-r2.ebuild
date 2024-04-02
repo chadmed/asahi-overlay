@@ -11,7 +11,7 @@ SRC_URI="https://github.com/AsahiLinux/widevine-installer/archive/8fa12dd2d81c4b
 LICENSE="MIT"
 SLOT=0
 
-KEYWORDS="~arm64"
+KEYWORDS="arm64"
 
 # Widevine only works with glibc 2.36 or above
 RDEPEND="
