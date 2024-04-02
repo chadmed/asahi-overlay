@@ -1,0 +1,15 @@
+Title: Stable users: you can now remove global ~arm64!
+Author: James Calligeros <jcalligeros99@gmail.com>
+Posted: 2024-04-02
+Revision: 1
+News-Item-Format: 2.0
+
+Thanks to the efforts of leio and sam, we now have enough stuff stable
+in arm64 for the global ~arm64 requirement to be dropped.
+
+User Action Required:
+    1. Accept ~arm64 for media-libs/mesa::asahi, dev-libs/libclc,
+       and sys-apps/asahi-meta using /etc/portage/package.accept_keywords/
+    2. Drop ACCEPT_KEYWORDS="~arm64" from /etc/portage/make.conf
+    2. Sit tight and wait a bit. We will let you know when you can drop
+       these keyword overrides too!
