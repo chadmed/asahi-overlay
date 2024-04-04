@@ -11,7 +11,7 @@ do anything. That script sets up this repo automatically. For all other users:
 2. Copy `repo.conf` into `/etc/portage/repos.conf/` and rename the file
 `asahi.conf`
 3. Run `emaint sync -r asahi`.
-4. Copy `resources/package.license`, `resources/package.mask` and `resources/package.accept_keywords`
+4. Copy `resources/package.license` and `resources/package.mask`
    to their respective homes (note: the `package.*` nodes in `/etc/portage/` should be folders)
 
 Enjoy!
