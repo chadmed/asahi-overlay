@@ -3,9 +3,9 @@ DESCRIPTION=Metapackage for the Asahi support packages
 EAPI=8
 HOMEPAGE=https://asahilinux.org/
 IUSE=+audio +mesa +sources kernel
-KEYWORDS=~arm64
+KEYWORDS=arm64
 LICENSE=metapackage
 RDEPEND=sys-boot/m1n1 sys-boot/u-boot sys-apps/asahi-scripts sys-apps/asahi-configs sys-firmware/asahi-firmware kernel? ( sys-kernel/asahi-kernel ) sources? ( sys-kernel/asahi-sources ) media-libs/alsa-ucm-conf-asahi audio? ( media-libs/asahi-audio ) mesa? ( >=media-libs/mesa-24.1.0_pre20240228-r1[video_cards_asahi(-)] kernel? ( >=sys-kernel/asahi-kernel-6.6.0_p15 ) sources? ( >=sys-kernel/asahi-sources-6.6.0_p15 ) )
 REQUIRED_USE=sources? ( !kernel ) kernel? ( !sources )
 SLOT=0
-_md5_=e228262a0d46a622b039425fc9abcbe4
+_md5_=7b16baeec9fab980f365b5cfa116dc4a
