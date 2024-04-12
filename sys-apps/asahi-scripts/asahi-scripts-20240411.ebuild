@@ -8,11 +8,10 @@ HOMEPAGE="https://asahilinux.org/"
 SRC_URI="https://github.com/AsahiLinux/${PN}/archive/refs/tags/${PV}.tar.gz -> ${PN}-${PV}.tar.gz"
 LICENSE="MIT"
 SLOT="0"
-KEYWORDS="~arm64"
+KEYWORDS="arm64"
 
 PATCHES=("${FILESDIR}/makefile.patch"
 	"${FILESDIR}/update-m1n1-dtbs.patch"
-	"${FILESDIR}/20231219.1_dracut_fw_grep_mkdir_deps.patch"
 	)
 
 BDEPEND="
