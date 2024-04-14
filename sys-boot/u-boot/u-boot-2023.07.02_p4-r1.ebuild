@@ -4,6 +4,10 @@
 EAPI="8"
 PYTHON_COMPAT=( python3_{10..11} )
 
+# $PV is expected to be of following form: 2023.07.02_p2
+MY_TAG="$(ver_cut 5)"
+MY_P="asahi-v$(ver_cut 1-3)-${MY_TAG}"
+
 DESCRIPTION="Asahi Linux fork of Das U-Boot"
 HOMEPAGE="https://asahilinux.org/"
 SRC_URI="https://github.com/AsahiLinux/u-boot/archive/refs/tags/${MY_P}.tar.gz -> ${PN}-${PV}.tar.gz"
@@ -15,10 +19,6 @@ KEYWORDS="arm64"
 PATCHES=(
 	"${FILESDIR}/u-boot-2023.07.02_p4-font-size.patch"
 )
-
-# $PV is expected to be of following form: 2023.07.02_p2
-MY_TAG="$(ver_cut 5)"
-MY_P="asahi-v$(ver_cut 1-3)-${MY_TAG}"
 
 BDEPEND="
 	app-arch/cpio
