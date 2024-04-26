@@ -1,0 +1,2 @@
+# unmask known mesa version to override gentoo's package.mask for mesa 24.1
+~media-libs/mesa-24.1.0_pre20240228
