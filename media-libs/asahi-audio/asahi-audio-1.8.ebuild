@@ -7,7 +7,7 @@ DESCRIPTION="PipeWire/WirePlumber configuration files for Apple Silicon"
 HOMEPAGE="https://github.com/AsahiLinux/asahi-audio"
 SRC_URI="https://github.com/AsahiLinux/${PN}/archive/refs/tags/v${PV}.tar.gz -> ${PN}-${PV}.tar.gz"
 LICENSE="MIT"
-SLOT="1.0"
+SLOT="0/1.0"
 
 KEYWORDS="arm64"
 
@@ -24,6 +24,5 @@ RDEPEND="
 	sys-apps/speakersafetyd
 "
 DEPEND="
-	!!media-libs/asahi-audio:0
 	${RDEPEND}
 "
