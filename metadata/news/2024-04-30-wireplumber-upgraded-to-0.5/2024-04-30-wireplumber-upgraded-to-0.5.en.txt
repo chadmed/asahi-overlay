@@ -1,0 +1,26 @@
+Title: IMPORTANT: media-video/wireplumber has been upgraded to 0.5.2
+Author: James Calligeros <jcalligeros99@gmail.com>
+Posted: 2024-04-30
+Revision: 1
+News-Item-Format: 2.0
+
+As some will be aware, WirePlumber 0.5.0 introduced a significant breaking change
+to its entire configuration system, eliminating the use of Lua scripts for
+basic config-like actions. This also came with a complete rework of how Lua scripts
+are registered with WirePlumber for execution.
+
+ANY CUSTOM FUNCTIONALITY WHICH RELIES ON WIREPLUMBER'S LUA API WILL BREAK ON UPGRADE
+
+If you rely on this functionality, please review the WirePlumber documentation on
+porting your Lua scripts to the new API and registering them with the system:
+
+https://pipewire.pages.freedesktop.org/wireplumber/daemon/configuration/migration.html
+
+Most typical desktop users, including EasyEffects users, should experience no regressions
+as a result of this. If for any reason you do, or if you encounter a dependency conflict
+when upgrading your system, please open an issue on the overlay:
+
+https://github.com/chadmed/asahi-overlay/issues
+
+We are deploying this to ::asahi as a canary for wider deployment to ::gentoo simply
+because media-libs/asahi-audio-2.1 relies on the WirePlumber 0.5.x API.
