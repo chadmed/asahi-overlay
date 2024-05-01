@@ -27,7 +27,7 @@ DESCRIPTION="Replacement for pipewire-media-session"
 HOMEPAGE="https://gitlab.freedesktop.org/pipewire/wireplumber"
 
 LICENSE="MIT"
-SLOT="0/0.5"
+SLOT="0/0.4"
 IUSE="elogind system-service systemd test"
 
 REQUIRED_USE="
