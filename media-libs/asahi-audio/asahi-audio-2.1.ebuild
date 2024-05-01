@@ -12,8 +12,8 @@ SLOT="0/2.0"
 KEYWORDS="~arm64"
 
 RDEPEND="
-	>=media-video/pipewire-1.0.2:0/0.5[extra,lv2,sound-server]
-	media-video/wireplumber:0/0.5
+	>=media-video/pipewire-1.0.2[extra,lv2,sound-server]
+	>=media-video/wireplumber-0.5.2
 	|| (
 		>=sys-kernel/asahi-sources-6.6.0_p11
 		>=sys-kernel/asahi-kernel-6.6.0_p11
