@@ -54,8 +54,8 @@ DESCRIPTION="Multimedia processing graphs"
 HOMEPAGE="https://pipewire.org/"
 
 LICENSE="MIT LGPL-2.1+ GPL-2"
-# Config style changed with WirePlumber 0.5
-SLOT="0/0.5"
+
+SLOT="0/0.4"
 IUSE="${PIPEWIRE_DOCS_USEFLAG} bluetooth dbus doc echo-cancel extra ffmpeg flatpak gstreamer gsettings ieee1394 jack-client jack-sdk liblc3 lv2"
 IUSE+=" modemmanager pipewire-alsa readline roc selinux sound-server ssl system-service systemd test v4l X zeroconf"
 
