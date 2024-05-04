@@ -1,0 +1,7 @@
+# Copyright 1999-2023 Gentoo Authors
+# Distributed under the terms of the GNU General Public License v2
+
+# Janne Grunau <j@jannau.net> (2024-05-04)
+# Use +caps so that kwin_wayland gets CAP_SYS_NICE used for real time
+# input and kms commit threads.
+kde-plasma/kwin caps
