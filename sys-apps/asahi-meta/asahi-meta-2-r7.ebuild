@@ -9,7 +9,7 @@ HOMEPAGE="https://asahilinux.org/"
 LICENSE="metapackage"
 SLOT=0
 KEYWORDS="arm64"
-IUSE="+audio +mesa +sources kernel"
+IUSE="+audio +mesa +sources kde kernel"
 
 REQUIRED_USE="
 	sources? ( !kernel )
@@ -31,4 +31,5 @@ RDEPEND="
 		kernel? ( >=sys-kernel/asahi-kernel-6.6.0_p15 )
 		sources? ( >=sys-kernel/asahi-sources-6.6.0_p15 )
 	)
+	kde? ( kde-plasma/kwin[caps] )
 "
