@@ -7,14 +7,17 @@ devices.
 If you used [asahi-gentoosupport](https://github.com/chadmed/asahi-gentoosupport), you should not need to
 do anything. That script sets up this repo automatically. For all other users:
 
-1. Go clone asahi-gentoosupport.
-2. Copy `repo.conf` into `/etc/portage/repos.conf/` and rename the file
-`asahi.conf`
-3. Run `emaint sync -r asahi`.
-4. Copy `resources/package.license` and `resources/package.mask`
-   to their respective homes (note: the `package.*` nodes in `/etc/portage/` should be folders)
+1. Go clone asahi-gentoosupport
+2. Copy `resources/package.mask` and `resources/package.use` to their homes in
+   `/etc/portage/` (note: the `package.*` nodes in `/etc/portage/` should be folders)
+3. Install `app-eselect/eselect-repository`
+4. Run `eselect repository enable asahi`
+5. Run `emaint sync -r asahi`
 
 Enjoy!
+
+If you intend to use a DE/WM with your system, please make sure to edit
+`package.use` according to the instructions contained therein.
 
 ## Usage
 No manual intervention is required to use this repo correctly as it
