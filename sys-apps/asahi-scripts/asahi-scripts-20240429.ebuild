@@ -27,6 +27,8 @@ src_install() {
 	# install gentoo sys config
 	insinto /etc/default
 	newins "${FILESDIR}"/update-m1n1.gentoo.conf update-m1n1
+
+	dobin ${S}/update-grub
 }
 
 pkg_postinst() {
