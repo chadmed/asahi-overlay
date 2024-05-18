@@ -11,9 +11,7 @@ SLOT="0"
 KEYWORDS="arm64"
 IUSE="clang"
 
-BDEPEND="
-	dev-build/make
-	sys-apps/dtc"
+BDEPEND="dev-build/make"
 
 RDEPEND="
 	sys-boot/u-boot
