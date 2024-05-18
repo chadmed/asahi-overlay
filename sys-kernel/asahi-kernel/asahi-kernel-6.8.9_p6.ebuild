@@ -4,42 +4,50 @@
 EAPI="8"
 K_SECURITY_UNSUPPORTED="1"
 ETYPE="sources"
-#K_WANT_GENPATCHES="base extras experimental"
-#K_GENPATCHES_VER="5"
 K_NODRYRUN="1"
 
 inherit kernel-build
 
+MY_P=linux-${PV%.*}
+GENPATCHES_P="genpatches-$(ver_cut 1-2)-12"
+
 if [[ ${PV} != ${PV/_rc} ]] ; then
 	# $PV is expected to be of following form: 6.0_rc5_p1
 	MY_TAG="$(ver_cut 6)"
-	MY_P="asahi-$(ver_rs 2 - $(ver_cut 1-4))-${MY_TAG}"
+	MY_BASE="$(ver_rs 2 - $(ver_cut 1-4))"
 else
 	# $PV is expected to be of following form: 5.19.0_p1
 	MY_TAG="$(ver_cut 5)"
 	if [[ "$(ver_cut 3)" == "0" ]] ; then
-		MY_P="asahi-$(ver_cut 1-2)-${MY_TAG}"
+		MY_BASE="$(ver_cut 1-2)"
 	else
-		MY_P="asahi-$(ver_cut 1-3)-${MY_TAG}"
+		MY_BASE="$(ver_cut 1-3)"
 	fi
 fi
+
+ASAHI_TAG="asahi-${MY_BASE}-${MY_TAG}"
+
 CONFIG_VER=6.8.9-402-gentoo
-GENTOO_CONFIG_VER=g11
+GENTOO_CONFIG_VER=g13
 FEDORA_CONFIG_DISTGIT="copr-dist-git.fedorainfracloud.org/cgit/@asahi/kernel"
 # FEDORA_CONFIG_DISTGIT="copr-dist-git.fedorainfracloud.org/cgit/ngompa/fedora-asahi-dev"
 FEDORA_CONFIG_SHA1=82a221a3043efc2022d39f532e13535f183661ca
 
 DESCRIPTION="Asahi Linux kernel sources"
 HOMEPAGE="https://asahilinux.org"
-KERNEL_URI="https://github.com/AsahiLinux/linux/archive/refs/tags/${MY_P}.tar.gz -> linux-${MY_P}.tar.gz"
-SRC_URI="${KERNEL_URI}
-	https://github.com/projg2/gentoo-kernel-config/archive/${GENTOO_CONFIG_VER}.tar.gz
-		-> gentoo-kernel-config-${GENTOO_CONFIG_VER}.tar.gz
+SRC_URI="
+    https://cdn.kernel.org/pub/linux/kernel/v$(ver_cut 1).x/${MY_P}.tar.xz
+    https://github.com/AsahiLinux/linux/compare/v${MY_BASE}...${ASAHI_TAG}.patch
+        -> linux-${ASAHI_TAG}.patch
+    https://dev.gentoo.org/~mpagano/dist/genpatches/${GENPATCHES_P}.base.tar.xz
+    https://dev.gentoo.org/~mpagano/dist/genpatches/${GENPATCHES_P}.extras.tar.xz
+    https://github.com/projg2/gentoo-kernel-config/archive/${GENTOO_CONFIG_VER}.tar.gz
+        -> gentoo-kernel-config-${GENTOO_CONFIG_VER}.tar.gz
 	https://${FEDORA_CONFIG_DISTGIT}/kernel.git/plain/kernel-aarch64-16k-fedora.config?id=${FEDORA_CONFIG_SHA1}
 		-> kernel-aarch64-16k-fedora.config-${CONFIG_VER}
 "
 
-S="${WORKDIR}/linux-${MY_P}"
+S="${WORKDIR}/${MY_P}"
 
 LICENSE="GPL-2"
 KEYWORDS="~arm64"
@@ -68,11 +76,15 @@ QA_FLAGS_IGNORED="
 	usr/src/linux-.*/arch/powerpc/kernel/vdso.*/vdso.*.so.dbg
 "
 
-PATCHES=(
-		"${FILESDIR}/${PN}-$(ver_cut 1-2)-enable-speakers.patch"
-)
-
 src_prepare() {
+    local PATCHES=(
+        # meh, genpatches have no directory
+        "${WORKDIR}"/*.patch
+        "${FILESDIR}/asahi-kernel-6.8.2_revert_spi_stable_asahi.patch"
+        "${DISTDIR}/linux-asahi-6.8.9-6.patch"
+        "${FILESDIR}/${PN}-$(ver_cut 1-2)-config-gentoo-Drop-RANDSTRUCT-from-GENTOO_KERNEL_SEL.patch"
+		"${FILESDIR}/${PN}-$(ver_cut 1-2)-enable-speakers.patch"
+    )
 	default
 
 	# prepare the default config
