@@ -30,7 +30,7 @@ fi
 BASE_ASAHI_TAG="asahi-${MY_BASE}-4"
 ASAHI_TAG="asahi-${MY_BASE}-${MY_TAG}"
 
-CONFIG_VER=6.9.6-400-gentoo
+CONFIG_VER=6.9.9-405-gentoo
 GENTOO_CONFIG_VER=g13
 FEDORA_CONFIG_DISTGIT="copr-dist-git.fedorainfracloud.org/cgit/@asahi/kernel"
 # FEDORA_CONFIG_DISTGIT="copr-dist-git.fedorainfracloud.org/cgit/ngompa/fedora-asahi-dev"
