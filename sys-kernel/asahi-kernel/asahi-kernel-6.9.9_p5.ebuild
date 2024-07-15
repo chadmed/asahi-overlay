@@ -135,7 +135,7 @@ src_install() {
 	local module_ver
 	module_ver=$(<"${relfile}") || die
 
-	for dtb in /boot/dtbs/${module_ver}/apple/*.dtb; do
+	for dtb in ${ED}/boot/dtbs/${module_ver}/apple/*.dtb; do
 		dosym ${dtb} /${kernel_dir}/arch/arm64/boot/dts/apple/$(basename ${dtb})
 	done
 }
