@@ -129,8 +129,7 @@ src_install() {
 	kernel-build_src_install
 
 	# symlink installed *.dtbs back into kernel "source" directory
-	local dir_ver=${PV}${KV_LOCALVERSION}
-	local kernel_dir=/usr/src/linux-${dir_ver}
+	local kernel_dir=/usr/src/linux-${KV_FULL}
 	local relfile=${ED}${kernel_dir}/include/config/kernel.release
 	local module_ver
 	module_ver=$(<"${relfile}") || die
