@@ -1,13 +1,13 @@
 Title: Asahi Mesa Flatpak runtime now available
 Author: James Calligeros <jcalligeros99@gmail.com>
 Posted: 2024-07-16
-Revision: 1
+Revision: 2
 News-Item-Format: 2.0
 
 You can now use flatpaks which require graphical acceleration on Asahi!
 
 Steps:
-    1. Emerge media-libs/mesa-flatpak-asahi
+    1. Emerge media-libs/mesa-asahi-flatpak
     2. Log out and log back in
 
 That's it! Flatpaks which require GPU acceleration will now work!
