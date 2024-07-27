@@ -126,13 +126,9 @@ src_install() {
 	kernel-build_src_install
 
 	# symlink installed *.dtbs back into kernel "source" directory
-	local kernel_dir=/usr/src/linux-${KV_FULL}
-	local relfile=${ED}${kernel_dir}/include/config/kernel.release
-	local module_ver
-	module_ver=$(<"${relfile}") || die
-
-	for dtb in ${ED}/boot/dtbs/${module_ver}/apple/*.dtb; do
-		dosym ${dtb} /${kernel_dir}/arch/arm64/boot/dts/apple/$(basename ${dtb})
+	for dtb in ${ED}/boot/dtbs/${KV_FULL}/apple/*.dtb; do
+		local basedtb=$(basename ${dtb})
+		dosym -r ${EROOT}/boot/dtbs/${KV_FULL}/apple/${basedtb} ${EROOT}/usr/src/linux-${KV_FULL}/arch/arm64/boot/dts/apple/${basedtb}
 	done
 }
 
