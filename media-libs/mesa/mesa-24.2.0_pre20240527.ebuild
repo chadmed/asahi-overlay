@@ -23,7 +23,7 @@ S="${WORKDIR}/mesa-asahi-${MY_PV}"
 LICENSE="MIT SGI-B-2.0"
 SLOT="0"
 
-KEYWORDS="~arm64"
+KEYWORDS="arm64"
 
 RADEON_CARDS="r300 r600 radeon radeonsi"
 VIDEO_CARDS="${RADEON_CARDS} asahi d3d12 freedreno intel lavapipe lima nouveau panfrost v3d vc4 virgl vivante vmware"
