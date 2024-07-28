@@ -90,6 +90,7 @@ REQUIRED_USE="
 "
 
 LIBDRM_DEPSTRING=">=x11-libs/libdrm-2.4.119"
+ASAHI_KERNEL_MIN_VER="6.9.9_p5"
 RDEPEND="
 	>=dev-libs/expat-2.1.0-r3[${MULTILIB_USEDEP}]
 	>=media-libs/libglvnd-1.3.2[X?,${MULTILIB_USEDEP}]
@@ -125,7 +126,13 @@ RDEPEND="
 		>=media-libs/libva-1.7.3:=[${MULTILIB_USEDEP}]
 	)
 	vdpau? ( >=x11-libs/libvdpau-1.5:=[${MULTILIB_USEDEP}] )
-	video_cards_asahi? ( dev-libs/libclc[spirv(-)] )
+	video_cards_asahi? (
+		|| (
+			>=sys-kernel/asahi-sources-${ASAHI_KERNEL_MIN_VER}
+			>=sys-kernel/asahi-kernel-${ASAHI_KERNEL_MIN_VER}
+		)
+		dev-libs/libclc[spirv(-)]
+	)
 	video_cards_radeonsi? ( virtual/libelf:0=[${MULTILIB_USEDEP}] )
 	video_cards_zink? ( media-libs/vulkan-loader:=[${MULTILIB_USEDEP}] )
 	selinux? ( sys-libs/libselinux[${MULTILIB_USEDEP}] )
