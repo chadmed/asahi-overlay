@@ -5,7 +5,7 @@ EAPI=8
 
 LLVM_COMPAT=( {17..18} )
 LLVM_OPTIONAL=1
-PYTHON_COMPAT=( python3_{10..12} )
+PYTHON_COMPAT=( python3_{10..13} )
 
 inherit llvm-r1 meson-multilib python-any-r1 linux-info
 
