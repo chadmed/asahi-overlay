@@ -32,7 +32,7 @@ REQUIRED_USE="|| ( 2208 2308 )"
 
 RDEPEND="
 	sys-apps/flatpak
-	=media-libs/mesa-${PV}
+	~media-libs/mesa-${PV}
 "
 
 DEPEND="${RDEPEND}
