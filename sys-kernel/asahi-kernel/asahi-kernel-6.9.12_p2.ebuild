@@ -29,11 +29,11 @@ fi
 # the first tag of a linux 6.x or linux stable 6.x.y release
 ASAHI_TAG="asahi-${MY_BASE}-${MY_TAG}"
 
-CONFIG_VER=6.9.12-400-gentoo
+CONFIG_VER=6.9.12-401-gentoo
 GENTOO_CONFIG_VER=g13
 FEDORA_CONFIG_DISTGIT="copr-dist-git.fedorainfracloud.org/cgit/@asahi/kernel"
 # FEDORA_CONFIG_DISTGIT="copr-dist-git.fedorainfracloud.org/cgit/ngompa/fedora-asahi-dev"
-FEDORA_CONFIG_SHA1=c444448bda99f817acb642511741c1573143a012
+FEDORA_CONFIG_SHA1=39a9d06b1b8194b754cd958fdaadb44db008b37a
 
 DESCRIPTION="Asahi Linux kernel sources"
 HOMEPAGE="https://asahilinux.org"
