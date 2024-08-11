@@ -3,10 +3,12 @@
 
 EAPI=8
 
+MY_HASH="eab8c668ad3f9db27a444ee1f94b82d8f3ab5336"
+
 DESCRIPTION="Widevine installer for AArch64 systems"
 HOMEPAGE="https://asahilinux.org/"
 
-SRC_URI="https://github.com/AsahiLinux/widevine-installer/archive/8fa12dd2d81c4b5d2a713e169cac70898512322e.tar.gz -> ${PN}-${PV}.tar.gz"
+SRC_URI="https://github.com/AsahiLinux/widevine-installer/archive/${MY_HASH}.tar.gz -> ${PN}-${PV}.tar.gz"
 
 LICENSE="MIT"
 SLOT=0
@@ -23,7 +25,7 @@ PATCHES="${FILESDIR}/disable-configs.patch"
 
 src_unpack() {
 	default
-	mv "${PN}-8fa12dd2d81c4b5d2a713e169cac70898512322e" "${PN}-${PV}"
+	mv "${PN}-${MY_HASH}" "${PN}-${PV}"
 }
 
 src_install() {
