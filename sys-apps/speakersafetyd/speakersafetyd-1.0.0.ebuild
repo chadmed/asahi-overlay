@@ -111,7 +111,8 @@ RDEPEND="${DEPEND}"
 QA_FLAGS_IGNORED="usr/bin/${PN}"
 
 src_install() {
-	emake DESTDIR="${D}" install || die
+	cargo_src_install
+	emake DESTDIR="${D}" install-data
 	doinitd "${FILESDIR}/speakersafetyd"
 }
 
