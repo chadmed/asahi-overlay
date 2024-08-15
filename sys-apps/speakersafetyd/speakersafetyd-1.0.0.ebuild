@@ -116,7 +116,12 @@ src_install() {
 	doinitd "${FILESDIR}/speakersafetyd"
 }
 
-src_postinst() {
+pkg_postinst() {
+	udev_reload
+	default
+}
+ 
+pkg_postrm() {
 	udev_reload
 	default
 }
