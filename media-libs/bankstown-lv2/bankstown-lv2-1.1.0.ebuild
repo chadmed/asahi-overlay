@@ -49,6 +49,13 @@ RDEPEND="${DEPEND}"
 # update with proper path to binaries this crate installs, omit leading /
 QA_FLAGS_IGNORED="usr/bin/${PN}"
 
+# cargo.eclass now builds arch-specific targets
+src_prepare() {
+	sed -i \
+		-e "s|target/release|$(cargo_target_dir)|" Makefile || die
+	default
+}
+
 src_configure() {
 	cargo_src_configure
 }
