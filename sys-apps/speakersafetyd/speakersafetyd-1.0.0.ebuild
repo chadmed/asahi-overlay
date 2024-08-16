@@ -118,10 +118,8 @@ src_install() {
 
 pkg_postinst() {
 	udev_reload
-	default
 }
- 
+
 pkg_postrm() {
 	udev_reload
-	default
 }
