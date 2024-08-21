@@ -1,0 +1,48 @@
+commit 1691e8e5ea531d74a8ff919989622798a41fb068
+Author: Sasha Finkelstein <fnkl.kernel@gmail.com>
+Date:   Wed Aug 21 12:07:35 2024 +0200
+
+    unvendor xxhash
+
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index be31012..cbf4559 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -285,10 +285,7 @@ endif()
+ find_package(PkgConfig REQUIRED)
+ find_package(Python 3.0 REQUIRED COMPONENTS Interpreter)
+ 
+-set(XXHASH_BUNDLED_MODE TRUE)
+-set(XXHASH_BUILD_XXHSUM FALSE)
+-set(BUILD_SHARED_LIBS OFF)
+-add_subdirectory(External/xxhash/cmake_unofficial/)
++find_library(XXHASH xxhash REQUIRED)
+ 
+ add_definitions(-Wno-trigraphs)
+ add_definitions(-DGLOBAL_DATA_DIRECTORY="${DATA_DIRECTORY}/")
+diff --git a/FEXCore/Source/CMakeLists.txt b/FEXCore/Source/CMakeLists.txt
+index f044514..727455c 100644
+--- a/FEXCore/Source/CMakeLists.txt
++++ b/FEXCore/Source/CMakeLists.txt
+@@ -181,7 +181,7 @@ endif()
+ # Some defines for the softfloat library
+ list(APPEND DEFINES "-DSOFTFLOAT_BUILTIN_CLZ")
+ 
+-set (LIBS fmt::fmt vixl xxHash::xxhash FEXHeaderUtils CodeEmitter)
++set (LIBS fmt::fmt xxhash vixl FEXHeaderUtils CodeEmitter)
+ 
+ if (NOT MINGW_BUILD)
+   list (APPEND LIBS dl)
+diff --git a/Source/Tools/FEXRootFSFetcher/CMakeLists.txt b/Source/Tools/FEXRootFSFetcher/CMakeLists.txt
+index 69fdf84..0c4fa38 100644
+--- a/Source/Tools/FEXRootFSFetcher/CMakeLists.txt
++++ b/Source/Tools/FEXRootFSFetcher/CMakeLists.txt
+@@ -3,7 +3,7 @@ set(SRCS Main.cpp
+   XXFileHash.cpp)
+ 
+ add_executable(${NAME} ${SRCS})
+-list(APPEND LIBS FEXCore Common xxHash::xxhash)
++list(APPEND LIBS FEXCore Common xxhash)
+ 
+ target_include_directories(${NAME} PRIVATE ${CMAKE_SOURCE_DIR}/Source/)
+ 
