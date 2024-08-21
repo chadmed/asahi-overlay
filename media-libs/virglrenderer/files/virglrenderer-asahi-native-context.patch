@@ -1,0 +1,2082 @@
+From 84efb186c1dacc0838770027f73a09d065a5bbdf Mon Sep 17 00:00:00 2001
+From: Sergio Lopez <slp@redhat.com>
+Date: Thu, 18 Apr 2024 11:13:25 +0200
+Subject: [PATCH] drm: implement native context support for asahi
+
+Implement an equivalent of the existing msm native context support for
+the asahi driver.
+
+Signed-off-by: Sergio Lopez <slp@redhat.com>
+---
+ config.h.meson                 |    1 +
+ meson.build                    |    7 +-
+ meson_options.txt              |    7 +
+ src/drm/asahi/asahi_proto.h    |  133 ++++
+ src/drm/asahi/asahi_renderer.c | 1064 ++++++++++++++++++++++++++++++++
+ src/drm/asahi/asahi_renderer.h |   15 +
+ src/drm/drm-uapi/asahi_drm.h   |  663 ++++++++++++++++++++
+ src/drm/drm_renderer.c         |   13 +
+ src/drm/drm_renderer.h         |    2 +-
+ src/drm_hw.h                   |    3 +-
+ src/meson.build                |   11 +
+ 11 files changed, 1916 insertions(+), 3 deletions(-)
+ create mode 100644 src/drm/asahi/asahi_proto.h
+ create mode 100644 src/drm/asahi/asahi_renderer.c
+ create mode 100644 src/drm/asahi/asahi_renderer.h
+ create mode 100644 src/drm/drm-uapi/asahi_drm.h
+
+diff --git a/config.h.meson b/config.h.meson
+index 43fde210..2ee7ee78 100644
+--- a/config.h.meson
++++ b/config.h.meson
+@@ -39,6 +39,7 @@
+ #mesondefine ENABLE_DRM
+ #mesondefine ENABLE_DRM_MSM
+ #mesondefine ENABLE_DRM_AMDGPU
++#mesondefine ENABLE_DRM_ASAHI
+ #mesondefine ENABLE_RENDER_SERVER
+ #mesondefine ENABLE_RENDER_SERVER_WORKER_PROCESS
+ #mesondefine ENABLE_RENDER_SERVER_WORKER_THREAD
+diff --git a/meson.build b/meson.build
+index 4f9dc743..3f90fc9a 100644
+--- a/meson.build
++++ b/meson.build
+@@ -284,7 +284,12 @@ if with_drm_amdgpu
+   conf_data.set('ENABLE_DRM_AMDGPU', 1)
+ endif
+ 
+-with_drm = with_drm_msm or with_drm_amdgpu
++with_drm_asahi = have_vla and get_option('drm-asahi-experimental')
++if with_drm_asahi
++  conf_data.set('ENABLE_DRM_ASAHI', 1)
++endif
++
++with_drm = with_drm_msm or with_drm_amdgpu or with_drm_asahi
+ 
+ with_check_gl_errors = get_option('check-gl-errors')
+ if with_check_gl_errors
+diff --git a/meson_options.txt b/meson_options.txt
+index 838d34be..e1378022 100644
+--- a/meson_options.txt
++++ b/meson_options.txt
+@@ -80,6 +80,13 @@ option(
+   description : 'enable support for amdgpu drm native context'
+ )
+ 
++option(
++  'drm-asahi-experimental',
++  type : 'boolean',
++  value : 'false',
++  description : 'enable support for asahi drm native context'
++)
++
+ option(
+   'render-server',
+   type : 'boolean',
+diff --git a/src/drm/asahi/asahi_proto.h b/src/drm/asahi/asahi_proto.h
+new file mode 100644
+index 00000000..e46a2c31
+--- /dev/null
++++ b/src/drm/asahi/asahi_proto.h
+@@ -0,0 +1,133 @@
++/*
++ * Copyright 2024 Sergio Lopez
++ * Copyright 2022 Google LLC
++ * SPDX-License-Identifier: MIT
++ */
++
++#ifndef ASAHI_PROTO_H_
++#define ASAHI_PROTO_H_
++
++/**
++ * Defines the layout of shmem buffer used for host->guest communication.
++ */
++struct asahi_shmem {
++   struct vdrm_shmem base;
++
++   /**
++    * Counter that is incremented on asynchronous errors, like SUBMIT
++    * or GEM_NEW failures.  The guest should treat errors as context-
++    * lost.
++    */
++   uint32_t async_error;
++
++   /**
++    * Counter that is incremented on global fault (see MSM_PARAM_FAULTS)
++    */
++   uint32_t global_faults;
++};
++DEFINE_CAST(vdrm_shmem, asahi_shmem)
++
++/*
++ * Possible cmd types for "command stream", ie. payload of EXECBUF ioctl:
++ */
++enum asahi_ccmd {
++   ASAHI_CCMD_NOP = 1, /* No payload, can be used to sync with host */
++   ASAHI_CCMD_IOCTL_SIMPLE,
++   ASAHI_CCMD_GET_PARAMS,
++   ASAHI_CCMD_GEM_NEW,
++   ASAHI_CCMD_GEM_BIND,
++   ASAHI_CCMD_SUBMIT,
++};
++
++#define ASAHI_CCMD(_cmd, _len)                                                           \
++   (struct vdrm_ccmd_req)                                                                 \
++   {                                                                                     \
++      .cmd = ASAHI_CCMD_##_cmd, .len = (_len),                                           \
++   }
++
++/*
++ * ASAHI_CCMD_NOP
++ */
++struct asahi_ccmd_nop_req {
++   struct vdrm_ccmd_req hdr;
++};
++
++/*
++ * ASAHI_CCMD_IOCTL_SIMPLE
++ *
++ * Forward simple/flat IOC_RW or IOC_W ioctls.  Limited ioctls are supported.
++ */
++struct asahi_ccmd_ioctl_simple_req {
++   struct vdrm_ccmd_req hdr;
++
++   uint32_t cmd;
++   uint8_t payload[];
++};
++DEFINE_CAST(vdrm_ccmd_req, asahi_ccmd_ioctl_simple_req)
++
++struct asahi_ccmd_ioctl_simple_rsp {
++   struct vdrm_ccmd_rsp hdr;
++
++   /* ioctl return value, interrupted syscalls are handled on the host without
++    * returning to the guest.
++    */
++   int32_t ret;
++
++   /* The output payload for IOC_RW ioctls, the payload is the same size as
++    * asahi_context_cmd_ioctl_simple_req.
++    *
++    * For IOC_W ioctls (userspace writes, kernel reads) this is zero length.
++    */
++   uint8_t payload[];
++};
++
++struct asahi_ccmd_get_params_req {
++   struct vdrm_ccmd_req hdr;
++   struct drm_asahi_get_params params;
++};
++DEFINE_CAST(vdrm_ccmd_req, asahi_ccmd_get_params_req)
++
++struct asahi_ccmd_get_params_rsp {
++   struct vdrm_ccmd_rsp hdr;
++   int32_t ret;
++   struct drm_asahi_params_global params;
++};
++
++struct asahi_ccmd_gem_new_req {
++   struct vdrm_ccmd_req hdr;
++   uint32_t flags;
++   uint32_t bind_flags;
++   uint32_t vm_id;
++   uint32_t blob_id;
++   uint64_t size;
++   uint64_t addr;
++};
++DEFINE_CAST(vdrm_ccmd_req, asahi_ccmd_gem_new_req)
++
++struct asahi_ccmd_gem_bind_req {
++   struct vdrm_ccmd_req hdr;
++   uint32_t op;
++   uint32_t flags;
++   uint32_t vm_id;
++   uint32_t res_id;
++   uint64_t size;
++   uint64_t addr;
++};
++DEFINE_CAST(vdrm_ccmd_req, asahi_ccmd_gem_bind_req)
++
++struct asahi_ccmd_gem_bind_rsp {
++   struct vdrm_ccmd_rsp hdr;
++   int32_t ret;
++};
++
++struct asahi_ccmd_submit_req {
++   struct vdrm_ccmd_req hdr;
++   uint32_t queue_id;
++   uint32_t result_res_id;
++   uint32_t command_count;
++
++   uint8_t payload[];
++};
++DEFINE_CAST(vdrm_ccmd_req, asahi_ccmd_submit_req)
++
++#endif // ASAHI_PROTO_H_
+diff --git a/src/drm/asahi/asahi_renderer.c b/src/drm/asahi/asahi_renderer.c
+new file mode 100644
+index 00000000..9775ea9a
+--- /dev/null
++++ b/src/drm/asahi/asahi_renderer.c
+@@ -0,0 +1,1064 @@
++/*
++ * Copyright 2024 Sergio Lopez
++ * Copyright 2022 Google LLC
++ * SPDX-License-Identifier: MIT
++ */
++
++#include <errno.h>
++#include <fcntl.h>
++#include <stdlib.h>
++#include <string.h>
++#include <unistd.h>
++#include <assert.h>
++#include <linux/dma-buf.h>
++#include <sys/mman.h>
++#include <sys/types.h>
++
++#include <xf86drm.h>
++
++#include "virgl_context.h"
++#include "virgl_util.h"
++#include "virglrenderer.h"
++
++#include "util/anon_file.h"
++#include "util/hash_table.h"
++#include "util/u_atomic.h"
++
++#include "drm_fence.h"
++
++#include "asahi_drm.h"
++#include "asahi_proto.h"
++#include "asahi_renderer.h"
++
++static unsigned nr_timelines;
++
++/**
++ * A single context (from the PoV of the virtio-gpu protocol) maps to
++ * a single drm device open.  Other drm constructs (ie. submitqueue) are
++ * opaque to the protocol.
++ *
++ * Typically each guest process will open a single virtio-gpu "context".
++ * The single drm device open maps to an individual GEM address_space on
++ * the kernel side, providing GPU address space isolation between guest
++ * processes.
++ *
++ * GEM buffer objects are tracked via one of two id's:
++ *  - resource-id:  global, assigned by guest kernel
++ *  - blob-id:      context specific, assigned by guest userspace
++ *
++ * The blob-id is used to link the bo created via the corresponding ioctl
++ * and the get_blob() cb. It is unused in the case of a bo that is
++ * imported from another context.  An object is added to the blob table
++ * in GEM_NEW and removed in ctx->get_blob() (where it is added to
++ * resource_table). By avoiding having an obj in both tables, we can
++ * safely free remaining entries in either hashtable at context teardown.
++ */
++struct asahi_context {
++   struct virgl_context base;
++
++   struct asahi_shmem *shmem;
++   uint8_t *rsp_mem;
++   uint32_t rsp_mem_sz;
++
++   struct vdrm_ccmd_rsp *current_rsp;
++
++   int fd;
++
++   struct hash_table *blob_table;
++   struct hash_table *resource_table;
++
++   int eventfd;
++
++   /**
++    * Indexed by ring_idx-1, which is the same as the submitqueue priority+1.
++    * On the kernel side, there is some drm_sched_entity per {drm_file, prio}
++    * tuple, and the sched entity determines the fence timeline, ie. submits
++    * against a single sched entity complete in fifo order.
++    */
++   struct drm_timeline timelines[];
++};
++DEFINE_CAST(virgl_context, asahi_context)
++
++static struct hash_entry *
++table_search(struct hash_table *ht, uint32_t key)
++{
++   /* zero is not a valid key for u32_keys hashtable: */
++   if (!key)
++      return NULL;
++   return _mesa_hash_table_search(ht, (void *)(uintptr_t)key);
++}
++
++static int
++gem_close(int fd, uint32_t handle)
++{
++   struct drm_gem_close args = { .handle = handle };
++   return drmIoctl(fd, DRM_IOCTL_GEM_CLOSE, &args);
++}
++
++struct asahi_object {
++   uint32_t blob_id;
++   uint32_t res_id;
++   uint32_t handle;
++   uint32_t flags;
++   uint32_t size;
++   bool exported   : 1;
++   bool exportable : 1;
++   uint8_t *map;
++};
++
++static struct asahi_object *
++asahi_object_create(uint32_t handle, uint32_t flags, uint32_t size)
++{
++   struct asahi_object *obj = calloc(1, sizeof(*obj));
++
++   if (!obj)
++      return NULL;
++
++   obj->handle = handle;
++   obj->flags = flags;
++   obj->size = size;
++
++   return obj;
++}
++
++static bool
++valid_blob_id(struct asahi_context *actx, uint32_t blob_id)
++{
++   /* must be non-zero: */
++   if (blob_id == 0)
++      return false;
++
++   /* must not already be in-use: */
++   if (table_search(actx->blob_table, blob_id))
++      return false;
++
++   return true;
++}
++
++static void
++asahi_object_set_blob_id(struct asahi_context *actx, struct asahi_object *obj, uint32_t blob_id)
++{
++   assert(valid_blob_id(actx, blob_id));
++
++   obj->blob_id = blob_id;
++   _mesa_hash_table_insert(actx->blob_table, (void *)(uintptr_t)obj->blob_id, obj);
++}
++
++static bool
++valid_res_id(struct asahi_context *actx, uint32_t res_id)
++{
++   return !table_search(actx->resource_table, res_id);
++}
++
++static void
++asahi_object_set_res_id(struct asahi_context *actx, struct asahi_object *obj, uint32_t res_id)
++{
++   assert(valid_res_id(actx, res_id));
++
++   obj->res_id = res_id;
++   _mesa_hash_table_insert(actx->resource_table, (void *)(uintptr_t)obj->res_id, obj);
++}
++
++static void
++asahi_remove_object(struct asahi_context *actx, struct asahi_object *obj)
++{
++   drm_dbg("obj=%p, blob_id=%u, res_id=%u", obj, obj->blob_id, obj->res_id);
++   _mesa_hash_table_remove_key(actx->resource_table, (void *)(uintptr_t)obj->res_id);
++}
++
++static struct asahi_object *
++asahi_retrieve_object_from_blob_id(struct asahi_context *actx, uint64_t blob_id)
++{
++   assert((blob_id >> 32) == 0);
++   uint32_t id = blob_id;
++   struct hash_entry *entry = table_search(actx->blob_table, id);
++   if (!entry)
++      return NULL;
++   struct asahi_object *obj = entry->data;
++   _mesa_hash_table_remove(actx->blob_table, entry);
++   return obj;
++}
++
++static struct asahi_object *
++asahi_get_object_from_res_id(struct asahi_context *actx, uint32_t res_id)
++{
++   const struct hash_entry *entry = table_search(actx->resource_table, res_id);
++   return likely(entry) ? entry->data : NULL;
++}
++
++static uint32_t
++handle_from_res_id(struct asahi_context *actx, uint32_t res_id)
++{
++   struct asahi_object *obj = asahi_get_object_from_res_id(actx, res_id);
++   if (!obj)
++      return 0;    /* zero is an invalid GEM handle */
++   return obj->handle;
++}
++
++/**
++ * Probe capset params.
++ */
++int
++asahi_renderer_probe(UNUSED int fd, struct virgl_renderer_capset_drm *capset)
++{
++   drm_log("");
++
++   capset->wire_format_version = 2;
++
++   nr_timelines = 1;
++
++   return 0;
++}
++
++static void
++asahi_renderer_unmap_blob(struct asahi_context *actx)
++{
++   if (!actx->shmem)
++      return;
++
++   uint32_t blob_size = actx->rsp_mem_sz + actx->shmem->base.rsp_mem_offset;
++
++   munmap(actx->shmem, blob_size);
++
++   actx->shmem = NULL;
++   actx->rsp_mem = NULL;
++   actx->rsp_mem_sz = 0;
++}
++
++static void
++resource_delete_fxn(struct hash_entry *entry)
++{
++   free((void *)entry->data);
++}
++
++static void
++asahi_renderer_destroy(struct virgl_context *vctx)
++{
++   struct asahi_context *actx = to_asahi_context(vctx);
++
++   for (unsigned i = 0; i < nr_timelines; i++)
++      drm_timeline_fini(&actx->timelines[i]);
++
++   close(actx->eventfd);
++
++   asahi_renderer_unmap_blob(actx);
++
++   _mesa_hash_table_destroy(actx->resource_table, resource_delete_fxn);
++   _mesa_hash_table_destroy(actx->blob_table, resource_delete_fxn);
++
++   close(actx->fd);
++   free(actx);
++}
++
++static void
++asahi_renderer_attach_resource(struct virgl_context *vctx, struct virgl_resource *res)
++{
++   struct asahi_context *actx = to_asahi_context(vctx);
++   struct asahi_object *obj = asahi_get_object_from_res_id(actx, res->res_id);
++
++   drm_dbg("obj=%p, res_id=%u", obj, res->res_id);
++
++   if (!obj) {
++      int fd;
++      enum virgl_resource_fd_type fd_type = virgl_resource_export_fd(res, &fd);
++
++      /* If importing a dmabuf resource created by another context (or
++       * externally), then import it to create a gem obj handle in our
++       * context:
++       */
++      if (fd_type == VIRGL_RESOURCE_FD_DMABUF) {
++         uint32_t handle;
++         int ret;
++
++         ret = drmPrimeFDToHandle(actx->fd, fd, &handle);
++         if (ret) {
++            drm_log("Could not import: %s", strerror(errno));
++            close(fd);
++            return;
++         }
++
++         /* lseek() to get bo size */
++         int size = lseek(fd, 0, SEEK_END);
++         if (size < 0)
++            drm_log("lseek failed: %d (%s)", size, strerror(errno));
++         close(fd);
++
++         obj = asahi_object_create(handle, 0, size);
++         if (!obj)
++            return;
++
++         asahi_object_set_res_id(actx, obj, res->res_id);
++
++         drm_dbg("obj=%p, res_id=%u, handle=%u", obj, obj->res_id, obj->handle);
++      } else {
++         if (fd_type != VIRGL_RESOURCE_FD_INVALID)
++            close(fd);
++         return;
++      }
++   }
++}
++
++static void
++asahi_renderer_detach_resource(struct virgl_context *vctx, struct virgl_resource *res)
++{
++   struct asahi_context *actx = to_asahi_context(vctx);
++   struct asahi_object *obj = asahi_get_object_from_res_id(actx, res->res_id);
++
++   drm_dbg("obj=%p, res_id=%u", obj, res->res_id);
++
++   if (!obj)
++      return;
++
++   if (res->fd_type == VIRGL_RESOURCE_FD_SHM) {
++      asahi_renderer_unmap_blob(actx);
++
++      /* shmem resources don't have an backing host GEM bo:, so bail now: */
++      return;
++   }
++
++   asahi_remove_object(actx, obj);
++
++   if (obj->map)
++      munmap(obj->map, obj->size);
++
++   gem_close(actx->fd, obj->handle);
++
++   free(obj);
++}
++
++static enum virgl_resource_fd_type
++asahi_renderer_export_opaque_handle(struct virgl_context *vctx, struct virgl_resource *res,
++                                    int *out_fd)
++{
++   struct asahi_context *actx = to_asahi_context(vctx);
++   struct asahi_object *obj = asahi_get_object_from_res_id(actx, res->res_id);
++   int ret;
++
++   drm_dbg("obj=%p, res_id=%u", obj, res->res_id);
++
++   if (!obj) {
++      drm_log("invalid res_id %u", res->res_id);
++      return VIRGL_RESOURCE_FD_INVALID;
++   }
++
++   if (!obj->exportable) {
++      /* crosvm seems to like to export things it doesn't actually need an
++       * fd for.. don't let it spam our fd table!
++       */
++      return VIRGL_RESOURCE_FD_INVALID;
++   }
++
++   ret = drmPrimeHandleToFD(actx->fd, obj->handle, DRM_CLOEXEC | DRM_RDWR, out_fd);
++   if (ret) {
++      drm_log("failed to get dmabuf fd: %s", strerror(errno));
++      return VIRGL_RESOURCE_FD_INVALID;
++   }
++
++   return VIRGL_RESOURCE_FD_DMABUF;
++}
++
++static int
++asahi_renderer_transfer_3d(UNUSED struct virgl_context *vctx,
++                           UNUSED struct virgl_resource *res,
++                           UNUSED const struct vrend_transfer_info *info,
++                           UNUSED int transfer_mode)
++{
++   drm_log("unsupported");
++   return -1;
++}
++
++static int
++asahi_renderer_get_blob(struct virgl_context *vctx, uint32_t res_id, uint64_t blob_id,
++                        uint64_t blob_size, uint32_t blob_flags,
++                        struct virgl_context_blob *blob)
++{
++   struct asahi_context *actx = to_asahi_context(vctx);
++
++   drm_dbg("blob_id=%" PRIu64 ", res_id=%u, blob_size=%" PRIu64 ", blob_flags=0x%x",
++           blob_id, res_id, blob_size, blob_flags);
++
++   if ((blob_id >> 32) != 0) {
++      drm_log("invalid blob_id: %" PRIu64, blob_id);
++      return -EINVAL;
++   }
++
++   /* blob_id of zero is reserved for the shmem buffer: */
++   if (blob_id == 0) {
++      int fd;
++
++      if (blob_flags != VIRGL_RENDERER_BLOB_FLAG_USE_MAPPABLE) {
++         drm_log("invalid blob_flags: 0x%x", blob_flags);
++         return -EINVAL;
++      }
++
++      if (actx->shmem) {
++         drm_log("There can be only one!");
++         return -EINVAL;
++      }
++
++      if (blob_size < sizeof(*actx->shmem)) {
++         drm_log("Invalid blob size");
++         return -EINVAL;
++      }
++
++      fd = os_create_anonymous_file(blob_size, "asahi-shmem");
++      if (fd < 0) {
++         drm_log("Failed to create shmem file: %s", strerror(errno));
++         return -ENOMEM;
++      }
++
++      int ret = fcntl(fd, F_ADD_SEALS, F_SEAL_SEAL | F_SEAL_SHRINK | F_SEAL_GROW);
++      if (ret) {
++         drm_log("fcntl failed: %s", strerror(errno));
++         close(fd);
++         return -ENOMEM;
++      }
++
++      actx->shmem = mmap(NULL, blob_size, PROT_WRITE | PROT_READ, MAP_SHARED, fd, 0);
++      if (actx->shmem == MAP_FAILED) {
++         drm_log("shmem mmap failed: %s", strerror(errno));
++         close(fd);
++         return -ENOMEM;
++      }
++
++      actx->shmem->base.rsp_mem_offset = sizeof(*actx->shmem);
++
++      uint8_t *ptr = (uint8_t *)actx->shmem;
++      actx->rsp_mem = &ptr[actx->shmem->base.rsp_mem_offset];
++      actx->rsp_mem_sz = blob_size - actx->shmem->base.rsp_mem_offset;
++
++      blob->type = VIRGL_RESOURCE_FD_SHM;
++      blob->u.fd = fd;
++      blob->map_info = VIRGL_RENDERER_MAP_CACHE_CACHED;
++
++      return 0;
++   }
++
++   if (!valid_res_id(actx, res_id)) {
++      drm_log("Invalid res_id %u", res_id);
++      return -EINVAL;
++   }
++
++   struct asahi_object *obj = asahi_retrieve_object_from_blob_id(actx, blob_id);
++
++   /* If GEM_NEW fails, we can end up here without a backing obj: */
++   if (!obj) {
++      drm_log("No object");
++      return -ENOENT;
++   }
++
++   /* a memory can only be exported once; we don't want two resources to point
++    * to the same storage.
++    */
++   if (obj->exported) {
++      drm_log("Already exported!");
++      return -EINVAL;
++   }
++
++   /* The size we get from guest userspace is not necessarily rounded up to the
++    * nearest page size, but the actual GEM buffer allocation is, as is the
++    * guest GEM buffer (and therefore the blob_size value we get from the guest
++    * kernel).
++    */
++   if (ALIGN_POT(obj->size, getpagesize()) != blob_size) {
++      drm_log("Invalid blob size");
++      return -EINVAL;
++   }
++
++   asahi_object_set_res_id(actx, obj, res_id);
++
++   if (blob_flags & VIRGL_RENDERER_BLOB_FLAG_USE_SHAREABLE) {
++      int fd, ret;
++
++      ret = drmPrimeHandleToFD(actx->fd, obj->handle, DRM_CLOEXEC | DRM_RDWR, &fd);
++      if (ret) {
++         drm_log("Export to fd failed");
++         return -EINVAL;
++      }
++
++      blob->type = VIRGL_RESOURCE_FD_DMABUF;
++      blob->u.fd = fd;
++   } else {
++      blob->type = VIRGL_RESOURCE_OPAQUE_HANDLE;
++      blob->u.opaque_handle = obj->handle;
++   }
++
++   blob->map_info = VIRGL_RENDERER_MAP_CACHE_WC;
++
++   obj->exported = true;
++   obj->exportable = !!(blob_flags & VIRGL_RENDERER_BLOB_FLAG_USE_MAPPABLE);
++
++   return 0;
++}
++
++static void *
++asahi_context_rsp_noshadow(struct asahi_context *actx, const struct vdrm_ccmd_req *hdr)
++{
++   return &actx->rsp_mem[hdr->rsp_off];
++}
++
++static void *
++asahi_context_rsp(struct asahi_context *actx, const struct vdrm_ccmd_req *hdr, unsigned len)
++{
++   unsigned rsp_mem_sz = actx->rsp_mem_sz;
++   unsigned off = hdr->rsp_off;
++
++   if ((off > rsp_mem_sz) || (len > rsp_mem_sz - off)) {
++      drm_log("invalid shm offset: off=%u, len=%u (shmem_size=%u)", off, len, rsp_mem_sz);
++      return NULL;
++   }
++
++   struct vdrm_ccmd_rsp *rsp = asahi_context_rsp_noshadow(actx, hdr);
++
++   assert(len >= sizeof(*rsp));
++
++   /* With newer host and older guest, we could end up wanting a larger rsp struct
++    * than guest expects, so allocate a shadow buffer in this case rather than
++    * having to deal with this in all the different ccmd handlers.  This is similar
++    * in a way to what drm_ioctl() does.
++    */
++   if (len > rsp->len) {
++      rsp = malloc(len);
++      if (!rsp)
++         return NULL;
++      rsp->len = len;
++   }
++
++   actx->current_rsp = rsp;
++
++   return rsp;
++}
++
++static int
++asahi_ccmd_nop(UNUSED struct asahi_context *actx, UNUSED const struct vdrm_ccmd_req *hdr)
++{
++   return 0;
++}
++
++static int
++asahi_ccmd_ioctl_simple(struct asahi_context *actx, const struct vdrm_ccmd_req *hdr)
++{
++   const struct asahi_ccmd_ioctl_simple_req *req = to_asahi_ccmd_ioctl_simple_req(hdr);
++   unsigned payload_len = _IOC_SIZE(req->cmd);
++   unsigned req_len = size_add(sizeof(*req), payload_len);
++
++   if (hdr->len != req_len) {
++      drm_log("%u != %u", hdr->len, req_len);
++      return -EINVAL;
++   }
++
++   /* Apply a reasonable upper bound on ioctl size: */
++   if (payload_len > 128) {
++      drm_log("invalid ioctl payload length: %u", payload_len);
++      return -EINVAL;
++   }
++
++   /* Allow-list of supported ioctls: */
++   unsigned iocnr = _IOC_NR(req->cmd) - DRM_COMMAND_BASE;
++   switch (iocnr) {
++   case DRM_ASAHI_GET_PARAMS:
++   case DRM_ASAHI_VM_CREATE:
++   case DRM_ASAHI_VM_DESTROY:
++   case DRM_ASAHI_QUEUE_CREATE:
++   case DRM_ASAHI_QUEUE_DESTROY:
++      break;
++   default:
++      drm_log("invalid ioctl: %08x (%u)", req->cmd, iocnr);
++      return -EINVAL;
++   }
++
++   struct asahi_ccmd_ioctl_simple_rsp *rsp;
++   unsigned rsp_len = sizeof(*rsp);
++
++   if (req->cmd & IOC_OUT)
++      rsp_len = size_add(rsp_len, payload_len);
++
++   rsp = asahi_context_rsp(actx, hdr, rsp_len);
++
++   if (!rsp)
++      return -ENOMEM;
++
++   /* Copy the payload because the kernel can write (if IOC_OUT bit
++    * is set) and to avoid casting away the const:
++    */
++   char payload[payload_len];
++   memcpy(payload, req->payload, payload_len);
++
++   rsp->ret = drmIoctl(actx->fd, req->cmd, payload);
++
++   if (req->cmd & IOC_OUT)
++      memcpy(rsp->payload, payload, payload_len);
++
++   return 0;
++}
++
++static int
++asahi_ccmd_get_params(struct asahi_context *actx, const struct vdrm_ccmd_req *hdr)
++{
++   struct asahi_ccmd_get_params_req *req = to_asahi_ccmd_get_params_req(hdr);
++   unsigned req_len = sizeof(*req);
++
++   if (hdr->len != req_len) {
++      drm_log("%u != %u", hdr->len, req_len);
++      return -EINVAL;
++   }
++
++   struct asahi_ccmd_get_params_rsp *rsp;
++   unsigned rsp_len = sizeof(*rsp);
++
++   rsp = asahi_context_rsp(actx, hdr, rsp_len);
++
++   if (!rsp)
++      return -ENOMEM;
++
++   req->params.pointer = (uint64_t)&rsp->params;
++
++   rsp->ret = drmIoctl(actx->fd, DRM_IOCTL_ASAHI_GET_PARAMS, &req->params);
++
++   return 0;
++}
++
++static int
++asahi_ccmd_gem_new(struct asahi_context *actx, const struct vdrm_ccmd_req *hdr)
++{
++   const struct asahi_ccmd_gem_new_req *req = to_asahi_ccmd_gem_new_req(hdr);
++   int ret = 0;
++
++   if (!valid_blob_id(actx, req->blob_id)) {
++      drm_log("Invalid blob_id %u\n", req->blob_id);
++      ret = -EINVAL;
++      goto out_error;
++   }
++
++   int flags = ASAHI_GEM_WRITEBACK;
++   if (req->flags & ASAHI_GEM_NOCACHE) {
++      flags = 0;
++   }
++
++   /*
++    * First part, allocate the GEM bo:
++    */
++   struct drm_asahi_gem_create gem_create = {
++      .flags = flags,
++      .vm_id = 0,
++      .size = req->size,
++   };
++
++   ret = drmIoctl(actx->fd, DRM_IOCTL_ASAHI_GEM_CREATE, &gem_create);
++   if (ret) {
++      drm_log("GEM_CREATE failed: %d (%s)\n", ret, strerror(errno));
++      goto out_error;
++   }
++
++   /*
++    * Second part, bind:
++    */
++
++   struct drm_asahi_gem_bind gem_bind = {
++      .op = ASAHI_BIND_OP_BIND,
++      .flags = req->bind_flags,
++      .handle = gem_create.handle,
++      .vm_id = req->vm_id,
++      .offset = 0,
++      .range = req->size,
++      .addr = req->addr,
++   };
++
++   ret = drmIoctl(actx->fd, DRM_IOCTL_ASAHI_GEM_BIND, &gem_bind);
++   if (ret) {
++      drm_log("DRM_IOCTL_ASAHI_GEM_BIND failed: (handle=%d)\n", gem_create.handle);
++      goto out_close;
++   }
++
++   int prime_fd = -1;
++   ret =
++      drmPrimeHandleToFD(actx->fd, gem_create.handle, DRM_CLOEXEC | DRM_RDWR, &prime_fd);
++   if (ret) {
++      drm_log("Couldn't obtain PRIME_FD for handle: %d\n", gem_create.handle);
++      return ret;
++   }
++
++   /*
++    * And then finally create our asahi_object for tracking the resource,
++    * and add to blob table:
++    */
++   struct asahi_object *obj =
++      asahi_object_create(gem_create.handle, req->flags, req->size);
++
++   if (!obj) {
++      ret = -ENOMEM;
++      goto out_close;
++   }
++
++   asahi_object_set_blob_id(actx, obj, req->blob_id);
++
++   drm_dbg("obj=%p, blob_id=%u, handle=%u\n", obj, obj->blob_id, obj->handle);
++
++   return 0;
++
++out_close:
++   gem_close(actx->fd, gem_create.handle);
++out_error:
++   if (actx->shmem)
++      actx->shmem->async_error++;
++   return ret;
++}
++
++static int
++asahi_ccmd_gem_bind(struct asahi_context *actx, const struct vdrm_ccmd_req *hdr)
++{
++   const struct asahi_ccmd_gem_bind_req *req = to_asahi_ccmd_gem_bind_req(hdr);
++   struct asahi_object *obj = asahi_get_object_from_res_id(actx, req->res_id);
++   int ret = 0;
++
++   if (!obj) {
++      drm_log("Could not lookup obj: res_id=%u", req->res_id);
++      return -ENOENT;
++   }
++
++   drm_dbg("gem_bind: handle=%d\n", obj->handle);
++
++   struct drm_asahi_gem_bind gem_bind = {
++      .op = req->op,
++      .flags = req->flags,
++      .handle = obj->handle,
++      .vm_id = req->vm_id,
++      .offset = 0,
++      .range = req->size,
++      .addr = req->addr,
++   };
++
++   ret = drmIoctl(actx->fd, DRM_IOCTL_ASAHI_GEM_BIND, &gem_bind);
++   if (ret) {
++      drm_log("DRM_IOCTL_ASAHI_GEM_BIND failed: (handle=%d)\n", obj->handle);
++   }
++
++   return ret;
++}
++
++static int
++asahi_ccmd_submit(struct asahi_context *actx, const struct vdrm_ccmd_req *hdr)
++{
++   const struct asahi_ccmd_submit_req *req = to_asahi_ccmd_submit_req(hdr);
++   int ret = 0;
++
++   drm_log("number of commands: %d", req->command_count);
++
++   if (req->command_count == 0) {
++      return -EINVAL;
++   }
++
++   struct drm_asahi_command *commands =
++      (struct drm_asahi_command *)calloc(req->command_count,
++                                         sizeof(struct drm_asahi_command));
++
++   uint64_t payload_end = (uint64_t) &req->payload +
++      hdr->len - sizeof(struct asahi_ccmd_submit_req);
++
++   char *ptr = (char *)req->payload;
++   for (uint32_t i = 0; i < req->command_count; i++) {
++      struct drm_asahi_command *cmd = (struct drm_asahi_command *)ptr;
++      if (((uint64_t) cmd + sizeof(struct drm_asahi_command)) > payload_end) {
++         ret = -EINVAL;
++         goto free_cmd;
++      }
++      memcpy(&commands[i], cmd, sizeof(struct drm_asahi_command));
++
++      uint64_t cmd_buffer =
++         (uint64_t)(uintptr_t) ptr + sizeof(struct drm_asahi_command);
++      commands[i].cmd_buffer = cmd_buffer;
++
++      if (((uint64_t) ptr + sizeof(struct drm_asahi_command)) > payload_end) {
++         ret = -EINVAL;
++         goto free_cmd;
++      }
++      ptr += sizeof(struct drm_asahi_command);
++
++      if (((uint64_t) ptr + commands[i].cmd_buffer_size) > payload_end) {
++         ret = -EINVAL;
++         goto free_cmd;
++      }
++      ptr += commands[i].cmd_buffer_size;
++
++      if (commands[i].cmd_type == DRM_ASAHI_CMD_RENDER) {
++         struct drm_asahi_cmd_render *c = (struct drm_asahi_cmd_render *)cmd_buffer;
++         drm_dbg("command is RENDER: fragments = %d", c->fragment_attachment_count);
++
++         size_t attachments_size = c->fragment_attachment_count * sizeof(struct drm_asahi_attachment);
++         if ((cmd_buffer + commands[i].cmd_buffer_size + attachments_size) > payload_end) {
++            ret = -EINVAL;
++            goto free_cmd;
++         }
++
++         c->fragment_attachments = cmd_buffer + commands[i].cmd_buffer_size;
++         ptr += attachments_size;
++      } else if (commands[i].cmd_type == DRM_ASAHI_CMD_COMPUTE) {
++         drm_dbg("command is COMPUTE");
++      } else {
++         drm_log("Unknown command: %d", commands[i].cmd_type);
++      }
++   }
++
++   struct drm_asahi_submit submit = {
++      .flags = 0,
++      .queue_id = req->queue_id,
++      .result_handle = handle_from_res_id(actx, req->result_res_id),
++      .command_count = req->command_count,
++      .commands = (uint64_t)(uintptr_t)&commands[0],
++   };
++
++   struct drm_asahi_sync in_sync = { .sync_type = DRM_ASAHI_SYNC_SYNCOBJ };
++   int in_fence_fd = virgl_context_take_in_fence_fd(&actx->base);
++
++   if (in_fence_fd >= 0) {
++      ret = drmSyncobjCreate(actx->fd, 0, &in_sync.handle);
++      assert(ret == 0);
++      ret = drmSyncobjImportSyncFile(actx->fd, in_sync.handle, in_fence_fd);
++      if (ret == 0) {
++         submit.in_sync_count = 1;
++         submit.in_syncs = (uint64_t)(uintptr_t)&in_sync;
++      }
++   }
++
++   struct drm_asahi_sync out_sync = { .sync_type = DRM_ASAHI_SYNC_SYNCOBJ };
++
++   ret = drmSyncobjCreate(actx->fd, 0, &out_sync.handle);
++   if (ret == 0) {
++      submit.out_sync_count = 1;
++      submit.out_syncs = (uint64_t)(uintptr_t)&out_sync;
++   } else {
++      drm_dbg("out syncobj creation failed");
++   }
++
++   ret = drmIoctl(actx->fd, DRM_IOCTL_ASAHI_SUBMIT, &submit);
++   if (ret) {
++      drm_log("DRM_IOCTL_ASAHI_SUBMIT failed: %d", ret);
++   }
++
++   if (in_fence_fd >= 0) {
++      close(in_fence_fd);
++      drmSyncobjDestroy(actx->fd, in_sync.handle);
++   }
++
++   if (ret == 0) {
++      int submit_fd;
++      ret = drmSyncobjExportSyncFile(actx->fd, out_sync.handle, &submit_fd);
++      if (ret == 0) {
++         drm_timeline_set_last_fence_fd(&actx->timelines[0], submit_fd);
++         drm_dbg("set last fd ring_idx: %d", submit_fd);
++      } else {
++         drm_log("failed to create a FD from the syncobj (%d)", ret);
++      }
++   } else {
++      drm_log("command submission failed");
++   }
++
++   drmSyncobjDestroy(actx->fd, out_sync.handle);
++ free_cmd:
++   free(commands);
++
++   return ret;
++}
++
++static const struct ccmd {
++   const char *name;
++   int (*handler)(struct asahi_context *actx, const struct vdrm_ccmd_req *hdr);
++   size_t size;
++} ccmd_dispatch[] = {
++#define HANDLER(N, n)                                                                    \
++   [ASAHI_CCMD_##N] = { #N, asahi_ccmd_##n, sizeof(struct asahi_ccmd_##n##_req) }
++   HANDLER(NOP, nop),
++   HANDLER(IOCTL_SIMPLE, ioctl_simple),
++   HANDLER(GET_PARAMS, get_params),
++   HANDLER(GEM_NEW, gem_new),
++   HANDLER(GEM_BIND, gem_bind),
++   HANDLER(SUBMIT, submit),
++};
++
++static int
++submit_cmd_dispatch(struct asahi_context *actx, const struct vdrm_ccmd_req *hdr)
++{
++   int ret;
++
++   if (hdr->cmd >= ARRAY_SIZE(ccmd_dispatch)) {
++      drm_log("invalid cmd: %u", hdr->cmd);
++      return -EINVAL;
++   }
++
++   const struct ccmd *ccmd = &ccmd_dispatch[hdr->cmd];
++
++   if (!ccmd->handler) {
++      drm_log("no handler: %u", hdr->cmd);
++      return -EINVAL;
++   }
++
++   drm_dbg("%s: hdr={cmd=%u, len=%u, seqno=%u, rsp_off=0x%x)", ccmd->name, hdr->cmd,
++           hdr->len, hdr->seqno, hdr->rsp_off);
++
++   /* If the request length from the guest is smaller than the expected
++    * size, ie. newer host and older guest, we need to make a copy of
++    * the request with the new fields at the end zero initialized.
++    */
++   if (ccmd->size > hdr->len) {
++      uint8_t buf[ccmd->size];
++
++      memcpy(&buf[0], hdr, hdr->len);
++      memset(&buf[hdr->len], 0, ccmd->size - hdr->len);
++
++      ret = ccmd->handler(actx, (struct vdrm_ccmd_req *)buf);
++   } else {
++      ret = ccmd->handler(actx, hdr);
++   }
++
++   if (ret) {
++      drm_log("%s: dispatch failed: %d (%s)", ccmd->name, ret, strerror(errno));
++      return ret;
++   }
++
++   /* If the response length from the guest is smaller than the
++    * expected size, ie. newer host and older guest, then a shadow
++    * copy is used, and we need to copy back to the actual rsp
++    * buffer.
++    */
++   struct vdrm_ccmd_rsp *rsp = asahi_context_rsp_noshadow(actx, hdr);
++   if (actx->current_rsp && (actx->current_rsp != rsp)) {
++      unsigned len = rsp->len;
++      memcpy(rsp, actx->current_rsp, len);
++      rsp->len = len;
++      free(actx->current_rsp);
++   }
++   actx->current_rsp = NULL;
++
++   /* Note that commands with no response, like SET_DEBUGINFO, could
++    * be sent before the shmem buffer is allocated:
++    */
++   if (actx->shmem) {
++      /* TODO better way to do this?  We need ACQ_REL semanatics (AFAIU)
++       * to ensure that writes to response buffer are visible to the
++       * guest process before the update of the seqno.  Otherwise we
++       * could just use p_atomic_set.
++       */
++      uint32_t seqno = hdr->seqno;
++      drm_log("updating seqno=%d\n", seqno);
++      p_atomic_xchg(&actx->shmem->base.seqno, seqno);
++   }
++
++   return 0;
++}
++
++static int
++asahi_renderer_submit_cmd(struct virgl_context *vctx, const void *_buffer, size_t size)
++{
++   struct asahi_context *actx = to_asahi_context(vctx);
++   const uint8_t *buffer = _buffer;
++
++   while (size >= sizeof(struct vdrm_ccmd_req)) {
++      const struct vdrm_ccmd_req *hdr = (const struct vdrm_ccmd_req *)buffer;
++
++      /* Sanity check first: */
++      if ((hdr->len > size) || (hdr->len < sizeof(*hdr)) || (hdr->len % 4)) {
++         drm_log("bad size, %u vs %zu (%u)", hdr->len, size, hdr->cmd);
++         goto cont;
++      }
++
++      if (hdr->rsp_off % 4) {
++         drm_log("bad rsp_off, %u", hdr->rsp_off);
++         goto cont;
++      }
++
++      int ret = submit_cmd_dispatch(actx, hdr);
++      if (ret) {
++         drm_log("dispatch failed: %d (%u)", ret, hdr->cmd);
++      }
++
++   cont:
++      buffer += hdr->len;
++      size -= hdr->len;
++   }
++
++   if (size > 0) {
++      drm_log("bad size, %zu trailing bytes", size);
++      return -EINVAL;
++   }
++
++   return 0;
++}
++
++static int
++asahi_renderer_get_fencing_fd(struct virgl_context *vctx)
++{
++   struct asahi_context *actx = to_asahi_context(vctx);
++   return actx->eventfd;
++}
++
++static void
++asahi_renderer_retire_fences(UNUSED struct virgl_context *vctx)
++{
++   /* No-op as VIRGL_RENDERER_ASYNC_FENCE_CB is required */
++}
++
++static void
++asahi_renderer_fence_retire(struct virgl_context *vctx, uint32_t ring_idx,
++                            uint64_t fence_id)
++{
++   vctx->fence_retire(vctx, ring_idx, fence_id);
++}
++
++static int
++asahi_renderer_submit_fence(struct virgl_context *vctx, uint32_t flags, uint32_t ring_idx,
++                            uint64_t fence_id)
++{
++   struct asahi_context *actx = to_asahi_context(vctx);
++
++   drm_dbg("flags=0x%x, ring_idx=%" PRIu32 ", fence_id=%" PRIu64, flags, ring_idx,
++           fence_id);
++
++   /* ring_idx zero is used for the guest to synchronize with host CPU,
++    * meaning by the time ->submit_fence() is called, the fence has
++    * already passed.. so just immediate signal:
++    */
++   if (ring_idx == 0) {
++      vctx->fence_retire(vctx, ring_idx, fence_id);
++      return 0;
++   }
++
++   return drm_timeline_submit_fence(&actx->timelines[0], flags, fence_id);
++}
++
++struct virgl_context *
++asahi_renderer_create(int fd, UNUSED size_t debug_len, UNUSED const char *debug_name)
++{
++   struct asahi_context *actx;
++
++   drm_log("");
++
++   actx = calloc(1, sizeof(*actx) + (nr_timelines * sizeof(actx->timelines[0])));
++   if (!actx)
++      return NULL;
++
++   actx->fd = fd;
++
++   /* Indexed by blob_id, but only lower 32b of blob_id are used: */
++   actx->blob_table = _mesa_hash_table_create_u32_keys(NULL);
++   /* Indexed by res_id: */
++   actx->resource_table = _mesa_hash_table_create_u32_keys(NULL);
++
++   actx->eventfd = create_eventfd(0);
++
++   drm_timeline_init(&actx->timelines[0], &actx->base, "asahi-sync", actx->eventfd, 1,
++                     asahi_renderer_fence_retire);
++
++   actx->base.destroy = asahi_renderer_destroy;
++   actx->base.attach_resource = asahi_renderer_attach_resource;
++   actx->base.detach_resource = asahi_renderer_detach_resource;
++   actx->base.export_opaque_handle = asahi_renderer_export_opaque_handle;
++   actx->base.transfer_3d = asahi_renderer_transfer_3d;
++   actx->base.get_blob = asahi_renderer_get_blob;
++   actx->base.submit_cmd = asahi_renderer_submit_cmd;
++   actx->base.get_fencing_fd = asahi_renderer_get_fencing_fd;
++   actx->base.retire_fences = asahi_renderer_retire_fences;
++   actx->base.submit_fence = asahi_renderer_submit_fence;
++   actx->base.supports_fence_sharing = true;
++
++   return &actx->base;
++}
+diff --git a/src/drm/asahi/asahi_renderer.h b/src/drm/asahi/asahi_renderer.h
+new file mode 100644
+index 00000000..42e46d81
+--- /dev/null
++++ b/src/drm/asahi/asahi_renderer.h
+@@ -0,0 +1,15 @@
++/*
++ * Copyright 2024 Sergio Lopez
++ * SPDX-License-Identifier: MIT
++ */
++
++#ifndef ASAHI_RENDERER_H_
++#define ASAHI_RENDERER_H_
++
++#include "drm_util.h"
++
++int asahi_renderer_probe(int fd, struct virgl_renderer_capset_drm *capset);
++
++struct virgl_context *asahi_renderer_create(int fd, size_t debug_len, const char *debug_name);
++
++#endif // ASAHI_RENDERER_H_
+diff --git a/src/drm/drm-uapi/asahi_drm.h b/src/drm/drm-uapi/asahi_drm.h
+new file mode 100644
+index 00000000..b263bdc3
+--- /dev/null
++++ b/src/drm/drm-uapi/asahi_drm.h
+@@ -0,0 +1,674 @@
++/* SPDX-License-Identifier: MIT */
++/*
++ * Copyright (C) The Asahi Linux Contributors
++ *
++ * Based on asahi_drm.h which is
++ *
++ * Copyright © 2014-2018 Broadcom
++ * Copyright © 2019 Collabora ltd.
++ */
++#ifndef _ASAHI_DRM_H_
++#define _ASAHI_DRM_H_
++
++#include "drm.h"
++
++#if defined(__cplusplus)
++extern "C" {
++#endif
++
++#define DRM_ASAHI_UNSTABLE_UABI_VERSION		10011
++
++#define DRM_ASAHI_GET_PARAMS			0x00
++#define DRM_ASAHI_VM_CREATE			0x01
++#define DRM_ASAHI_VM_DESTROY			0x02
++#define DRM_ASAHI_GEM_CREATE			0x03
++#define DRM_ASAHI_GEM_MMAP_OFFSET		0x04
++#define DRM_ASAHI_GEM_BIND			0x05
++#define DRM_ASAHI_QUEUE_CREATE			0x06
++#define DRM_ASAHI_QUEUE_DESTROY			0x07
++#define DRM_ASAHI_SUBMIT			0x08
++#define DRM_ASAHI_GET_TIME			0x09
++
++#define DRM_ASAHI_MAX_CLUSTERS	32
++
++struct drm_asahi_params_global {
++	__u32 unstable_uabi_version;
++	__u32 pad0;
++
++	__u64 feat_compat;
++	__u64 feat_incompat;
++
++	__u32 gpu_generation;
++	__u32 gpu_variant;
++	__u32 gpu_revision;
++	__u32 chip_id;
++
++	__u32 num_dies;
++	__u32 num_clusters_total;
++	__u32 num_cores_per_cluster;
++	__u32 num_frags_per_cluster;
++	__u32 num_gps_per_cluster;
++	__u32 num_cores_total_active;
++	__u64 core_masks[DRM_ASAHI_MAX_CLUSTERS];
++
++	__u32 vm_page_size;
++	__u32 pad1;
++	__u64 vm_user_start;
++	__u64 vm_user_end;
++	__u64 vm_usc_start;
++	__u64 vm_usc_end;
++	__u64 vm_kernel_min_size;
++
++	__u32 max_syncs_per_submission;
++	__u32 max_commands_per_submission;
++	__u32 max_commands_in_flight;
++	__u32 max_attachments;
++
++	__u32 timer_frequency_hz;
++	__u32 min_frequency_khz;
++	__u32 max_frequency_khz;
++	__u32 max_power_mw;
++
++	__u32 result_render_size;
++	__u32 result_compute_size;
++
++	__u32 firmware_version[4];
++};
++
++/*
++enum drm_asahi_feat_compat {
++	DRM_ASAHI_FEAT_SOFT_FAULTS = (1UL) << 0,
++};
++*/
++
++enum drm_asahi_feat_incompat {
++	DRM_ASAHI_FEAT_MANDATORY_ZS_COMPRESSION = (1UL) << 0,
++};
++
++struct drm_asahi_get_params {
++	/** @extensions: Pointer to the first extension struct, if any */
++	__u64 extensions;
++
++	/** @param: Parameter group to fetch (MBZ) */
++	__u32 param_group;
++
++	/** @pad: MBZ */
++	__u32 pad;
++
++	/** @value: User pointer to write parameter struct */
++	__u64 pointer;
++
++	/** @value: Size of user buffer, max size supported on return */
++	__u64 size;
++};
++
++struct drm_asahi_vm_create {
++	/** @extensions: Pointer to the first extension struct, if any */
++	__u64 extensions;
++
++	/** @kernel_start: Start of the kernel-reserved address range */
++	__u64 kernel_start;
++
++	/** @kernel_end: End of the kernel-reserved address range */
++	__u64 kernel_end;
++
++	/** @value: Returned VM ID */
++	__u32 vm_id;
++
++	/** @pad: MBZ */
++	__u32 pad;
++};
++
++struct drm_asahi_vm_destroy {
++	/** @extensions: Pointer to the first extension struct, if any */
++	__u64 extensions;
++
++	/** @value: VM ID to be destroyed */
++	__u32 vm_id;
++
++	/** @pad: MBZ */
++	__u32 pad;
++};
++
++#define ASAHI_GEM_WRITEBACK	(1L << 0)
++#define ASAHI_GEM_VM_PRIVATE	(1L << 1)
++#define ASAHI_GEM_NOCACHE	(1L << 2)
++
++struct drm_asahi_gem_create {
++	/** @extensions: Pointer to the first extension struct, if any */
++	__u64 extensions;
++
++	/** @size: Size of the BO */
++	__u64 size;
++
++	/** @flags: BO creation flags */
++	__u32 flags;
++
++	/** @handle: VM ID to assign to the BO, if ASAHI_GEM_VM_PRIVATE is set. */
++	__u32 vm_id;
++
++	/** @handle: Returned GEM handle for the BO */
++	__u32 handle;
++};
++
++struct drm_asahi_gem_mmap_offset {
++	/** @extensions: Pointer to the first extension struct, if any */
++	__u64 extensions;
++
++	/** @handle: Handle for the object being mapped. */
++	__u32 handle;
++
++	/** @flags: Must be zero */
++	__u32 flags;
++
++	/** @offset: The fake offset to use for subsequent mmap call */
++	__u64 offset;
++};
++
++enum drm_asahi_bind_op {
++	ASAHI_BIND_OP_BIND = 0,
++	ASAHI_BIND_OP_UNBIND = 1,
++	ASAHI_BIND_OP_UNBIND_ALL = 2,
++};
++
++#define ASAHI_BIND_READ		(1L << 0)
++#define ASAHI_BIND_WRITE	(1L << 1)
++
++struct drm_asahi_gem_bind {
++	/** @extensions: Pointer to the first extension struct, if any */
++	__u64 extensions;
++
++	/** @obj: Bind operation */
++	__u32 op;
++
++	/** @flags: One or more of ASAHI_BIND_* */
++	__u32 flags;
++
++	/** @obj: GEM object to bind */
++	__u32 handle;
++
++	/** @vm_id: The ID of the VM to bind to */
++	__u32 vm_id;
++
++	/** @offset: Offset into the object */
++	__u64 offset;
++
++	/** @range: Number of bytes from the object to bind to addr */
++	__u64 range;
++
++	/** @addr: Address to bind to */
++	__u64 addr;
++};
++
++enum drm_asahi_cmd_type {
++	DRM_ASAHI_CMD_RENDER = 0,
++	DRM_ASAHI_CMD_BLIT = 1,
++	DRM_ASAHI_CMD_COMPUTE = 2,
++};
++
++/* Note: this is an enum so that it can be resolved by Rust bindgen. */
++enum drm_asahi_queue_cap {
++	DRM_ASAHI_QUEUE_CAP_RENDER	= (1UL << DRM_ASAHI_CMD_RENDER),
++	DRM_ASAHI_QUEUE_CAP_BLIT	= (1UL << DRM_ASAHI_CMD_BLIT),
++	DRM_ASAHI_QUEUE_CAP_COMPUTE	= (1UL << DRM_ASAHI_CMD_COMPUTE),
++};
++
++struct drm_asahi_queue_create {
++	/** @extensions: Pointer to the first extension struct, if any */
++	__u64 extensions;
++
++	/** @flags: MBZ */
++	__u32 flags;
++
++	/** @vm_id: The ID of the VM this queue is bound to */
++	__u32 vm_id;
++
++	/** @type: Bitmask of DRM_ASAHI_QUEUE_CAP_* */
++	__u32 queue_caps;
++
++	/** @priority: Queue priority, 0-3 */
++	__u32 priority;
++
++	/** @queue_id: The returned queue ID */
++	__u32 queue_id;
++};
++
++struct drm_asahi_queue_destroy {
++	/** @extensions: Pointer to the first extension struct, if any */
++	__u64 extensions;
++
++	/** @queue_id: The queue ID to be destroyed */
++	__u32 queue_id;
++};
++
++enum drm_asahi_sync_type {
++	DRM_ASAHI_SYNC_SYNCOBJ = 0,
++	DRM_ASAHI_SYNC_TIMELINE_SYNCOBJ = 1,
++};
++
++struct drm_asahi_sync {
++	/** @extensions: Pointer to the first extension struct, if any */
++	__u64 extensions;
++
++	/** @sync_type: One of drm_asahi_sync_type */
++	__u32 sync_type;
++
++	/** @handle: The sync object handle */
++	__u32 handle;
++
++	/** @timeline_value: Timeline value for timeline sync objects */
++	__u64 timeline_value;
++};
++
++enum drm_asahi_subqueue {
++	DRM_ASAHI_SUBQUEUE_RENDER = 0, /* Also blit */
++	DRM_ASAHI_SUBQUEUE_COMPUTE = 1,
++	DRM_ASAHI_SUBQUEUE_COUNT = 2,
++};
++
++#define DRM_ASAHI_BARRIER_NONE ~(0U)
++
++struct drm_asahi_command {
++	/** @extensions: Pointer to the first extension struct, if any */
++	__u64 extensions;
++
++	/** @type: One of drm_asahi_cmd_type */
++	__u32 cmd_type;
++
++	/** @flags: Flags for command submission */
++	__u32 flags;
++
++	/** @cmdbuf: Pointer to the appropriate command buffer structure */
++	__u64 cmd_buffer;
++
++	/** @cmdbuf: Size of the command buffer structure */
++	__u64 cmd_buffer_size;
++
++	/** @cmdbuf: Offset into the result BO to return information about this command */
++	__u64 result_offset;
++
++	/** @cmdbuf: Size of the result data structure */
++	__u64 result_size;
++
++	/** @barriers: Array of command indices per subqueue to wait on */
++	__u32 barriers[DRM_ASAHI_SUBQUEUE_COUNT];
++};
++
++struct drm_asahi_submit {
++	/** @extensions: Pointer to the first extension struct, if any */
++	__u64 extensions;
++
++	/** @in_syncs: An optional array of drm_asahi_sync to wait on before starting this job. */
++	__u64 in_syncs;
++
++	/** @in_syncs: An optional array of drm_asahi_sync objects to signal upon completion. */
++	__u64 out_syncs;
++
++	/** @commands: Pointer to the drm_asahi_command array of commands to submit. */
++	__u64 commands;
++
++	/** @flags: Flags for command submission (MBZ) */
++	__u32 flags;
++
++	/** @queue_id: The queue ID to be submitted to */
++	__u32 queue_id;
++
++	/** @result_handle: An optional BO handle to place result data in */
++	__u32 result_handle;
++
++	/** @in_sync_count: Number of sync objects to wait on before starting this job. */
++	__u32 in_sync_count;
++
++	/** @in_sync_count: Number of sync objects to signal upon completion of this job. */
++	__u32 out_sync_count;
++
++	/** @pad: Number of commands to be submitted */
++	__u32 command_count;
++};
++
++struct drm_asahi_attachment {
++	/** @pointer: Base address of the attachment */
++	__u64 pointer;
++	/** @size: Size of the attachment in bytes */
++	__u64 size;
++	/** @order: Power of 2 exponent related to attachment size (?) */
++	__u32 order;
++	/** @flags: MBZ */
++	__u32 flags;
++};
++
++#define ASAHI_RENDER_NO_CLEAR_PIPELINE_TEXTURES (1UL << 0)
++#define ASAHI_RENDER_SET_WHEN_RELOADING_Z_OR_S (1UL << 1)
++#define ASAHI_RENDER_VERTEX_SPILLS (1UL << 2)
++#define ASAHI_RENDER_PROCESS_EMPTY_TILES (1UL << 3)
++#define ASAHI_RENDER_NO_VERTEX_CLUSTERING (1UL << 4)
++#define ASAHI_RENDER_MSAA_ZS (1UL << 5)
++/* XXX check */
++#define ASAHI_RENDER_NO_PREEMPTION (1UL << 6)
++
++struct drm_asahi_cmd_render {
++	/** @extensions: Pointer to the first extension struct, if any */
++	__u64 extensions;
++
++	__u64 flags;
++
++	__u64 encoder_ptr;
++	__u64 vertex_usc_base;
++	__u64 fragment_usc_base;
++
++	__u64 vertex_attachments;
++	__u64 fragment_attachments;
++	__u32 vertex_attachment_count;
++	__u32 fragment_attachment_count;
++
++	__u32 vertex_helper_program;
++	__u32 fragment_helper_program;
++	__u32 vertex_helper_cfg;
++	__u32 fragment_helper_cfg;
++	__u64 vertex_helper_arg;
++	__u64 fragment_helper_arg;
++
++	__u64 depth_buffer_load;
++	__u64 depth_buffer_load_stride;
++	__u64 depth_buffer_store;
++	__u64 depth_buffer_store_stride;
++	__u64 depth_buffer_partial;
++	__u64 depth_buffer_partial_stride;
++	__u64 depth_meta_buffer_load;
++	__u64 depth_meta_buffer_load_stride;
++	__u64 depth_meta_buffer_store;
++	__u64 depth_meta_buffer_store_stride;
++	__u64 depth_meta_buffer_partial;
++	__u64 depth_meta_buffer_partial_stride;
++
++	__u64 stencil_buffer_load;
++	__u64 stencil_buffer_load_stride;
++	__u64 stencil_buffer_store;
++	__u64 stencil_buffer_store_stride;
++	__u64 stencil_buffer_partial;
++	__u64 stencil_buffer_partial_stride;
++	__u64 stencil_meta_buffer_load;
++	__u64 stencil_meta_buffer_load_stride;
++	__u64 stencil_meta_buffer_store;
++	__u64 stencil_meta_buffer_store_stride;
++	__u64 stencil_meta_buffer_partial;
++	__u64 stencil_meta_buffer_partial_stride;
++
++	__u64 scissor_array;
++	__u64 depth_bias_array;
++	__u64 visibility_result_buffer;
++
++	__u64 vertex_sampler_array;
++	__u32 vertex_sampler_count;
++	__u32 vertex_sampler_max;
++
++	__u64 fragment_sampler_array;
++	__u32 fragment_sampler_count;
++	__u32 fragment_sampler_max;
++
++	__u64 zls_ctrl;
++	__u64 ppp_multisamplectl;
++	__u32 ppp_ctrl;
++
++	__u32 fb_width;
++	__u32 fb_height;
++
++	__u32 utile_width;
++	__u32 utile_height;
++
++	__u32 samples;
++	__u32 layers;
++
++	__u32 encoder_id;
++	__u32 cmd_ta_id;
++	__u32 cmd_3d_id;
++
++	__u32 sample_size;
++	__u32 tib_blocks;
++	__u32 iogpu_unk_214;
++
++	__u32 merge_upper_x;
++	__u32 merge_upper_y;
++
++	__u32 load_pipeline;
++	__u32 load_pipeline_bind;
++
++	__u32 store_pipeline;
++	__u32 store_pipeline_bind;
++
++	__u32 partial_reload_pipeline;
++	__u32 partial_reload_pipeline_bind;
++
++	__u32 partial_store_pipeline;
++	__u32 partial_store_pipeline_bind;
++
++	__u32 depth_dimensions;
++	__u32 isp_bgobjdepth;
++	__u32 isp_bgobjvals;
++
++};
++
++#define ASAHI_RENDER_UNK_UNK1			(1UL << 0)
++#define ASAHI_RENDER_UNK_SET_TILE_CONFIG	(1UL << 1)
++#define ASAHI_RENDER_UNK_SET_UTILE_CONFIG	(1UL << 2)
++#define ASAHI_RENDER_UNK_SET_AUX_FB_UNK		(1UL << 3)
++#define ASAHI_RENDER_UNK_SET_G14_UNK		(1UL << 4)
++
++#define ASAHI_RENDER_UNK_SET_FRG_UNK_140	(1UL << 20)
++#define ASAHI_RENDER_UNK_SET_FRG_UNK_158	(1UL << 21)
++#define ASAHI_RENDER_UNK_SET_FRG_TILECFG	(1UL << 22)
++#define ASAHI_RENDER_UNK_SET_LOAD_BGOBJVALS	(1UL << 23)
++#define ASAHI_RENDER_UNK_SET_FRG_UNK_38		(1UL << 24)
++#define ASAHI_RENDER_UNK_SET_FRG_UNK_3C		(1UL << 25)
++
++#define ASAHI_RENDER_UNK_SET_RELOAD_ZLSCTRL	(1UL << 27)
++#define ASAHI_RENDER_UNK_SET_UNK_BUF_10		(1UL << 28)
++#define ASAHI_RENDER_UNK_SET_FRG_UNK_MASK	(1UL << 29)
++
++#define ASAHI_RENDER_UNK_SET_IOGPU_UNK54	(1UL << 40)
++#define ASAHI_RENDER_UNK_SET_IOGPU_UNK56	(1UL << 41)
++#define ASAHI_RENDER_UNK_SET_TILING_CONTROL	(1UL << 42)
++#define ASAHI_RENDER_UNK_SET_TILING_CONTROL_2	(1UL << 43)
++#define ASAHI_RENDER_UNK_SET_VTX_UNK_F0		(1UL << 44)
++#define ASAHI_RENDER_UNK_SET_VTX_UNK_F8		(1UL << 45)
++#define ASAHI_RENDER_UNK_SET_VTX_UNK_118	(1UL << 46)
++#define ASAHI_RENDER_UNK_SET_VTX_UNK_MASK	(1UL << 47)
++
++#define ASAHI_RENDER_EXT_UNKNOWNS	0xff00
++
++/* XXX: Do not upstream this struct */
++struct drm_asahi_cmd_render_unknowns {
++	/** @type: Type ID of this extension */
++	__u32 type;
++	__u32 pad;
++	/** @next: Pointer to the next extension struct, if any */
++	__u64 next;
++
++	__u64 flags;
++
++	__u64 tile_config;
++	__u64 utile_config;
++
++	__u64 aux_fb_unk;
++	__u64 g14_unk;
++	__u64 frg_unk_140;
++	__u64 frg_unk_158;
++	__u64 frg_tilecfg;
++	__u64 load_bgobjvals;
++	__u64 frg_unk_38;
++	__u64 frg_unk_3c;
++	__u64 reload_zlsctrl;
++	__u64 unk_buf_10;
++	__u64 frg_unk_mask;
++
++	__u64 iogpu_unk54;
++	__u64 iogpu_unk56;
++	__u64 tiling_control;
++	__u64 tiling_control_2;
++	__u64 vtx_unk_f0;
++	__u64 vtx_unk_f8;
++	__u64 vtx_unk_118;
++	__u64 vtx_unk_mask;
++};
++
++/* XXX check */
++#define ASAHI_COMPUTE_NO_PREEMPTION (1UL << 0)
++
++struct drm_asahi_cmd_compute {
++	__u64 flags;
++
++	__u64 encoder_ptr;
++	__u64 encoder_end;
++	__u64 usc_base;
++
++	__u64 attachments;
++	__u32 attachment_count;
++	__u32 pad;
++
++	__u32 helper_program;
++	__u32 helper_cfg;
++	__u64 helper_arg;
++
++	__u32 encoder_id;
++	__u32 cmd_id;
++
++	__u64 sampler_array;
++	__u32 sampler_count;
++	__u32 sampler_max;
++
++	__u32 iogpu_unk_40;
++	__u32 unk_mask;
++};
++
++enum drm_asahi_status {
++	DRM_ASAHI_STATUS_PENDING = 0,
++	DRM_ASAHI_STATUS_COMPLETE,
++	DRM_ASAHI_STATUS_UNKNOWN_ERROR,
++	DRM_ASAHI_STATUS_TIMEOUT,
++	DRM_ASAHI_STATUS_FAULT,
++	DRM_ASAHI_STATUS_KILLED,
++	DRM_ASAHI_STATUS_NO_DEVICE,
++};
++
++enum drm_asahi_fault {
++	DRM_ASAHI_FAULT_NONE = 0,
++	DRM_ASAHI_FAULT_UNKNOWN,
++	DRM_ASAHI_FAULT_UNMAPPED,
++	DRM_ASAHI_FAULT_AF_FAULT,
++	DRM_ASAHI_FAULT_WRITE_ONLY,
++	DRM_ASAHI_FAULT_READ_ONLY,
++	DRM_ASAHI_FAULT_NO_ACCESS,
++};
++
++struct drm_asahi_result_info {
++	/** @status: One of enum drm_asahi_status */
++	__u32 status;
++
++	/** @reason: One of drm_asahi_fault_type */
++	__u32 fault_type;
++
++	/** @unit: Unit number, hardware dependent */
++	__u32 unit;
++
++	/** @sideband: Sideband information, hardware dependent */
++	__u32 sideband;
++
++	/** @level: Page table level at which the fault occurred, hardware dependent */
++	__u8 level;
++
++	/** @read: Fault was a read */
++	__u8 is_read;
++
++	/** @pad: MBZ */
++	__u16 pad;
++
++	/** @unk_5: Extra bits, hardware dependent */
++	__u32 extra;
++
++	/** @address: Fault address, cache line aligned */
++	__u64 address;
++};
++
++#define DRM_ASAHI_RESULT_RENDER_TVB_GROW_OVF (1UL << 0)
++#define DRM_ASAHI_RESULT_RENDER_TVB_GROW_MIN (1UL << 1)
++#define DRM_ASAHI_RESULT_RENDER_TVB_OVERFLOWED (1UL << 2)
++
++struct drm_asahi_result_render {
++	/** @address: Common result information */
++	struct drm_asahi_result_info info;
++
++	/** @flags: Zero or more of of DRM_ASAHI_RESULT_RENDER_* */
++	__u64 flags;
++
++	/** @vertex_ts_start: Timestamp of the start of vertex processing */
++	__u64 vertex_ts_start;
++
++	/** @vertex_ts_end: Timestamp of the end of vertex processing */
++	__u64 vertex_ts_end;
++
++	/** @fragment_ts_start: Timestamp of the start of fragment processing */
++	__u64 fragment_ts_start;
++
++	/** @fragment_ts_end: Timestamp of the end of fragment processing */
++	__u64 fragment_ts_end;
++
++	/** @tvb_size_bytes: TVB size at the start of this render */
++	__u64 tvb_size_bytes;
++
++	/** @tvb_usage_bytes: Total TVB usage in bytes for this render */
++	__u64 tvb_usage_bytes;
++
++	/** @num_tvb_overflows: Number of TVB overflows that occurred for this render */
++	__u32 num_tvb_overflows;
++};
++
++struct drm_asahi_result_compute {
++	/** @address: Common result information */
++	struct drm_asahi_result_info info;
++
++	/** @flags: Zero or more of of DRM_ASAHI_RESULT_COMPUTE_* */
++	__u64 flags;
++
++	/** @ts_start: Timestamp of the start of this compute command */
++	__u64 ts_start;
++
++	/** @vertex_ts_end: Timestamp of the end of this compute command */
++	__u64 ts_end;
++};
++
++struct drm_asahi_get_time {
++	/** @extensions: Pointer to the first extension struct, if any */
++	__u64 extensions;
++
++	/** @flags: MBZ. */
++	__u64 flags;
++
++	/** @tv_sec: On return, seconds part of a point in time */
++	__s64 tv_sec;
++
++	/** @tv_nsec: On return, nanoseconds part of a point in time */
++	__s64 tv_nsec;
++
++	/** @gpu_timestamp: On return, the GPU timestamp at that point in time */
++	__u64 gpu_timestamp;
++};
++
++/* Note: this is an enum so that it can be resolved by Rust bindgen. */
++enum {
++   DRM_IOCTL_ASAHI_GET_PARAMS       = DRM_IOWR(DRM_COMMAND_BASE + DRM_ASAHI_GET_PARAMS, struct drm_asahi_get_params),
++   DRM_IOCTL_ASAHI_VM_CREATE        = DRM_IOWR(DRM_COMMAND_BASE + DRM_ASAHI_VM_CREATE, struct drm_asahi_vm_create),
++   DRM_IOCTL_ASAHI_VM_DESTROY       = DRM_IOW(DRM_COMMAND_BASE + DRM_ASAHI_VM_DESTROY, struct drm_asahi_vm_destroy),
++   DRM_IOCTL_ASAHI_GEM_CREATE       = DRM_IOWR(DRM_COMMAND_BASE + DRM_ASAHI_GEM_CREATE, struct drm_asahi_gem_create),
++   DRM_IOCTL_ASAHI_GEM_MMAP_OFFSET  = DRM_IOWR(DRM_COMMAND_BASE + DRM_ASAHI_GEM_MMAP_OFFSET, struct drm_asahi_gem_mmap_offset),
++   DRM_IOCTL_ASAHI_GEM_BIND         = DRM_IOW(DRM_COMMAND_BASE + DRM_ASAHI_GEM_BIND, struct drm_asahi_gem_bind),
++   DRM_IOCTL_ASAHI_QUEUE_CREATE     = DRM_IOWR(DRM_COMMAND_BASE + DRM_ASAHI_QUEUE_CREATE, struct drm_asahi_queue_create),
++   DRM_IOCTL_ASAHI_QUEUE_DESTROY    = DRM_IOW(DRM_COMMAND_BASE + DRM_ASAHI_QUEUE_DESTROY, struct drm_asahi_queue_destroy),
++   DRM_IOCTL_ASAHI_SUBMIT           = DRM_IOW(DRM_COMMAND_BASE + DRM_ASAHI_SUBMIT, struct drm_asahi_submit),
++   DRM_IOCTL_ASAHI_GET_TIME         = DRM_IOWR(DRM_COMMAND_BASE + DRM_ASAHI_GET_TIME, struct drm_asahi_get_time),
++};
++
++#if defined(__cplusplus)
++}
++#endif
++
++#endif /* _ASAHI_DRM_H_ */
+diff --git a/src/drm/drm_renderer.c b/src/drm/drm_renderer.c
+index 73792828..e59abc0f 100644
+--- a/src/drm/drm_renderer.c
++++ b/src/drm/drm_renderer.c
+@@ -9,6 +9,7 @@
+ #include <inttypes.h>
+ #include <stddef.h>
+ #include <stdint.h>
++#include <string.h>
+ #include <unistd.h>
+ 
+ #include <xf86drm.h>
+@@ -25,6 +26,10 @@
+ #  include "amdgpu/amdgpu_renderer.h"
+ #endif
+ 
++#ifdef ENABLE_DRM_ASAHI
++#  include "asahi/asahi_renderer.h"
++#endif
++
+ static struct virgl_renderer_capset_drm capset;
+ 
+ static const struct backend {
+@@ -49,6 +54,14 @@ static const struct backend {
+       .create = amdgpu_renderer_create,
+    },
+ #endif
++#ifdef ENABLE_DRM_ASAHI
++   {
++      .context_type = VIRTGPU_DRM_CONTEXT_ASAHI,
++      .name = "asahi",
++      .probe = asahi_renderer_probe,
++      .create = asahi_renderer_create,
++   },
++#endif
+ };
+ 
+ int
+diff --git a/src/drm/drm_renderer.h b/src/drm/drm_renderer.h
+index 9ff4449e..75695420 100644
+--- a/src/drm/drm_renderer.h
++++ b/src/drm/drm_renderer.h
+@@ -14,7 +14,7 @@
+ 
+ #include "virgl_util.h"
+ 
+-#if defined(ENABLE_DRM_MSM) || defined(ENABLE_DRM_AMDGPU)
++#if defined(ENABLE_DRM_MSM) || defined(ENABLE_DRM_AMDGPU) || defined(ENABLE_DRM_ASAHI)
+ 
+ int drm_renderer_init(int drm_fd);
+ 
+diff --git a/src/drm_hw.h b/src/drm_hw.h
+index 33a90842..c0b2c053 100644
+--- a/src/drm_hw.h
++++ b/src/drm_hw.h
+@@ -17,7 +17,8 @@ struct virgl_renderer_capset_drm {
+    uint32_t version_minor;
+    uint32_t version_patchlevel;
+ #define VIRTGPU_DRM_CONTEXT_MSM      1
+-#define VIRTGPU_DRM_CONTEXT_AMDGPU   2
++#define VIRTGPU_DRM_CONTEXT_AMDGPU   4
++#define VIRTGPU_DRM_CONTEXT_ASAHI    2
+    uint32_t context_type;
+    uint32_t pad;
+    union {
+diff --git a/src/meson.build b/src/meson.build
+index 4835fb2d..b3c4fa53 100644
+--- a/src/meson.build
++++ b/src/meson.build
+@@ -162,6 +162,13 @@ drm_amdgpu_sources = [
+    'drm/amdgpu/amdgpu_renderer.h',
+ ]
+ 
++drm_asahi_sources = [
++   'drm/drm-uapi/asahi_drm.h',
++   'drm/asahi/asahi_proto.h',
++   'drm/asahi/asahi_renderer.c',
++   'drm/asahi/asahi_renderer.h',
++]
++
+ proxy_sources = [
+    'proxy/proxy_client.c',
+    'proxy/proxy_common.c',
+@@ -234,6 +241,10 @@ if with_drm_amdgpu
+    virgl_depends += [libdrm_amdgpu_dep]
+ endif
+ 
++if with_drm_asahi
++   virgl_sources += drm_asahi_sources
++endif
++
+ if with_render_server
+    virgl_sources += proxy_sources
+ endif
+-- 
+2.45.0
+
