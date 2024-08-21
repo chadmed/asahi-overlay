@@ -1,0 +1,10 @@
+diff --git a/External/imgui/CMakeLists.txt b/External/imgui/CMakeLists.txt
+index 82667b0e..75172980 100644
+--- a/External/imgui/CMakeLists.txt
++++ b/External/imgui/CMakeLists.txt
+@@ -4,4 +4,4 @@ set(SRCS imgui.cpp
+   imgui_widgets.cpp
+   addons/imguinodegrapheditor/imguinodegrapheditor.cpp
+   addons/imguifilesystem/imguifilesystem.cpp)
+-add_library(${NAME} ${SRCS})
++add_library(${NAME} STATIC ${SRCS})
