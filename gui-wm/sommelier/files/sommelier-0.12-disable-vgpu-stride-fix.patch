@@ -1,0 +1,38 @@
+From 58ecdd7e7ffd1d8f9df425ed794ce8decfcce27d Mon Sep 17 00:00:00 2001
+From: Sergio Lopez <slp@redhat.com>
+Date: Thu, 28 Sep 2023 15:13:31 +0200
+Subject: [PATCH] drm: Disable virtgpu stride fix
+
+Altering the stride when the drm device is virtio-gpu breaks DRM
+native context implementations.
+
+Signed-off-by: Sergio Lopez <slp@redhat.com>
+---
+ compositor/sommelier-drm.cc | 4 ++++
+ 1 file changed, 4 insertions(+)
+
+diff --git a/compositor/sommelier-drm.cc b/compositor/sommelier-drm.cc
+index 78de2cf..0361edf 100644
+--- a/compositor/sommelier-drm.cc
++++ b/compositor/sommelier-drm.cc
+@@ -154,6 +154,9 @@ static void sl_drm_create_prime_buffer(struct wl_client* client,
+       memset(&info_arg, 0, sizeof(info_arg));
+       info_arg.bo_handle = prime_handle.handle;
+       info_arg.type = VIRTGPU_RESOURCE_INFO_TYPE_EXTENDED;
++
++      // Fedora (slp): Disable this as it breaks DRM native context
++#if 0
+       ret = drmIoctl(drm_fd, DRM_IOCTL_VIRTGPU_RESOURCE_INFO_CROS, &info_arg);
+       // Correct stride0 if we are able to get proper resource info.
+       if (!ret) {
+@@ -163,6 +166,7 @@ static void sl_drm_create_prime_buffer(struct wl_client* client,
+         }
+         is_gpu_buffer = 1;
+       }
++#endif
+ 
+       // Always close the handle we imported.
+       memset(&gem_close, 0, sizeof(gem_close));
+-- 
+2.40.0
+
