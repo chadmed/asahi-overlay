@@ -9,7 +9,7 @@ K_NODRYRUN="1"
 inherit kernel-build
 
 MY_P=linux-${PV%.*}
-GENPATCHES_P="genpatches-$(ver_cut 1-2)-6"
+GENPATCHES_P="genpatches-$(ver_cut 1-2)-8"
 
 if [[ ${PV} != ${PV/_rc} ]] ; then
 	# $PV is expected to be of following form: 6.0_rc5_p1
