@@ -1,0 +1,11 @@
+Title: Battery charge threshold persistence now available
+Author: James Calligeros <jcalligeros99@gmail.com>
+Posted: 2024-08-23
+Revision: 1
+News-Item-Format: 2.0
+
+It is now possible to save and restore your set charge end threshold across
+boots! If you use systemd, no manual invervention is required. For OpenRC
+users, you will need to add the new macsmc-battery service to your default
+runlevel. Make sure to start the service manually after installation to
+ensure it works!
