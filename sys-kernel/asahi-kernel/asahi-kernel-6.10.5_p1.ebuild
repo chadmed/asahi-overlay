@@ -106,6 +106,7 @@ src_prepare() {
 	)
 	use debug || merge_configs+=(
 		"${dist_conf_path}"/no-debug.config
+		"${FILESDIR}"/linux-6.10_disable_debug_info_btf.config
 	)
 
 	# deselect all non APPLE arm64 ARCHs
