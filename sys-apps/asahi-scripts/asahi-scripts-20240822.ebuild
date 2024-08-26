@@ -10,6 +10,8 @@ LICENSE="MIT"
 SLOT="0"
 KEYWORDS="~arm64"
 
+IUSE="livecd"
+
 BDEPEND="
 	dev-build/make
 	virtual/udev
@@ -24,14 +26,27 @@ src_compile() {
 }
 
 src_install() {
-	emake DESTDIR="${D}" PREFIX="/usr" SYS_PREFIX="" install-dracut
-	emake DESTDIR="${D}" PREFIX="/usr" install-macsmc-battery
+	# For Gentoo releng, we only want the dracut modules
+	use livecd && (
+		insinto /usr/lib/dracut/modules.d/91kernel-modules-asahi
+		doins "${S}"/dracut/modules.d/91kernel-modules-asahi/module-setup.sh
 
-	newinitd "${FILESDIR}/${PN}-macsmc-battery.openrc" "macsmc-battery"
+		insinto /usr/lib/dracut/modules.d/99asahi-firmware
+		doins "${S}"/dracut/modules.d/99asahi-firmware/install-asahi-firmware.sh
+		doins "${S}"/dracut/modules.d/99asahi-firmware/load-asahi-firmware.sh
+		doins "${S}"/dracut/modules.d/99asahi-firmware/module-setup.sh
+	)
 
-	# install gentoo sys config
-	insinto /etc/default
-	newins "${FILESDIR}"/update-m1n1.gentoo.conf update-m1n1
+	use livecd || (
+		emake DESTDIR="${D}" PREFIX="/usr" SYS_PREFIX="" install-dracut
+		emake DESTDIR="${D}" PREFIX="/usr" install-macsmc-battery
+
+		newinitd "${FILESDIR}/${PN}-macsmc-battery.openrc" "macsmc-battery"
+
+		# install gentoo sys config
+		insinto /etc/default
+		newins "${FILESDIR}"/update-m1n1.gentoo.conf update-m1n1
+	)
 }
 
 pkg_postinst() {

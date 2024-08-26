@@ -5,6 +5,9 @@
   <email>jcalligeros99@gmail.com</email>
   <name>James Calligeros</name>
 </maintainer>
+<use>
+  <flag name="livecd">Install the Asahi dracut modules only for Gentoo release engineering</flag>
+</use>
 <upstream>
   <remote-id type="github">AsahiLinux/asahi-scripts</remote-id>
 </upstream>
