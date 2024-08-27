@@ -10,13 +10,9 @@ inherit meson python-any-r1
 DESCRIPTION="Nested Wayland compositor with support for X11 forwarding"
 HOMEPAGE="https://chromium.googlesource.com/chromiumos/platform2/+/refs/heads/main/vm_tools/sommelier/"
 
-GIT_HASH="31e06b16f0546e277408ffbebc4e5dded7d3324e"
-
 SRC_URI="
-	https://chromium.googlesource.com/chromiumos/platform2/+archive/${GIT_HASH}/vm_tools/sommelier.tar.gz -> ${P}.tar.gz
+	https://github.com/WhatAmISupposedToPutHere/sommelier/archive/refs/tags/v${PV}.tar.gz -> ${P}.tar.gz
 "
-
-S="${WORKDIR}"
 
 LICENSE="BSD"
 SLOT="0"
