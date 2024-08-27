@@ -254,16 +254,16 @@ src_compile() {
 		CHOST=${CTARGET} strip-unsupported-flags
 		local oldcc="${CC}"
 		# Fix compilation on systems which use a Clang/LLVM toolchain
-		export CC="${CTARGET}-multilib-linux-gnu-gcc -m32"
-		export AS="${CTARGET}-multilib-linux-gnu-as"
-		export AR="${CTARGET}-multilib-linux-gnu-ar"
-		export RANLIB="${CTARGET}-multilib-linux-gnu-ranlib"
-		export OBJCOPY="${CTARGET}-multilib-linux-gnu-objcopy"
-		export NM="${CTARGET}-multilib-linux-gnu-nm"
+		export CC="${CTARGET}-gcc -m32"
+		export AS="${CTARGET}-as"
+		export AR="${CTARGET}-ar"
+		export RANLIB="${CTARGET}-ranlib"
+		export OBJCOPY="${CTARGET}-objcopy"
+		export NM="${CTARGET}-nm"
 		export libc_cv_slibdir="${prefix}/lib"
 		x86mt-build glibc x86
 		export libc_cv_slibdir="${prefix}/lib64"
-		export CC="${CTARGET}-multilib-linux-gnu-gcc"
+		export CC="${CTARGET}-gcc"
 		x86mt-build glibc amd64
 	)
 	local file
