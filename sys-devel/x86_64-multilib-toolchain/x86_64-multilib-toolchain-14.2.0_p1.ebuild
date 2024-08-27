@@ -253,11 +253,17 @@ src_compile() {
 		export CXX=
 		CHOST=${CTARGET} strip-unsupported-flags
 		local oldcc="${CC}"
-		export CC="$(CHOST=${CTARGET} tc-getCC) -m32"
+		# Fix compilation on systems which use a Clang/LLVM toolchain
+		export CC="${CTARGET}-multilib-linux-gnu-gcc -m32"
+		export AS="${CTARGET}-multilib-linux-gnu-as"
+		export AR="${CTARGET}-multilib-linux-gnu-ar"
+		export RANLIB="${CTARGET}-multilib-linux-gnu-ranlib"
+		export OBJCOPY="${CTARGET}-multilib-linux-gnu-objcopy"
+		export NM="${CTARGET}-multilib-linux-gnu-nm"
 		export libc_cv_slibdir="${prefix}/lib"
 		x86mt-build glibc x86
 		export libc_cv_slibdir="${prefix}/lib64"
-		export CC="${oldcc}"
+		export CC="${CTARGET}-multilib-linux-gnu-gcc"
 		x86mt-build glibc amd64
 	)
 	local file
