@@ -254,6 +254,12 @@ src_prepare() {
 	for header in $THUNK_HEADERS; do
 		cp -a "${BROOT}/usr/include/${header}" "${THUNK_INC_DIR}/${header}" || die
 	done
+
+	# Fix compilation with systemwide clang
+	if [[ -e "${EROOT}"/etc/clang/gentoo-gcc-install.cfg ]]; then
+		eapply "${FILESDIR}/${PN}-thunkgen-gcc-install-dir.patch"
+	fi
+
 }
 
 src_configure() {
