@@ -82,6 +82,7 @@ PATCHES="
 	${FILESDIR}/${P}-json-maker-as-static.patch
 	${FILESDIR}/${P}-imgui-as-static.patch
 	${FILESDIR}/${PN}-thunks-toolchain-paths.patch
+	${FILESDIR}/${PN}-thunkgen-gcc-install-dir.patch
 "
 
 IUSE="X +thunks crossdev-toolchain"
@@ -254,12 +255,6 @@ src_prepare() {
 	for header in $THUNK_HEADERS; do
 		cp -a "${BROOT}/usr/include/${header}" "${THUNK_INC_DIR}/${header}" || die
 	done
-
-	# Fix compilation with systemwide clang
-	if [[ -e "${EROOT}"/etc/clang/gentoo-gcc-install.cfg ]]; then
-		eapply "${FILESDIR}/${PN}-thunkgen-gcc-install-dir.patch"
-	fi
-
 }
 
 src_configure() {
@@ -273,7 +268,7 @@ src_configure() {
 
 		strip-unsupported-flags
 	fi
-
+	oldpath="${PATH}"
 	use crossdev-toolchain || PATH="${BROOT}/usr/lib/x86_64-multilib-toolchain/bin:${PATH}"
 
 	local x64_cc="$(find_compiler 'x86_64*-linux-gnu-gcc' || die)"
@@ -314,4 +309,13 @@ src_install() {
 	tc-is-lto && dostrip -x /usr/lib/libFEXCore.a
 	use thunks && dostrip -x /usr/share/fex-emu/GuestThunks{,_32}/
 	rm "${ED}/usr/share/man/man1/FEX.1.gz" || die
+	PATH="${oldpath}"
+}
+
+pkg_postinst() {
+	if [[ "$(getconf PAGESIZE)" -ne 4096 ]] && ! type -P "${EPREFIX}/usr/bin/krun" >/dev/null ; then
+		ewarn "Your system page size is not 4096 and as such"
+		ewarn "you need to install app-emulation/krun or a similar solution"
+		ewarn "for FEX to work on your machine."
+	fi
 }
