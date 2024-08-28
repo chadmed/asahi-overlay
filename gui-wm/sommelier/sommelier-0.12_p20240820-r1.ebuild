@@ -20,6 +20,7 @@ KEYWORDS="~amd64 ~arm64"
 
 PATCHES="
 	${FILESDIR}/${PN}-0.12-disable-vgpu-stride-fix.patch
+	${FILESDIR}/${PN}-0.12-enforce-16k-alignment.patch
 "
 
 IUSE="test"
