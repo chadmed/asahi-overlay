@@ -286,6 +286,7 @@ src_configure() {
 
 	export X86_CFLAGS="$(my-test-flags-PROG ${x64_cc/%gcc/cc} c ${CFLAGS} ${LDFLAGS})"
 	export X86_CXXFLAGS="$(my-test-flags-PROG ${x64_cc/%gcc/c++} c++ ${CXXFLAGS} ${LDFLAGS})"
+	export X86_LDFLAGS="$(my-test-flags-PROG ${x64_cc/%gcc/cc} c ${LDFLAGS})"
 
 	my-filter-var X86_CFLAGS '-flto*' -fwhole-program-vtables '-fsanitize=cfi*'
 	my-filter-var X86_CXXFLAGS '-flto*' -fwhole-program-vtables '-fsanitize=cfi*'
@@ -300,6 +301,7 @@ src_configure() {
 		-DBUILD_THUNKS=$(usex thunks True False)
 		-DX86_CFLAGS="${X86_CFLAGS}"
 		-DX86_CXXFLAGS="${X86_CXXFLAGS}"
+		-DX86_LDFLAGS="${X86_LDFLAGS}"
 	)
 	cmake_src_configure
 }
