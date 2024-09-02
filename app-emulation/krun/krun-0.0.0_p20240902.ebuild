@@ -32,6 +32,7 @@ CRATES="
 	fastrand@2.1.0
 	futures-core@0.3.30
 	futures-sink@0.3.30
+	getrandom@0.2.15
 	gimli@0.29.0
 	glob@0.3.1
 	hermit-abi@0.3.9
@@ -76,6 +77,7 @@ CRATES="
 	tokio-util@0.7.11
 	unicode-ident@1.0.12
 	utf8parse@0.2.1
+	uuid@1.10.0
 	wasi@0.11.0+wasi-snapshot-preview1
 	windows-sys@0.48.0
 	windows-sys@0.52.0
@@ -100,7 +102,7 @@ CRATES="
 
 inherit cargo
 
-GIT_COMMIT="d6e7e17e5bbccdfd1021cd552b92a5c1774e044e"
+GIT_COMMIT="54bd66e42f0dcb40ae9b73e2632a926c86551857"
 
 DESCRIPTION="Run programs from your system in a microVM"
 HOMEPAGE="https://github.com/slp/krun"
@@ -123,6 +125,7 @@ RDEPEND="
 	net-misc/passt
 	net-misc/socat
 	gui-wm/sommelier
+	games-util/hidpipe
 	|| (
 	   net-misc/dhcpcd
 	   net-misc/dhcp[client]
