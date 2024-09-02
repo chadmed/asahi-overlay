@@ -251,8 +251,7 @@ src_compile() {
 
 		export libc_cv_cxx_link_ok=no
 		export CXX=
-		CHOST=${CTARGET} strip-unsupported-flags
-		local oldcc="${CC}"
+
 		# Fix compilation on systems which use a Clang/LLVM toolchain
 		export CC="${CTARGET}-gcc -m32"
 		export AS="${CTARGET}-as"
@@ -260,6 +259,9 @@ src_compile() {
 		export RANLIB="${CTARGET}-ranlib"
 		export OBJCOPY="${CTARGET}-objcopy"
 		export NM="${CTARGET}-nm"
+
+		CHOST=${CTARGET} strip-unsupported-flags
+
 		export libc_cv_slibdir="${prefix}/lib"
 		x86mt-build glibc x86
 		export libc_cv_slibdir="${prefix}/lib64"
