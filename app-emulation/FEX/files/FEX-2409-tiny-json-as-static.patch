@@ -1,0 +1,9 @@
+diff --git a/External/tiny-json/CMakeLists.txt b/External/tiny-json/CMakeLists.txt
+index 8cf0054..a0c6194 100644
+--- a/External/tiny-json/CMakeLists.txt
++++ b/External/tiny-json/CMakeLists.txt
+@@ -1,3 +1,3 @@
+ set(NAME tiny-json)
+ set(SRCS tiny-json.c)
+-add_library(${NAME} ${SRCS})
++add_library(${NAME} STATIC ${SRCS})
