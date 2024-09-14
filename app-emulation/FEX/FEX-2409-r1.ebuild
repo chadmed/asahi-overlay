@@ -306,7 +306,7 @@ src_configure() {
 		-DENABLE_CCACHE=False
 		-DENABLE_LTO=$(if tc-is-lto; then echo True; else echo False; fi)
 		-DUSE_FEXCONFIG_TOOLKIT=${fexconfig_toolkit}
-		-DBUILD_THUNKS=$(usex thunks True False)
+		-DBUILD_THUNKS=$(usex thunks)
 		-DX86_CFLAGS="${X86_CFLAGS}"
 		-DX86_CXXFLAGS="${X86_CXXFLAGS}"
 		-DX86_LDFLAGS="${X86_LDFLAGS}"

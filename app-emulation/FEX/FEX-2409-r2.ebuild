@@ -13,7 +13,6 @@ JEMALLOC_GLIBC_HASH="888181c5f7072ab1bd7aa7aca6d9f85816a95c43"
 # TODO: unvendor this when this version will be available in gentoo
 FMTLIB_V="11.0.2"
 CPP_OPTPARSE_HASH="eab4212ae864ba64306f0fe87f102e66cb5a3617"
-VIXL_HASH="a90f5d5020c305d03d3182dcc90a31321cc7a661"
 ROBIN_MAP_HASH="d5683d9f1891e5b04e3e3b2192b5349dc8d814ea"
 IMGUI_HASH="4c986ecb8d2807087fd8e34894d1e7a138bc2f1d"
 
@@ -25,9 +24,10 @@ SRC_URI="
 	https://github.com/FEX-Emu/jemalloc/archive/${JEMALLOC_GLIBC_HASH}.tar.gz -> jemalloc-glibc-${JEMALLOC_GLIBC_HASH}.tar.gz
 	https://github.com/fmtlib/fmt/archive/refs/tags/${FMTLIB_V}.tar.gz -> libfmt-${FMTLIB_V}.tar.gz
 	https://github.com/Sonicadvance1/cpp-optparse/archive/${CPP_OPTPARSE_HASH}.tar.gz -> cpp-optparse-${CPP_OPTPARSE_HASH}.tar.gz
-	https://github.com/FEX-Emu/vixl/archive/${VIXL_HASH}.tar.gz -> vixl-${VIXL_HASH}.tar.gz
 	https://github.com/FEX-Emu/robin-map/archive/${ROBIN_MAP_HASH}.tar.gz -> robin-map-${ROBIN_MAP_HASH}.tar.gz
-	https://github.com/Sonicadvance1/imgui/archive/${IMGUI_HASH}.tar.gz -> imgui-${IMGUI_HASH}.tar.gz
+	imgui? (
+		https://github.com/Sonicadvance1/imgui/archive/${IMGUI_HASH}.tar.gz -> imgui-${IMGUI_HASH}.tar.gz
+	)
 	thunks? (
 		https://github.com/KhronosGroup/Vulkan-Headers/archive/${VULKAN_HEADERS_HASH}.tar.gz -> Vulkan-Headers-${VULKAN_HEADERS_HASH}.tar.gz
 	)
@@ -61,7 +61,7 @@ RDEPEND="
 	)
 	qt6? (
 		dev-qt/qtbase:6[gui,wayland(-),widgets,X(-)]
-		dev-qt/qtquick3d
+		dev-qt/qtdeclarative:6
 	)
 	thunks? (
 		x11-libs/libX11
@@ -71,6 +71,8 @@ RDEPEND="
 		media-libs/libglvnd
 		x11-libs/libxcb
 	)
+	app-emulation/fex-rootfs-gentoo
+	app-emulation/fex-rootfs-mesa-asahi
 "
 DEPEND="
 	>=sys-kernel/linux-headers-6.8
@@ -79,12 +81,13 @@ DEPEND="
 
 PATCHES="
 	${FILESDIR}/${P}-unvendor-xxhash.patch
+	${FILESDIR}/${P}-unvendor-vixl.patch
 	${FILESDIR}/${P}-unvendor-drm-headers.patch
 	${FILESDIR}/${P}-tiny-json-as-static.patch
 	${FILESDIR}/${P}-fmt-as-static.patch
-	${FILESDIR}/${P}-imgui-as-static.patch
 	${FILESDIR}/${PN}-thunks-toolchain-paths.patch
 	${FILESDIR}/${PN}-thunkgen-gcc-install-dir.patch
+	${FILESDIR}/${P}-system-rootfs-path.patch
 "
 
 IUSE="crossdev-toolchain fexconfig imgui qt5 qt6 +thunks"
@@ -209,10 +212,9 @@ src_unpack() {
 		jemalloc "jemalloc-${JEMALLOC_HASH}"
 		jemalloc_glibc "jemalloc-${JEMALLOC_GLIBC_HASH}"
 		fmt "fmt-${FMTLIB_V}"
-		vixl "vixl-${VIXL_HASH}"
 		robin-map "robin-map-${ROBIN_MAP_HASH}"
-		imgui "imgui-${IMGUI_HASH}"
 	)
+	use imgui && deps[imgui]="imgui-${IMGUI_HASH}"
 	use thunks && deps[Vulkan-Headers]="Vulkan-Headers-${VULKAN_HEADERS_HASH}"
 	for dep in "${!deps[@]}"; do
 		rmdir "${S}/External/${dep}" || die
@@ -252,6 +254,7 @@ THUNK_HEADERS="
 "
 
 src_prepare() {
+	use imgui && eapply "${FILESDIR}/${P}-imgui-as-static.patch"
 	cmake_src_prepare
 	sed -i -e "s:__REPLACE_ME_WITH_HEADER_DIR__:${THUNK_INC_DIR}:" ThunkLibs/GuestLibs/CMakeLists.txt || die
 	mkdir "${THUNK_INC_DIR}" || die
@@ -306,7 +309,7 @@ src_configure() {
 		-DENABLE_CCACHE=False
 		-DENABLE_LTO=$(if tc-is-lto; then echo True; else echo False; fi)
 		-DUSE_FEXCONFIG_TOOLKIT=${fexconfig_toolkit}
-		-DBUILD_THUNKS=$(usex thunks True False)
+		-DBUILD_THUNKS=$(usex thunks)
 		-DX86_CFLAGS="${X86_CFLAGS}"
 		-DX86_CXXFLAGS="${X86_CXXFLAGS}"
 		-DX86_LDFLAGS="${X86_LDFLAGS}"

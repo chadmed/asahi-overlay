@@ -1,0 +1,131 @@
+diff --git a/Source/Tools/FEXQonfig/Main.cpp b/Source/Tools/FEXQonfig/Main.cpp
+index 5f17dfbd9..fe27db867 100644
+--- a/Source/Tools/FEXQonfig/Main.cpp
++++ b/Source/Tools/FEXQonfig/Main.cpp
+@@ -189,9 +189,12 @@ static void ConfigInit(fextl::string ConfigFilename) {
+ RootFSModel::RootFSModel() {
+   INotifyFD = inotify_init1(IN_NONBLOCK | IN_CLOEXEC);
+ 
+-  fextl::string RootFS = FEXCore::Config::GetDataDirectory() + "RootFS/";
+-  FolderFD = inotify_add_watch(INotifyFD, RootFS.c_str(), IN_CREATE | IN_DELETE);
+-  if (FolderFD != -1) {
++  fextl::string RootFSUser = FEXCore::Config::GetDataDirectory() + "RootFS/";
++  fextl::string RootFSSystem = "/usr/share/fex-emu/RootFS/";
++
++  FolderFDUser = inotify_add_watch(INotifyFD, RootFSUser.c_str(), IN_CREATE | IN_DELETE);
++  FolderFDSystem = inotify_add_watch(INotifyFD, RootFSSystem.c_str(), IN_CREATE | IN_DELETE);
++  if ((FolderFDSystem != -1) || (FolderFDUser != -1)) {
+     Thread = std::thread {&RootFSModel::INotifyThreadFunc, this};
+   } else {
+     qWarning() << "Could not set up inotify. RootFS folder won't be monitored for changes.";
+@@ -209,24 +212,34 @@ RootFSModel::~RootFSModel() {
+   Thread.join();
+ }
+ 
+-void RootFSModel::Reload() {
+-  beginResetModel();
+-  removeRows(0, rowCount());
+-
+-  fextl::string RootFS = FEXCore::Config::GetDataDirectory() + "RootFS/";
+-  std::vector<QString> NamedRootFS {};
+-  for (auto& it : std::filesystem::directory_iterator(RootFS)) {
++void RootFSModel::ProcessRootfsDir(const fextl::string& Dir, std::vector<QString>& FsList) {
++  std::error_code ec;
++  for (auto& it : std::filesystem::directory_iterator(Dir, ec)) {
+     if (it.is_directory()) {
+-      NamedRootFS.push_back(QString::fromStdString(it.path().filename()));
++      FsList.push_back(QString::fromStdString(it.path()));
+     } else if (it.is_regular_file()) {
+       // If it is a regular file then we need to check if it is a valid archive
+       if (it.path().extension() == ".sqsh" && FEX::FormatCheck::IsSquashFS(fextl::string_from_path(it.path()))) {
+-        NamedRootFS.push_back(QString::fromStdString(it.path().filename()));
++        FsList.push_back(QString::fromStdString(it.path()));
+       } else if (it.path().extension() == ".ero" && FEX::FormatCheck::IsEroFS(fextl::string_from_path(it.path()))) {
+-        NamedRootFS.push_back(QString::fromStdString(it.path().filename()));
++        FsList.push_back(QString::fromStdString(it.path()));
+       }
+     }
+   }
++  if (ec && ec != std::errc::no_such_file_or_directory) {
++    throw std::filesystem::filesystem_error("", Dir, ec);
++  }
++}
++
++void RootFSModel::Reload() {
++  beginResetModel();
++  removeRows(0, rowCount());
++
++  fextl::string RootFSUser = FEXCore::Config::GetDataDirectory() + "RootFS/";
++  std::vector<QString> NamedRootFS {};
++  ProcessRootfsDir(RootFSUser, NamedRootFS);
++  fextl::string RootFSSystem = "/usr/share/fex-emu/RootFS/";
++  ProcessRootfsDir(RootFSSystem, NamedRootFS);
+   std::sort(NamedRootFS.begin(), NamedRootFS.end(), [](const QString& a, const QString& b) { return QString::localeAwareCompare(a, b) < 0; });
+   for (auto& Entry : NamedRootFS) {
+     appendRow(new QStandardItem(Entry));
+@@ -243,6 +256,13 @@ QUrl RootFSModel::getBaseUrl() const {
+   return QUrl::fromLocalFile(QString::fromStdString(FEXCore::Config::GetDataDirectory().c_str()) + "RootFS/");
+ }
+ 
++QList<QString> RootFSModel::getStandardPrefixes() const {
++  return QList({
++        QString::fromStdString(FEXCore::Config::GetDataDirectory().c_str()) + "RootFS/",
++        QString::fromStdString("/usr/share/fex-emu/RootFS/")
++      });
++}
++
+ void RootFSModel::INotifyThreadFunc() {
+   while (!ExitRequest.try_wait()) {
+     constexpr size_t DATA_SIZE = (16 * (sizeof(struct inotify_event) + NAME_MAX + 1));
+diff --git a/Source/Tools/FEXQonfig/Main.h b/Source/Tools/FEXQonfig/Main.h
+index a70cbb1e9..389371887 100644
+--- a/Source/Tools/FEXQonfig/Main.h
++++ b/Source/Tools/FEXQonfig/Main.h
+@@ -1,4 +1,6 @@
+ // SPDX-License-Identifier: MIT
++#include <FEXCore/fextl/string.h>
++
+ #include <QStandardItemModel>
+ #include <QQmlApplicationEngine>
+ 
+@@ -41,9 +43,11 @@ class RootFSModel : public QStandardItemModel {
+   std::latch ExitRequest {1};
+ 
+   int INotifyFD;
+-  int FolderFD;
++  int FolderFDUser;
++  int FolderFDSystem;
+ 
+   void INotifyThreadFunc();
++  void ProcessRootfsDir(const fextl::string& Dir, std::vector<QString>& FsList);
+ 
+ public:
+   RootFSModel();
+@@ -55,6 +59,7 @@ public slots:
+   bool hasItem(const QString&) const;
+ 
+   QUrl getBaseUrl() const;
++  QList<QString> getStandardPrefixes() const;
+ };
+ 
+ class ConfigRuntime : public QObject {
+diff --git a/Source/Tools/FEXQonfig/main.qml b/Source/Tools/FEXQonfig/main.qml
+index c8cb01aa8..d22c4fd30 100644
+--- a/Source/Tools/FEXQonfig/main.qml
++++ b/Source/Tools/FEXQonfig/main.qml
+@@ -369,7 +369,14 @@ ApplicationWindow {
+                             component RootFSRadioDelegate: RadioButton {
+                                 property var name
+ 
+-                                text: name
++                                text: (() => {
++                                    for (const base of RootFSModel.getStandardPrefixes()) {
++                                        if (name.startsWith(base)) {
++                                            return name.substring(base.length)
++                                        }
++                                    }
++                                    return name
++                                })()
+                                 checked: rootfsList.selectedItem === name
+ 
+                                 onToggled: {
