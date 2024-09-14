@@ -118,6 +118,11 @@ src_prepare() {
 		"${FILESDIR}"/linux-6.8_arch_apple_overrides.config
 	)
 
+	# amdgpu no longer builds with clang (issue #113)
+	merge_configs+=(
+		"${FILESDIR}"/linux-6.10_drop_amdgpu.config
+	)
+
 	kernel-build_merge_configs "${merge_configs[@]}"
 }
 
