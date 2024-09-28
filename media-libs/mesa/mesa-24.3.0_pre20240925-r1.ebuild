@@ -80,6 +80,7 @@ REQUIRED_USE="
 		)
 	)
 	llvm? ( ${LLVM_REQUIRED_USE} )
+	video_cards_asahi? ( llvm )
 	video_cards_lavapipe? ( llvm vulkan )
 	video_cards_radeon? ( x86? ( llvm ) amd64? ( llvm ) )
 	video_cards_r300?   ( x86? ( llvm ) amd64? ( llvm ) )
@@ -315,6 +316,8 @@ src_prepare() {
 	default
 	sed -i -e "/^PLATFORM_SYMBOLS/a '__gentoo_check_ldflags__'," \
 		bin/symbols-check.py || die # bug #830728
+	# Patch version string for Asahi
+	sed -i -e "s/devel/asahi${MY_PV}/" VERSION
 }
 
 multilib_src_configure() {
