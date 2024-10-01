@@ -12,11 +12,11 @@ HOMEPAGE="https://asahilinux.org https://flatpak.org"
 
 SRC_URI="
 2308? (
-	https://download.copr.fedorainfracloud.org/results/@asahi/flatpak/fedora-40-aarch64/08074958-mesa-asahi-23.08-flatpak/mesa-asahi-23.08-flatpak-24.3.0~asahipre20240925-1.aarch64.rpm  -> ${P}-2308.rpm
+	https://download.copr.fedorainfracloud.org/results/@asahi/flatpak/fedora-40-aarch64/08093406-mesa-asahi-23.08-flatpak/mesa-asahi-23.08-flatpak-24.3.0~asahipre20240930-1.aarch64.rpm  -> ${P}-2308.rpm
 )
 
 2408? (
-	https://download.copr.fedorainfracloud.org/results/@asahi/flatpak/fedora-40-aarch64/08074960-mesa-asahi-24.08-flatpak/mesa-asahi-24.08-flatpak-24.3.0~asahipre20240925-1.aarch64.rpm -> ${P}-2408.rpm
+	https://download.copr.fedorainfracloud.org/results/@asahi/flatpak/fedora-40-aarch64/08093396-mesa-asahi-24.08-flatpak/mesa-asahi-24.08-flatpak-24.3.0~asahipre20240930-1.aarch64.rpm -> ${P}-2408.rpm
 )
 "
 
