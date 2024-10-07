@@ -42,17 +42,14 @@ KV_FULL="${PVR/_p/-asahi-}"
 S="${WORKDIR}/linux-${KV_FULL}"
 
 KEYWORDS="~arm64"
-IUSE="rust"
 
 DEPEND="
 	${DEPEND}
-	rust? (
-		|| (
-			>=dev-lang/rust-bin-1.76[rust-src,rustfmt]
-			>=dev-lang/rust-1.76[rust-src,rustfmt]
-		)
-		dev-util/bindgen
+	|| (
+		>=dev-lang/rust-bin-1.76[rust-src,rustfmt]
+		>=dev-lang/rust-1.76[rust-src,rustfmt]
 	)
+	dev-util/bindgen
 "
 
 UNIPATCH_STRICTORDER="yes"
