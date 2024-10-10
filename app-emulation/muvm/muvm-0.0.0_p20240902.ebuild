@@ -105,11 +105,11 @@ inherit cargo
 GIT_COMMIT="54bd66e42f0dcb40ae9b73e2632a926c86551857"
 
 DESCRIPTION="Run programs from your system in a microVM"
-HOMEPAGE="https://github.com/slp/krun"
+HOMEPAGE="https://github.com/AsahiLinux/muvm"
 
 SRC_URI="
 	${CARGO_CRATE_URIS}
-	https://github.com/slp/krun/archive/${GIT_COMMIT}.tar.gz -> ${P}.tar.gz
+	https://github.com/AsahiLinux/muvm/archive/${GIT_COMMIT}.tar.gz -> ${P}.tar.gz
 "
 
 S="${WORKDIR}/${PN}-${GIT_COMMIT}"
