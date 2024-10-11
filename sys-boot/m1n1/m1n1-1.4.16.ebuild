@@ -8,7 +8,7 @@ HOMEPAGE="https://asahilinux.org/"
 SRC_URI="https://github.com/AsahiLinux/m1n1/archive/refs/tags/v${PV}.tar.gz -> ${PN}-${PV}.tar.gz"
 LICENSE="MIT"
 SLOT="0"
-KEYWORDS="~arm64"
+KEYWORDS="arm64"
 IUSE="clang"
 
 BDEPEND="dev-build/make"
