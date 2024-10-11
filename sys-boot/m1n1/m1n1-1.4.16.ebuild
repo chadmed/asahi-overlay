@@ -30,7 +30,7 @@ src_compile() {
 	if use clang; then
 		emake USE_CLANG=1 \
 		RELEASE=1 \
-		ARCH="${CHOST}-"
+		ARCH="${CHOST}"
 	else
 		emake USE_CLANG=0 \
 		RELEASE=1 \
