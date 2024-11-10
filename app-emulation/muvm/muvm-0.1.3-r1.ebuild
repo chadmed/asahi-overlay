@@ -100,6 +100,8 @@ CRATES="
 	windows_x86_64_msvc@0.52.5
 "
 
+RUST_MIN_VER="1.72.0"
+
 inherit cargo
 
 DESCRIPTION="Run programs from your system in a microVM"
