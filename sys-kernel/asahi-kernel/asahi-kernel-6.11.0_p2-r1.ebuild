@@ -6,7 +6,10 @@ K_SECURITY_UNSUPPORTED="1"
 ETYPE="sources"
 K_NODRYRUN="1"
 
-inherit kernel-build
+RUST_MIN_VER="1.76.0"
+RUST_USEDEP='rust-src,rustfmt'
+
+inherit kernel-build rust
 
 MY_P=linux-${PV%.*}
 GENPATCHES_P="genpatches-$(ver_cut 1-2)-1"
@@ -59,11 +62,6 @@ IUSE="debug"
 # Rust is non-negotiable for the dist kernel
 DEPEND="
 	${DEPEND}
-	virtual/rust
-	|| (
-			>=dev-lang/rust-bin-1.76[rust-src,rustfmt]
-			>=dev-lang/rust-1.76[rust-src,rustfmt]
-		)
 	dev-util/bindgen
 	debug? ( dev-util/pahole )
 "
