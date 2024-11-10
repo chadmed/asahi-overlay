@@ -55,7 +55,7 @@ SRC_URI="
 S="${WORKDIR}/${MY_P}"
 
 LICENSE="GPL-2"
-KEYWORDS="~arm64"
+KEYWORDS="arm64"
 
 IUSE="debug"
 
