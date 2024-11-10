@@ -5,6 +5,6 @@
   <email>asahi@gentoo.org</email>
 </maintainer>
 <upstream>
-  <remote-id type="github">WhatAmISupposedToPutHere/hidpipe</remote-id>
+  <remote-id type="github">AsahiLinux/hidpipe</remote-id>
 </upstream>
 </pkgmetadata>
