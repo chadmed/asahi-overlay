@@ -8,7 +8,7 @@ LLVM_OPTIONAL=1
 CARGO_OPTIONAL=1
 PYTHON_COMPAT=( python3_{10..13} )
 
-inherit flag-o-matic llvm-r1 meson-multilib python-any-r1 linux-info rust-toolchain toolchain-funcs
+inherit flag-o-matic llvm-r1 meson-multilib python-any-r1 linux-info rust-toolchain
 
 MY_P="${P/_/-}"
 
@@ -22,6 +22,9 @@ CRATES="
 	unicode-ident@1.0.12
 	paste@1.0.14
 "
+
+RUST_MIN_VER="1.74.1"
+RUST_OPTIONAL=1
 
 inherit cargo
 
@@ -53,7 +56,7 @@ SLOT="0"
 
 RADEON_CARDS="r300 r600 radeon radeonsi"
 VIDEO_CARDS="${RADEON_CARDS}
-	asahi d3d12 freedreno honeykrisp intel lavapipe lima nouveau nvk panfrost v3d vc4 virgl
+	asahi d3d12 freedreno intel lavapipe lima nouveau nvk panfrost v3d vc4 virgl
 	vivante vmware zink"
 for card in ${VIDEO_CARDS}; do
 	IUSE_VIDEO_CARDS+=" video_cards_${card}"
@@ -86,7 +89,6 @@ REQUIRED_USE="
 	video_cards_r300?   ( x86? ( llvm ) amd64? ( llvm ) )
 	video_cards_zink? ( vulkan opengl )
 	video_cards_nvk? ( vulkan video_cards_nouveau )
-	video_cards_honeykrisp? ( vulkan video_cards_asahi )
 	vdpau? ( X )
 	xa? ( X )
 "
@@ -163,7 +165,7 @@ RDEPEND="${RDEPEND}
 DEPEND="${RDEPEND}
 	video_cards_d3d12? ( >=dev-util/directx-headers-1.613.0[${MULTILIB_USEDEP}] )
 	valgrind? ( dev-debug/valgrind )
-	wayland? ( >=dev-libs/wayland-protocols-1.34 )
+	wayland? ( >=dev-libs/wayland-protocols-1.38 )
 	X? (
 		x11-libs/libXrandr[${MULTILIB_USEDEP}]
 		x11-base/xorg-proto
@@ -172,7 +174,11 @@ DEPEND="${RDEPEND}
 BDEPEND="
 	${PYTHON_DEPS}
 	opencl? (
-		>=virtual/rust-1.62.0
+		${RUST_DEPEND}
+		>=dev-util/bindgen-0.58.0
+	)
+	video_cards_asahi? (
+		${RUST_DEPEND}
 		>=dev-util/bindgen-0.58.0
 	)
 	>=dev-build/meson-1.4.1
@@ -194,7 +200,7 @@ BDEPEND="
 		video_cards_nvk? (
 			>=dev-util/bindgen-0.68.1
 			>=dev-util/cbindgen-0.26.0
-			>=virtual/rust-1.74.1
+			${RUST_DEPEND}
 		)
 	)
 	wayland? ( dev-util/wayland-scanner )
@@ -226,9 +232,9 @@ src_unpack() {
 
 pkg_pretend() {
 	if use vulkan; then
-		if ! use video_cards_d3d12 &&
+		if ! use video_cards_asahi &&
+		   ! use video_cards_d3d12 &&
 		   ! use video_cards_freedreno &&
-		   ! use video_cards_honeykrisp &&
 		   ! use video_cards_intel &&
 		   ! use video_cards_lavapipe &&
 		   ! use video_cards_nouveau &&
@@ -312,6 +318,10 @@ pkg_setup() {
 
 	use llvm && llvm-r1_pkg_setup
 	python-any-r1_pkg_setup
+
+	if use opencl || (use vulkan && use video_cards_nvk); then
+		rust_pkg_setup
+	fi
 }
 
 src_prepare() {
@@ -326,7 +336,7 @@ multilib_src_configure() {
 	local emesonargs=()
 
 	# bug #932591 and https://gitlab.freedesktop.org/mesa/mesa/-/issues/11140
-	tc-is-gcc && [[ $(gcc-major-version) -ge 14 ]] && filter-lto
+	filter-lto
 
 	local platforms
 	use X && platforms+="x11"
@@ -415,9 +425,9 @@ multilib_src_configure() {
 	fi
 
 	if use vulkan; then
+		vulkan_enable video_cards_asahi asahi
 		vulkan_enable video_cards_d3d12 microsoft-experimental
 		vulkan_enable video_cards_freedreno freedreno
-		vulkan_enable video_cards_honeykrisp asahi
 		vulkan_enable video_cards_intel intel intel_hasvk
 		vulkan_enable video_cards_lavapipe swrast
 		vulkan_enable video_cards_panfrost panfrost
