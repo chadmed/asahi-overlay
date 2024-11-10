@@ -25,6 +25,8 @@ CRATES="
 	wmidi@3.1.0
 "
 
+RUST_MIN_VER="1.72.0"
+
 inherit cargo
 
 DESCRIPTION="A barebones, fast LV2 bass enhancement plugin"
@@ -40,7 +42,7 @@ LICENSE="MIT"
 SLOT="0"
 KEYWORDS="arm64"
 
-DEPEND="virtual/rust
+DEPEND="
 media-libs/lv2
 "
 RDEPEND="${DEPEND}"
