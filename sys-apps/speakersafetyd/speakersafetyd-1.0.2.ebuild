@@ -7,7 +7,7 @@ EAPI=8
 
 CRATES="
 	alsa-sys@0.3.1
-	alsa@0.8.1
+	alsa@0.9.1
 	android-tzdata@0.1.1
 	android_system_properties@0.1.5
 	anstream@0.6.15
@@ -15,9 +15,7 @@ CRATES="
 	anstyle-query@1.1.1
 	anstyle-wincon@3.0.4
 	anstyle@1.0.8
-	atty@0.2.14
 	autocfg@1.3.0
-	bitflags@1.3.2
 	bitflags@2.6.0
 	bumpalo@3.16.0
 	cc@1.1.14
@@ -29,19 +27,16 @@ CRATES="
 	clap_derive@4.5.13
 	clap_lex@0.7.2
 	colorchoice@1.0.2
-	colored@1.9.4
+	colored@2.1.0
 	configparser@3.1.0
 	core-foundation-sys@0.8.7
 	deranged@0.3.11
 	equivalent@1.0.1
 	hashbrown@0.14.5
 	heck@0.5.0
-	hermit-abi@0.1.19
-	hermit-abi@0.4.0
 	iana-time-zone-haiku@0.1.2
 	iana-time-zone@0.1.60
 	indexmap@2.4.0
-	is-terminal@0.4.13
 	is_terminal_polyfill@1.70.1
 	itoa@1.0.11
 	js-sys@0.3.70
@@ -49,7 +44,6 @@ CRATES="
 	lazy_static@1.5.0
 	libc@0.2.158
 	log@0.4.22
-	nix@0.26.4
 	num-conv@0.1.0
 	num-traits@0.2.19
 	num_threads@0.1.7
@@ -63,7 +57,7 @@ CRATES="
 	shlex@1.3.0
 	signal-hook-registry@1.4.2
 	signal-hook@0.3.17
-	simple_logger@1.16.0
+	simple_logger@4.3.3
 	strsim@0.11.1
 	syn@2.0.76
 	time-core@0.1.2
@@ -76,19 +70,25 @@ CRATES="
 	wasm-bindgen-macro@0.2.93
 	wasm-bindgen-shared@0.2.93
 	wasm-bindgen@0.2.93
-	winapi-i686-pc-windows-gnu@0.4.0
-	winapi-x86_64-pc-windows-gnu@0.4.0
-	winapi@0.3.9
 	windows-core@0.52.0
+	windows-sys@0.48.0
 	windows-sys@0.52.0
+	windows-targets@0.48.5
 	windows-targets@0.52.6
+	windows_aarch64_gnullvm@0.48.5
 	windows_aarch64_gnullvm@0.52.6
+	windows_aarch64_msvc@0.48.5
 	windows_aarch64_msvc@0.52.6
+	windows_i686_gnu@0.48.5
 	windows_i686_gnu@0.52.6
 	windows_i686_gnullvm@0.52.6
+	windows_i686_msvc@0.48.5
 	windows_i686_msvc@0.52.6
+	windows_x86_64_gnu@0.48.5
 	windows_x86_64_gnu@0.52.6
+	windows_x86_64_gnullvm@0.48.5
 	windows_x86_64_gnullvm@0.52.6
+	windows_x86_64_msvc@0.48.5
 	windows_x86_64_msvc@0.52.6
 "
 
@@ -104,7 +104,6 @@ SLOT="0"
 KEYWORDS="~arm64"
 
 DEPEND="
-	virtual/rust
 	media-libs/alsa-ucm-conf-asahi
 "
 RDEPEND="${DEPEND}"
