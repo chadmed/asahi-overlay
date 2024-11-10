@@ -10,7 +10,10 @@ K_WANT_GENPATCHES="base extras"
 K_GENPATCHES_VER="5"
 K_NODRYRUN="1"
 
-inherit kernel-2
+RUST_MIN_VER="1.80.0"
+RUST_USEDEP='rust-src,rustfmt'
+
+inherit kernel-2 rust
 detect_version
 detect_arch
 
@@ -45,10 +48,6 @@ KEYWORDS="~arm64"
 
 DEPEND="
 	${DEPEND}
-	|| (
-		>=dev-lang/rust-bin-1.76[rust-src,rustfmt]
-		>=dev-lang/rust-1.76[rust-src,rustfmt]
-	)
 	dev-util/bindgen
 "
 
