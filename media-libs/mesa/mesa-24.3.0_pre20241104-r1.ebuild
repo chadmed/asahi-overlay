@@ -38,7 +38,7 @@ else
 	SRC_URI="
 		https://gitlab.freedesktop.org/asahi/mesa/-/archive/asahi-${MY_PV}/mesa-asahi-${MY_PV}.tar.gz
 	"
-	KEYWORDS="~arm64"
+	KEYWORDS="arm64"
 fi
 
 # This should be {CARGO_CRATE_URIS//.crate/.tar.gz} to correspond to the wrap files,
