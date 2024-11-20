@@ -84,6 +84,11 @@ PATCHES="
 	${FILESDIR}/${P}-fmt-as-static.patch
 	${FILESDIR}/${PN}-thunks-toolchain-paths.patch
 	${FILESDIR}/${PN}-thunkgen-gcc-install-dir.patch
+	${FILESDIR}/${P}-clone-fork-semantics.patch
+	${FILESDIR}/${P}-listen-abstract-named-sockets.patch
+	${FILESDIR}/${P}-align-stack-base.patch
+	${FILESDIR}/${P}-hide-rootfs-fd.patch
+	${FILESDIR}/${P}-hide-rootfs-fd-2.patch
 "
 
 IUSE="crossdev-toolchain fexconfig qt5 qt6 +thunks"

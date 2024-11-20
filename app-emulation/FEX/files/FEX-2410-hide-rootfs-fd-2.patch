@@ -1,0 +1,107 @@
+From 73ffaa1e18e80c6ee0bbd38b3f3e6baebff4b60a Mon Sep 17 00:00:00 2001
+From: Asahi Lina <lina@asahilina.net>
+Date: Wed, 13 Nov 2024 01:22:42 +0900
+Subject: [PATCH] FileManagement: Hide the FEX RootFS fd from /proc/self/fd
+ take 2
+
+Apparently Chromium/CEF can chroot or otherwise sandbox the filesystem
+away before forking and checking for directory FDs, making /proc
+inaccessible, which means we can't stat it for our inode check, breaking
+the hiding.
+
+So, double down on things and do what Chromium does: open an fd to /proc
+ahead of time, so that continues to work. Then we use it to update the
+inode of our RootFS fd instead, and finally, also do the /proc fd itself
+to hide that one too.
+
+We also don't need to check the st_dev of /proc more than once, since
+that's not expected to change anyway.
+
+Fixes cefsimple.
+---
+ .../LinuxSyscalls/FileManagement.cpp          | 33 +++++++++++++++----
+ .../LinuxSyscalls/FileManagement.h            |  2 ++
+ 2 files changed, 28 insertions(+), 7 deletions(-)
+
+diff --git a/Source/Tools/LinuxEmulation/LinuxSyscalls/FileManagement.cpp b/Source/Tools/LinuxEmulation/LinuxSyscalls/FileManagement.cpp
+index e71d3e049c..d4ccaa5a4a 100644
+--- a/Source/Tools/LinuxEmulation/LinuxSyscalls/FileManagement.cpp
++++ b/Source/Tools/LinuxEmulation/LinuxSyscalls/FileManagement.cpp
+@@ -322,6 +322,16 @@ FileManager::FileManager(FEXCore::Context::Context* ctx)
+     }
+   }
+ 
++  // Keep an fd open for /proc, to bypass chroot-style sandboxes
++  ProcFD = open("/proc", O_RDONLY | O_CLOEXEC);
++
++  // Track the st_dev of /proc, to check for inode equality
++  struct stat Buffer;
++  auto Result = fstat(ProcFD, &Buffer);
++  if (Result >= 0) {
++    ProcFSDev = Buffer.st_dev;
++  }
++
+   UpdatePID(::getpid());
+ }
+ 
+@@ -998,30 +1008,39 @@ void FileManager::UpdatePID(uint32_t PID) {
+   CurrentPID = PID;
+ 
+   // Track the inode of /proc/self/fd/<RootFSFD>, to be able to hide it
+-  auto FDpath = fextl::fmt::format("/proc/self/fd/{}", RootFSFD);
++  auto FDpath = fextl::fmt::format("self/fd/{}", RootFSFD);
+   struct stat Buffer {};
+-  int Result = fstatat(AT_FDCWD, FDpath.c_str(), &Buffer, AT_SYMLINK_NOFOLLOW);
++  int Result = fstatat(ProcFD, FDpath.c_str(), &Buffer, AT_SYMLINK_NOFOLLOW);
+   if (Result >= 0) {
+     RootFSFDInode = Buffer.st_ino;
++  } else {
++    // Probably in a strict sandbox
++    RootFSFDInode = 0;
++    ProcFDInode = 0;
++    return;
+   }
+ 
+-  // Track the st_dev of /proc, to check for inode equality
+-  Result = stat("/proc/self", &Buffer);
++  // And track the ProcFSFD itself
++  FDpath = fextl::fmt::format("self/fd/{}", ProcFD);
++  Result = fstatat(ProcFD, FDpath.c_str(), &Buffer, AT_SYMLINK_NOFOLLOW);
+   if (Result >= 0) {
+-    ProcFSDev = Buffer.st_dev;
++    ProcFDInode = Buffer.st_ino;
++  } else {
++    // ??
++    ProcFDInode = 0;
++    return;
+   }
+ }
+ 
+ bool FileManager::IsRootFSFD(int dirfd, uint64_t inode) {
+ 
+   // Check if we have to hide this entry
+-  if (inode == RootFSFDInode) {
++  if (inode == RootFSFDInode || inode == ProcFDInode) {
+     struct stat Buffer;
+     if (fstat(dirfd, &Buffer) >= 0) {
+       if (Buffer.st_dev == ProcFSDev) {
+         LogMan::Msg::DFmt("Hiding directory entry for RootFSFD");
+         return true;
+-      } else {
+       }
+     }
+   }
+diff --git a/Source/Tools/LinuxEmulation/LinuxSyscalls/FileManagement.h b/Source/Tools/LinuxEmulation/LinuxSyscalls/FileManagement.h
+index f84ef30be6..aecf9a874c 100644
+--- a/Source/Tools/LinuxEmulation/LinuxSyscalls/FileManagement.h
++++ b/Source/Tools/LinuxEmulation/LinuxSyscalls/FileManagement.h
+@@ -161,7 +161,9 @@ class FileManager final {
+   FEX_CONFIG_OPT(Is64BitMode, IS64BIT_MODE);
+   uint32_t CurrentPID {};
+   int RootFSFD {AT_FDCWD};
++  int ProcFD {0};
+   int64_t RootFSFDInode = 0;
++  int64_t ProcFDInode = 0;
+   dev_t ProcFSDev;
+ };
+ } // namespace FEX::HLE
