@@ -63,5 +63,5 @@ src_configure() {
 }
 
 src_install() {
-	emake DESTDIR="${D}" LIBDIR="$(get_libdir)" install || die
+	emake DESTDIR="${D}" LIBDIR="/usr/$(get_libdir)" install || die
 }
