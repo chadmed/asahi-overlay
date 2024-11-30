@@ -1,0 +1,3 @@
+# James Calligeros <jcalligeros99@gmail.com> 2024-11-24
+# Mask mesa-asahi-20241128 until we have flatpak extension builds
+=media-libs/mesa-25.0.0_pre20241128
