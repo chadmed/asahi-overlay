@@ -39,6 +39,7 @@ FEDORA_CONFIG_DISTGIT="copr-dist-git.fedorainfracloud.org/cgit/@asahi/kernel"
 FEDORA_CONFIG_SHA1=e5ae5b9db04b27dc69efceb35802130aec6cd375
 
 DESCRIPTION="Asahi Linux kernel sources"
+SLOT="asahi/${PVR}"
 HOMEPAGE="https://asahilinux.org"
 SRC_URI="
     https://cdn.kernel.org/pub/linux/kernel/v$(ver_cut 1).x/${MY_P}.tar.xz
