@@ -4,7 +4,7 @@
 EAPI=8
 
 DESCRIPTION="Virtual to depend on any Distribution Kernel"
-SLOT="0/${PVR}"
+SLOT="asahi/${PVR}"
 KEYWORDS="arm64"
 
 RDEPEND="
