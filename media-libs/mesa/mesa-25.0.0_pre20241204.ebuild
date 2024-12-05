@@ -217,7 +217,7 @@ src_unpack() {
 	if [[ ${PV} == 9999 ]]; then
 		git-r3_src_unpack
 	else
-		unpack "mesa-asahi-${MY_PV}.tar.gz"
+		unpack "mesa-asahi-${MY_PV}.tar.bz2"
 	fi
 
 	# We need this because we cannot tell meson to use DISTDIR yet
