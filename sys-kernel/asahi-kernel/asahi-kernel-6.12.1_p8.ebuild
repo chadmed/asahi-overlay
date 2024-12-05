@@ -43,7 +43,7 @@ SLOT="asahi/${PVR}"
 HOMEPAGE="https://asahilinux.org"
 SRC_URI="
     https://cdn.kernel.org/pub/linux/kernel/v$(ver_cut 1).x/${MY_P}.tar.xz
-    https://github.com/AsahiLinux/linux/compare/v${MY_BASE}...${ASAHI_TAG}.patch
+    https://github.com/AsahiLinux/linux/compare/v${MY_BASE}...${ASAHI_TAG}.diff
         -> linux-${ASAHI_TAG}.patch
     https://dev.gentoo.org/~mpagano/dist/genpatches/${GENPATCHES_P}.base.tar.xz
     https://dev.gentoo.org/~mpagano/dist/genpatches/${GENPATCHES_P}.extras.tar.xz
