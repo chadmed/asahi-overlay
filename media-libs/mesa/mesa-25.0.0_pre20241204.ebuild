@@ -132,8 +132,8 @@ RDEPEND="
 	vdpau? ( >=x11-libs/libvdpau-1.5:=[${MULTILIB_USEDEP}] )
 	video_cards_asahi? (
 		|| (
-			>=sys-kernel/asahi-sources-${ASAHI_KERNEL_MIN_VER}
-			>=sys-kernel/asahi-kernel-${ASAHI_KERNEL_MIN_VER}
+			>=sys-kernel/asahi-sources-${ASAHI_KERNEL_MIN_VER}:*
+			>=virtual/dist-kernel-${ASAHI_KERNEL_MIN_VER}:asahi
 		)
 		dev-libs/libclc[spirv(-)]
 	)
