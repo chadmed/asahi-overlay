@@ -6,7 +6,6 @@
     <name>James Calligeros</name>
   </maintainer>
   <use>
-    <flag name="2208">Install the extension for the FDO Runtime version 22.08</flag>
     <flag name="2308">Install the extension for the FDO Runtime version 23.08</flag>
     <flag name="2408">Install the extension for the FDO Runtime version 24.08</flag>
   </use>
