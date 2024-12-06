@@ -3,8 +3,6 @@
 
 EAPI=8
 
-LLVM_COMPAT=( 18 )
-
 inherit rpm
 
 DESCRIPTION="Asahi OpenGL Extension for Flatpak"
