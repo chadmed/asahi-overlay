@@ -1,0 +1,26 @@
+From 71158784ae331089350c8965c427a822ef87eedf Mon Sep 17 00:00:00 2001
+From: James Calligeros <jcalligeros99@gmail.com>
+Date: Sat, 7 Dec 2024 10:11:11 +1000
+Subject: [PATCH] Revert "FEXCore: Change yield implementation to use wfe"
+
+This reverts commit e53f3969e9cc2086fd3f6d283a2d45f2ec67f12c.
+---
+ FEXCore/Source/Interface/Core/JIT/MiscOps.cpp | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/FEXCore/Source/Interface/Core/JIT/MiscOps.cpp b/FEXCore/Source/Interface/Core/JIT/MiscOps.cpp
+index b826c038c..717a92af5 100644
+--- a/FEXCore/Source/Interface/Core/JIT/MiscOps.cpp
++++ b/FEXCore/Source/Interface/Core/JIT/MiscOps.cpp
+@@ -267,7 +267,7 @@ DEF_OP(RDRAND) {
+ }
+ 
+ DEF_OP(Yield) {
+-  wfe();
++  yield();
+ }
+ 
+ #undef DEF_OP
+-- 
+2.47.1
+
