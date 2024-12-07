@@ -81,7 +81,7 @@ src_prepare() {
     local PATCHES=(
         # meh, genpatches have no directory
         "${WORKDIR}"/*.patch
-        "${DISTDIR}/linux-${ASAHI_TAG}.patch"
+        "${DISTDIR}/linux-${ASAHI_TAG}.diff"
         "${FILESDIR}/${PN}-6.8-config-gentoo-Drop-RANDSTRUCT-from-GENTOO_KERNEL_SEL.patch"
     )
 	default
