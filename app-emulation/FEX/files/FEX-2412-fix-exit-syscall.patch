@@ -1,0 +1,89 @@
+From beec203f565cddfe0659cec13fd58ce212af5208 Mon Sep 17 00:00:00 2001
+From: Ryan Houdek <Sonicadvance1@gmail.com>
+Date: Sun, 8 Dec 2024 05:07:05 -0800
+Subject: [PATCH] LinuxSyscalls: Fixes exit syscall
+
+if an application is using `exit` then it is usually a faulting
+condition rather than cleanly exiting. When cleanly exiting
+applications will typically use `exit_group` instead.
+
+`exit` is useful to quickly cause a single thread to exit in a
+multi-threaded environment as well, where `exit_group` will take down
+the entire process group.
+
+FEX had implemented this in a way that would do a double Stop signal,
+cascading to a crash. When tied in to a crash handler, this could get
+caught in a weird way.
+
+This /should/ fix #4198, but I can't confirm locally. It looks like in
+that issue that the steam install is slightly buggered (as evident by
+missing srt-logger and steam-runtime-identify-library-abi).
+
+This is a bug regardless so fix it and create a unittest. If it doesn't
+fix the user's bug, then we have another workaround that will definitely
+solve it.
+---
+ .../LinuxSyscalls/Syscalls/Thread.cpp         |  7 ++--
+ .../tests/syscalls/syscall_exit.cpp           | 35 +++++++++++++++++++
+ 2 files changed, 39 insertions(+), 3 deletions(-)
+ create mode 100644 unittests/FEXLinuxTests/tests/syscalls/syscall_exit.cpp
+
+diff --git a/Source/Tools/LinuxEmulation/LinuxSyscalls/Syscalls/Thread.cpp b/Source/Tools/LinuxEmulation/LinuxSyscalls/Syscalls/Thread.cpp
+index 7ce392b398..3c93f76935 100644
+--- a/Source/Tools/LinuxEmulation/LinuxSyscalls/Syscalls/Thread.cpp
++++ b/Source/Tools/LinuxEmulation/LinuxSyscalls/Syscalls/Thread.cpp
+@@ -414,9 +414,10 @@ void RegisterThread(FEX::HLE::SyscallHandler* Handler) {
+                                 }
+ 
+                                 ThreadObject->StatusCode = status;
+-                                FEX::HLE::_SyscallHandler->TM.StopThread(ThreadObject);
+-
+-                                return 0;
++                                FEX::HLE::_SyscallHandler->TM.DestroyThread(ThreadObject, true);
++                                syscall(SYSCALL_DEF(exit), status);
++                                // This will never be reached
++                                std::terminate();
+                               });
+ 
+   REGISTER_SYSCALL_IMPL_FLAGS(prctl, SyscallFlags::OPTIMIZETHROUGH | SyscallFlags::NOSYNCSTATEONENTRY,
+diff --git a/unittests/FEXLinuxTests/tests/syscalls/syscall_exit.cpp b/unittests/FEXLinuxTests/tests/syscalls/syscall_exit.cpp
+new file mode 100644
+index 0000000000..4239fdeff4
+--- /dev/null
++++ b/unittests/FEXLinuxTests/tests/syscalls/syscall_exit.cpp
+@@ -0,0 +1,35 @@
++#include <catch2/catch_test_macros.hpp>
++
++#include <unistd.h>
++#include <sys/wait.h>
++#include <sys/syscall.h>
++
++TEST_CASE("fork - exit") {
++  int child_pid = ::fork();
++  if (child_pid == 0) {
++    ::syscall(SYS_exit, 1);
++    // unreachable
++    std::terminate();
++  } else {
++    int status {};
++    int exited_child = ::waitpid(child_pid, &status, 0);
++    bool exited = WIFEXITED(status);
++    REQUIRE(WIFEXITED(status) == 1);
++    CHECK(WEXITSTATUS(status) == 1);
++  }
++}
++
++TEST_CASE("fork - signal") {
++  int child_pid = ::fork();
++  if (child_pid == 0) {
++    ::syscall(SYS_tgkill, ::getpid(), ::gettid(), SIGKILL);
++    // unreachable
++    std::terminate();
++  } else {
++    int status {};
++    int exited_child = ::waitpid(child_pid, &status, 0);
++    bool exited = WIFEXITED(status);
++    REQUIRE(WIFSIGNALED(status) == 1);
++    CHECK(WTERMSIG(status) == SIGKILL);
++  }
++}
