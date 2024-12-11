@@ -32,7 +32,7 @@ RESTRICT="!test? ( test )"
 BDEPEND="
 	dev-util/wayland-scanner
 	$(python_gen_any_dep '
-		dev-python/jinja[${PYTHON_USEDEP}]
+		dev-python/jinja2[${PYTHON_USEDEP}]
 	')
 "
 
