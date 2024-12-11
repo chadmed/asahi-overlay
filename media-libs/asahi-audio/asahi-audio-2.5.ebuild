@@ -15,8 +15,8 @@ RDEPEND="
 	>=media-video/pipewire-1.0.2[extra,lv2,sound-server]
 	>=media-video/wireplumber-0.5.2
 	|| (
-		>=sys-kernel/asahi-sources-6.6.0_p11
-		>=sys-kernel/asahi-kernel-6.6.0_p11
+		>=sys-kernel/asahi-sources-6.6.0_p11:*
+		>=virtual/dist-kernel-6.6.0_p11:asahi
 	   )
 	>=media-libs/alsa-ucm-conf-asahi-5.0
 	>=media-libs/lsp-plugins-1.2.6[lv2]
