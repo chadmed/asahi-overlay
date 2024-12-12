@@ -17,7 +17,7 @@ RDEPEND="
 	sys-boot/u-boot
 	|| (
 		sys-kernel/asahi-sources
-		sys-kernel/asahi-kernel
+		virtual/dist-kernel:asahi
 	   )
 "
 
