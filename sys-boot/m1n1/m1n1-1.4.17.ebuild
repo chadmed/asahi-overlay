@@ -22,7 +22,7 @@ RDEPEND="
 "
 
 BDEPEND="${BDEPEND}
-	clang? ( sys-devel/clang )
+	clang? ( llvm-core/clang )
 "
 
 src_compile() {
