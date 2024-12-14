@@ -3,7 +3,7 @@
 
 EAPI=8
 
-inherit desktop xdg-utils
+inherit desktop xdg
 
 STEAMVER="1.0.0.81"
 ARM64_WRAPPER_COMMIT="fb3e8aeaffe5bb374b34f2eacc91130a05b17b21"
@@ -60,8 +60,13 @@ src_install() {
 }
 
 pkg_postinst() {
-	xdg_desktop_database_update
-	xdg_icon_cache_update
+	xdg_pkg_postinst
 	einfo "Steam has been installed. To launch steam, use the desktop entry or"
-	einfo "run /usr/bin/steam-aarch64 from a tty."
+	einfo "run /usr/bin/steam-aarch64 from the terminal."
+	default
+}
+
+pkg_postrm() {
+	xdg_pkg_postrm
+	default
 }
