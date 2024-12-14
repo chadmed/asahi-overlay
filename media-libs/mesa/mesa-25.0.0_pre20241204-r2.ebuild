@@ -319,7 +319,9 @@ pkg_setup() {
 	use llvm && llvm-r1_pkg_setup
 	python-any-r1_pkg_setup
 
-	if use opencl || (use vulkan && use video_cards_nvk); then
+	if use opencl ||
+	   (use vulkan && use video_cards_nvk) ||
+	   use video_cards_asahi; then
 		rust_pkg_setup
 	fi
 }
