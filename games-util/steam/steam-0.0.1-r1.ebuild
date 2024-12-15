@@ -63,10 +63,8 @@ pkg_postinst() {
 	xdg_pkg_postinst
 	einfo "Steam has been installed. To launch steam, use the desktop entry or"
 	einfo "run /usr/bin/steam-aarch64 from the terminal."
-	default
 }
 
 pkg_postrm() {
 	xdg_pkg_postrm
-	default
 }
