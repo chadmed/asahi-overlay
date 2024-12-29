@@ -84,6 +84,7 @@ PATCHES="
 	${FILESDIR}/${P}-llvm19-support.patch
 	${FILESDIR}/${P}-revert-pause-inst-changes.patch
 	${FILESDIR}/${P}-fix-exit-syscall.patch
+	${FILESDIR}/${P}-fix-libfmt-compat-break.patch
 "
 
 IUSE="crossdev-toolchain fexconfig qt5 qt6 +thunks"
