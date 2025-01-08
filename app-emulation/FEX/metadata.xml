@@ -8,7 +8,6 @@
   <flag name="crossdev-toolchain">Bring-your-own x86(-64) toolchains.</flag>
   <flag name="fexconfig">Build the FEXConfig tool</flag>
   <flag name="thunks">Build thunk libraries</flag>
-  <flag name="qt5">Build FEXConfig using Qt 5</flag>
   <flag name="qt6">Build FEXConfig using Qt 6</flag>
 </use>
 <upstream>
