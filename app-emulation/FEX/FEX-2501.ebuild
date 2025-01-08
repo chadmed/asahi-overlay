@@ -51,11 +51,6 @@ BDEPEND="
 RDEPEND="
 	dev-libs/xxhash
 	>=dev-libs/libfmt-11.0.2:=
-	qt5? (
-		dev-qt/qtcore:5
-		dev-qt/qtgui:5[wayland(-),X(-)]
-		dev-qt/qtwidgets[X]
-	)
 	qt6? (
 		dev-qt/qtbase:6[gui,wayland(-),widgets,X(-)]
 		dev-qt/qtdeclarative:6
@@ -83,11 +78,11 @@ PATCHES="
 	${FILESDIR}/${P}-thunkgen-gcc-install-dir.patch
 "
 
-IUSE="crossdev-toolchain fexconfig qt5 qt6 +thunks"
+IUSE="crossdev-toolchain fexconfig qt6 +thunks"
 
 REQUIRED_USE="
 	crossdev-toolchain? ( thunks )
-	fexconfig? ( ^^ ( qt5 qt6 ) )
+	fexconfig? ( qt6 )
 	thunks? ( ${LLVM_REQUIRED_USE} )
 "
 
