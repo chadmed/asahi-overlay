@@ -136,7 +136,6 @@ RDEPEND="
 	${DEPEND}
 	net-misc/passt
 	net-misc/socat
-	gui-wm/sommelier
 	!games-util/hidpipe
 	|| (
 	   net-misc/dhcpcd
