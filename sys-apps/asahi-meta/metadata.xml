@@ -6,10 +6,8 @@
         <name>James Calligeros</name>
     </maintainer>
     <use>
-        <flag name="kernel">Build <pkg>sys-kernel/asahi-kernel</pkg></flag>
         <flag name="mesa">Pull in <pkg>media-libs/mesa</pkg> with VIDEO_CARDS="asahi"</flag>
         <flag name="sound">Pull in <pkg>media-libs/asahi-audio</pkg> and its dependencies</flag>
-        <flag name="sources">Use <pkg>sys-kernel/asahi-sources</pkg> instead of the dist kernel</flag>
     </use>
     <upstream>
         <bugs-to>https://github.com/chadmed/asahi-overlay</bugs-to>
