@@ -9,7 +9,7 @@ HOMEPAGE="https://asahilinux.org/"
 LICENSE="metapackage"
 SLOT=0
 KEYWORDS="arm64"
-IUSE="+audio +mesa +sources kde kernel"
+IUSE="+mesa sound +sources kde kernel"
 
 REQUIRED_USE="
 	sources? ( !kernel )
@@ -25,7 +25,7 @@ RDEPEND="
 	kernel? ( sys-kernel/asahi-kernel )
 	sources? ( sys-kernel/asahi-sources )
 	media-libs/alsa-ucm-conf-asahi
-	audio? ( media-libs/asahi-audio )
+	sound? ( media-libs/asahi-audio )
 	mesa? (
 		>=media-libs/mesa-24.1.0_pre20240228[video_cards_asahi(-)]
 		kernel? ( >=sys-kernel/asahi-kernel-6.6.0_p15 )
