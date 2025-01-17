@@ -7,7 +7,7 @@ ETYPE="sources"
 K_NODRYRUN="1"
 
 RUST_MIN_VER="1.76.0"
-RUST_USEDEP='rust-src,rustfmt'
+RUST_REQ_USE='rust-src,rustfmt'
 
 inherit kernel-build rust
 
