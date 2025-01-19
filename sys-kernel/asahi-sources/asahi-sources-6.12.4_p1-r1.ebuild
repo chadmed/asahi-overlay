@@ -11,7 +11,7 @@ K_GENPATCHES_VER="6"
 K_NODRYRUN="1"
 
 RUST_MIN_VER="1.80.0"
-RUST_USEDEP='rust-src,rustfmt'
+RUST_REQ_USE='rust-src,rustfmt'
 
 inherit kernel-2 rust
 detect_version
