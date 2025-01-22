@@ -34,7 +34,9 @@ ASAHI_TAG="asahi-${MY_BASE}-${MY_TAG}"
 
 CONFIG_VER=6.12.4-400-gentoo
 GENTOO_CONFIG_VER=g6
-FEDORA_CONFIG_DISTGIT="copr-dist-git.fedorainfracloud.org/cgit/@asahi/kernel"
+# provide a temporary mirror as long as Fedora's copr dit-git cgit is dissabled
+FEDORA_CONFIG_DISTGIT="asahi.jannau.net/cgit/@asahi/kernel"
+# FEDORA_CONFIG_DISTGIT="copr-dist-git.fedorainfracloud.org/cgit/@asahi/kernel"
 # FEDORA_CONFIG_DISTGIT="copr-dist-git.fedorainfracloud.org/cgit/ngompa/fedora-asahi-dev"
 FEDORA_CONFIG_SHA1=0f8f1fbbbace045751fa63ffbe6e3024bb5f195e
 
