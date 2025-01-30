@@ -130,7 +130,7 @@ SLOT="0"
 KEYWORDS="~arm64"
 
 PATCHES="
-        ${FILESDIR}/${PN}-0.2.0-fix-xauthority-handling-for-wildcard-display.patch
+	${FILESDIR}/${PN}-0.2.0-fix-xauthority-handling-for-wildcard-display.patch
 "
 
 DEPEND="
