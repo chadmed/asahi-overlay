@@ -1,0 +1,812 @@
+From 37eec7fa1012e9cd071d620bc8265846000a2fb3 Mon Sep 17 00:00:00 2001
+From: Stefano Brivio <sbrivio@redhat.com>
+Date: Mon, 25 Nov 2024 16:31:47 +0100
+Subject: [PATCH] guest/net: New implementation of network setup with SLAAC and
+ own DHCP client
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+The existing implementation has a couple of issues:
+
+- it doesn't support IPv6 or SLAAC
+
+- it relies on either dhclient(8) or dhcpcd(8), which need a
+  significant amount of time to configure the network as they are
+  rather generic DHCP clients
+
+- on top of this, dhcpcd, by default, unless --noarp is given, will
+  spend five seconds ARP-probing the address it just received before
+  configuring it
+
+Replace the IPv4 part with a minimalistic, 90-line DHCP client that
+just does what we need, using option 80 (Rapid Commit) to speed up
+the whole exchange.
+
+Add IPv6 support (including IPv4-only, and IPv6-only modes) relying
+on the kernel to perform SLAAC. Safely avoid DAD (we're the only
+node on the link) by disabling router solicitations, starting SLAAC,
+and re-enabling them once addresses are configured.
+
+Instead of merely triggering the network setup and proceeding, wait
+until everything is configured, so that connectivity is guaranteed to
+be ready before any further process runs in the guest, say:
+
+  $ ./target/debug/muvm -- ping -c1 2a01:4f8:222:904::2
+  PING 2a01:4f8:222:904::2 (2a01:4f8:222:904::2) 56 data bytes
+  64 bytes from 2a01:4f8:222:904::2: icmp_seq=1 ttl=255 time=0.256 ms
+
+  --- 2a01:4f8:222:904::2 ping statistics ---
+  1 packets transmitted, 1 received, 0% packet loss, time 0ms
+  rtt min/avg/max/mdev = 0.256/0.256/0.256/0.000 ms
+
+The whole procedure now takes approximately 1.5 to 2 ms (for both
+IPv4 and IPv6), with the DHCP exchange and configuration taking
+somewhere around 300-500 µs out of that, instead of hundreds of
+milliseconds to seconds.
+
+Configure nameservers received via DHCP option 6 as well: passt
+already takes care care of translating DNS traffic directed to
+loopback addresses read from resolv.conf, so we can just write those
+to resolv.conf in the guest.
+
+At least for the moment being, for simplicity, omit handling of
+option 119 (domain search list), as I doubt it's going to be of much
+use for muvm.
+
+I'm not adding handling of the NDP RDNSS option (25, RFC 8106) either,
+for the moment, as it involves a second netlink socket subscribing to
+the RTNLGRP_ND_USEROPT group and listening to events while we receive
+the first router advertisement. The equivalent userspace tool would be
+rdnssd(8), which is not called before this change anyway. I would
+rather add it at a later time instead of making this patch explode.
+
+Matching support in passt for option 80 (RFC 4039) and for the DHCP
+"broadcast" flag (RFC 2131) needs at least passt 2024_11_27.c0fbc7e:
+
+  https://archives.passt.top/passt-user/20241127142126.3c53066e@elisabeth/
+
+Signed-off-by: Stefano Brivio <sbrivio@redhat.com>
+Co-authored-by: Teoh Han Hui <teohhanhui@gmail.com>
+---
+ Cargo.lock                   | 226 ++++++++++++++++++++++-
+ crates/muvm/Cargo.toml       |   4 +-
+ crates/muvm/src/guest/net.rs | 338 ++++++++++++++++++++++++++++-------
+ 3 files changed, 504 insertions(+), 64 deletions(-)
+
+diff --git a/Cargo.lock b/Cargo.lock
+index 8af7043..74c2ee4 100644
+--- a/Cargo.lock
++++ b/Cargo.lock
+@@ -119,7 +119,7 @@ dependencies = [
+  "regex",
+  "rustc-hash",
+  "shlex",
+- "syn",
++ "syn 2.0.61",
+ ]
+ 
+ [[package]]
+@@ -189,6 +189,78 @@ version = "1.0.1"
+ source = "registry+https://github.com/rust-lang/crates.io-index"
+ checksum = "0b6a852b24ab71dffc585bcb46eaf7959d175cb865a7152e35b348d1b2960422"
+ 
++[[package]]
++name = "const-str"
++version = "0.5.7"
++source = "registry+https://github.com/rust-lang/crates.io-index"
++checksum = "3618cccc083bb987a415d85c02ca6c9994ea5b44731ec28b9ecf09658655fba9"
++
++[[package]]
++name = "darling"
++version = "0.14.4"
++source = "registry+https://github.com/rust-lang/crates.io-index"
++checksum = "7b750cb3417fd1b327431a470f388520309479ab0bf5e323505daf0290cd3850"
++dependencies = [
++ "darling_core",
++ "darling_macro",
++]
++
++[[package]]
++name = "darling_core"
++version = "0.14.4"
++source = "registry+https://github.com/rust-lang/crates.io-index"
++checksum = "109c1ca6e6b7f82cc233a97004ea8ed7ca123a9af07a8230878fcfda9b158bf0"
++dependencies = [
++ "fnv",
++ "ident_case",
++ "proc-macro2",
++ "quote",
++ "strsim",
++ "syn 1.0.109",
++]
++
++[[package]]
++name = "darling_macro"
++version = "0.14.4"
++source = "registry+https://github.com/rust-lang/crates.io-index"
++checksum = "a4aab4dbc9f7611d8b55048a3a16d2d010c2c8334e46304b40ac1cc14bf3b48e"
++dependencies = [
++ "darling_core",
++ "quote",
++ "syn 1.0.109",
++]
++
++[[package]]
++name = "derive_builder"
++version = "0.11.2"
++source = "registry+https://github.com/rust-lang/crates.io-index"
++checksum = "d07adf7be193b71cc36b193d0f5fe60b918a3a9db4dad0449f57bcfd519704a3"
++dependencies = [
++ "derive_builder_macro",
++]
++
++[[package]]
++name = "derive_builder_core"
++version = "0.11.2"
++source = "registry+https://github.com/rust-lang/crates.io-index"
++checksum = "1f91d4cfa921f1c05904dc3c57b4a32c38aed3340cce209f3a6fd1478babafc4"
++dependencies = [
++ "darling",
++ "proc-macro2",
++ "quote",
++ "syn 1.0.109",
++]
++
++[[package]]
++name = "derive_builder_macro"
++version = "0.11.2"
++source = "registry+https://github.com/rust-lang/crates.io-index"
++checksum = "8f0314b72bed045f3a68671b3c86328386762c93f82d98c65c3cb5e5f573dd68"
++dependencies = [
++ "derive_builder_core",
++ "syn 1.0.109",
++]
++
+ [[package]]
+ name = "either"
+ version = "1.11.0"
+@@ -233,6 +305,12 @@ version = "2.1.0"
+ source = "registry+https://github.com/rust-lang/crates.io-index"
+ checksum = "9fc0510504f03c51ada170672ac806f1f105a88aa97a5281117e1ddc3368e51a"
+ 
++[[package]]
++name = "fnv"
++version = "1.0.7"
++source = "registry+https://github.com/rust-lang/crates.io-index"
++checksum = "3f9eec918d3f24069decb9af1554cad7c880e2da24a9afd88aca000531ab82c1"
++
+ [[package]]
+ name = "futures-core"
+ version = "0.3.30"
+@@ -256,6 +334,18 @@ dependencies = [
+  "wasi",
+ ]
+ 
++[[package]]
++name = "getset"
++version = "0.1.3"
++source = "registry+https://github.com/rust-lang/crates.io-index"
++checksum = "f636605b743120a8d32ed92fc27b6cde1a769f8f936c065151eb66f88ded513c"
++dependencies = [
++ "proc-macro-error2",
++ "proc-macro2",
++ "quote",
++ "syn 2.0.61",
++]
++
+ [[package]]
+ name = "gimli"
+ version = "0.29.0"
+@@ -286,6 +376,12 @@ version = "2.1.0"
+ source = "registry+https://github.com/rust-lang/crates.io-index"
+ checksum = "9a3a5bfb195931eeb336b2a7b4d761daec841b97f947d34394601737a7bba5e4"
+ 
++[[package]]
++name = "ident_case"
++version = "1.0.1"
++source = "registry+https://github.com/rust-lang/crates.io-index"
++checksum = "b9e0384b61958566e926dc50660321d12159025e767c18e043daf26b70104c39"
++
+ [[package]]
+ name = "input-linux"
+ version = "0.7.1"
+@@ -379,6 +475,16 @@ version = "0.4.13"
+ source = "registry+https://github.com/rust-lang/crates.io-index"
+ checksum = "01cda141df6706de531b6c46c3a33ecca755538219bd484262fa09410c13539c"
+ 
++[[package]]
++name = "lock_api"
++version = "0.4.12"
++source = "registry+https://github.com/rust-lang/crates.io-index"
++checksum = "07af8b9cdd281b7915f413fa73f29ebd5d55d0d3f0155584dade1ff18cea1b17"
++dependencies = [
++ "autocfg",
++ "scopeguard",
++]
++
+ [[package]]
+ name = "log"
+ version = "0.4.21"
+@@ -433,11 +539,13 @@ dependencies = [
+  "anyhow",
+  "bpaf",
+  "byteorder",
++ "const-str",
+  "env_logger",
+  "input-linux",
+  "input-linux-sys",
+  "krun-sys",
+  "log",
++ "neli",
+  "nix",
+  "procfs",
+  "rustix",
+@@ -450,6 +558,35 @@ dependencies = [
+  "uuid",
+ ]
+ 
++[[package]]
++name = "neli"
++version = "0.7.0-rc3"
++source = "registry+https://github.com/rust-lang/crates.io-index"
++checksum = "6a41d34e46954bbc11a4ebe77e0698f7c02a7f64b2f60da4a3c3431a44ce6704"
++dependencies = [
++ "bitflags",
++ "byteorder",
++ "derive_builder",
++ "getset",
++ "libc",
++ "log",
++ "neli-proc-macros",
++ "parking_lot",
++]
++
++[[package]]
++name = "neli-proc-macros"
++version = "0.2.0-rc3"
++source = "registry+https://github.com/rust-lang/crates.io-index"
++checksum = "424c3caa7dce62dc0fc31e92393ed806828b2c4c76f989d8c6deb1e585a1f550"
++dependencies = [
++ "either",
++ "proc-macro2",
++ "quote",
++ "serde",
++ "syn 2.0.61",
++]
++
+ [[package]]
+ name = "nix"
+ version = "0.29.0"
+@@ -492,6 +629,29 @@ dependencies = [
+  "memchr",
+ ]
+ 
++[[package]]
++name = "parking_lot"
++version = "0.12.3"
++source = "registry+https://github.com/rust-lang/crates.io-index"
++checksum = "f1bf18183cf54e8d6059647fc3063646a1801cf30896933ec2311622cc4b9a27"
++dependencies = [
++ "lock_api",
++ "parking_lot_core",
++]
++
++[[package]]
++name = "parking_lot_core"
++version = "0.9.10"
++source = "registry+https://github.com/rust-lang/crates.io-index"
++checksum = "1e401f977ab385c9e4e3ab30627d6f26d00e2c73eef317493c4ec6d468726cf8"
++dependencies = [
++ "cfg-if",
++ "libc",
++ "redox_syscall",
++ "smallvec",
++ "windows-targets 0.52.5",
++]
++
+ [[package]]
+ name = "pin-project-lite"
+ version = "0.2.14"
+@@ -504,6 +664,28 @@ version = "0.3.31"
+ source = "registry+https://github.com/rust-lang/crates.io-index"
+ checksum = "953ec861398dccce10c670dfeaf3ec4911ca479e9c02154b3a215178c5f566f2"
+ 
++[[package]]
++name = "proc-macro-error-attr2"
++version = "2.0.0"
++source = "registry+https://github.com/rust-lang/crates.io-index"
++checksum = "96de42df36bb9bba5542fe9f1a054b8cc87e172759a1868aa05c1f3acc89dfc5"
++dependencies = [
++ "proc-macro2",
++ "quote",
++]
++
++[[package]]
++name = "proc-macro-error2"
++version = "2.0.1"
++source = "registry+https://github.com/rust-lang/crates.io-index"
++checksum = "11ec05c52be0a07b08061f7dd003e7d7092e0472bc731b4af7bb1ef876109802"
++dependencies = [
++ "proc-macro-error-attr2",
++ "proc-macro2",
++ "quote",
++ "syn 2.0.61",
++]
++
+ [[package]]
+ name = "proc-macro2"
+ version = "1.0.82"
+@@ -544,6 +726,15 @@ dependencies = [
+  "proc-macro2",
+ ]
+ 
++[[package]]
++name = "redox_syscall"
++version = "0.5.8"
++source = "registry+https://github.com/rust-lang/crates.io-index"
++checksum = "03a862b389f93e68874fbf580b9de08dd02facb9a788ebadaf4a3fd33cf58834"
++dependencies = [
++ "bitflags",
++]
++
+ [[package]]
+ name = "regex"
+ version = "1.10.4"
+@@ -605,6 +796,12 @@ version = "1.0.18"
+ source = "registry+https://github.com/rust-lang/crates.io-index"
+ checksum = "f3cb5ba0dc43242ce17de99c180e96db90b235b8a9fdc9543c96d2209116bd9f"
+ 
++[[package]]
++name = "scopeguard"
++version = "1.2.0"
++source = "registry+https://github.com/rust-lang/crates.io-index"
++checksum = "94143f37725109f92c262ed2cf5e59bce7498c01bcc1502d7b9afe439a4e9f49"
++
+ [[package]]
+ name = "serde"
+ version = "1.0.203"
+@@ -622,7 +819,7 @@ checksum = "500cbc0ebeb6f46627f50f3f5811ccf6bf00643be300b4c3eabc0ef55dc5b5ba"
+ dependencies = [
+  "proc-macro2",
+  "quote",
+- "syn",
++ "syn 2.0.61",
+ ]
+ 
+ [[package]]
+@@ -651,6 +848,12 @@ dependencies = [
+  "libc",
+ ]
+ 
++[[package]]
++name = "smallvec"
++version = "1.13.2"
++source = "registry+https://github.com/rust-lang/crates.io-index"
++checksum = "3c5e1a9a646d36c3599cd173a41282daf47c44583ad367b8e6837255952e5c67"
++
+ [[package]]
+ name = "socket2"
+ version = "0.5.7"
+@@ -661,6 +864,23 @@ dependencies = [
+  "windows-sys 0.52.0",
+ ]
+ 
++[[package]]
++name = "strsim"
++version = "0.10.0"
++source = "registry+https://github.com/rust-lang/crates.io-index"
++checksum = "73473c0e59e6d5812c5dfe2a064a6444949f089e20eec9a2e5506596494e4623"
++
++[[package]]
++name = "syn"
++version = "1.0.109"
++source = "registry+https://github.com/rust-lang/crates.io-index"
++checksum = "72b64191b275b66ffe2469e8af2c1cfe3bafa67b529ead792a6d0160888b4237"
++dependencies = [
++ "proc-macro2",
++ "quote",
++ "unicode-ident",
++]
++
+ [[package]]
+ name = "syn"
+ version = "2.0.61"
+@@ -710,7 +930,7 @@ checksum = "5f5ae998a069d4b5aba8ee9dad856af7d520c3699e6159b185c2acd48155d39a"
+ dependencies = [
+  "proc-macro2",
+  "quote",
+- "syn",
++ "syn 2.0.61",
+ ]
+ 
+ [[package]]
+diff --git a/crates/muvm/Cargo.toml b/crates/muvm/Cargo.toml
+index 84dc2eb..722d3f0 100644
+--- a/crates/muvm/Cargo.toml
++++ b/crates/muvm/Cargo.toml
+@@ -3,7 +3,7 @@ name = "muvm"
+ version = "0.2.0"
+ authors = ["Sergio Lopez <slp@redhat.com>", "Teoh Han Hui <teohhanhui@gmail.com>", "Sasha Finkelstein <fnkl.kernel@gmail.com>", "Asahi Lina <lina@asahilina.net>"]
+ edition = "2021"
+-rust-version = "1.77.0"
++rust-version = "1.80.0"
+ description = "Run programs from your system in a microVM"
+ repository = "https://github.com/AsahiLinux/muvm"
+ license = "MIT"
+@@ -12,12 +12,14 @@ license = "MIT"
+ anyhow = { version = "1.0.82", default-features = false, features = ["std"] }
+ bpaf = { version = "0.9.11", default-features = false, features = [] }
+ byteorder = { version = "1.5.0", default-features = false, features = ["std"] }
++const-str = { version = "0.5.7", default-features = false, features = [] }
+ env_logger = { version = "0.11.3", default-features = false, features = ["auto-color", "humantime", "unstable-kv"] }
+ input-linux = { version = "0.7.0", default-features = false, features = [] }
+ input-linux-sys = { version = "0.9.0", default-features = false, features = [] }
+ krun-sys = { path = "../krun-sys", version = "1.9.1", default-features = false, features = [] }
+ log = { version = "0.4.21", default-features = false, features = ["kv"] }
+ nix = { version = "0.29.0", default-features = false, features = ["event", "fs", "ioctl", "mman", "ptrace", "signal", "socket", "uio", "user"] }
++neli = { version = "0.7.0-rc2", default-features = false, features = ["sync"] }
+ procfs = { version = "0.17.0", default-features = false, features = [] }
+ rustix = { version = "0.38.34", default-features = false, features = ["fs", "mount", "process", "pty", "std", "stdio", "system", "termios", "use-libc-auxv"] }
+ serde = { version = "1.0.203", default-features = false, features = ["derive"] }
+diff --git a/crates/muvm/src/guest/net.rs b/crates/muvm/src/guest/net.rs
+index b47f2e1..1d5f98a 100644
+--- a/crates/muvm/src/guest/net.rs
++++ b/crates/muvm/src/guest/net.rs
+@@ -1,14 +1,266 @@
+ use std::fs;
+ use std::io::Write;
+-use std::os::unix::process::ExitStatusExt as _;
+-use std::process::Command;
++use std::net::{Ipv4Addr, UdpSocket};
++use std::time::Duration;
+ 
+-use anyhow::{anyhow, Context, Result};
+-use log::debug;
++use anyhow::{Context, Result};
++use neli::consts::nl::NlmF;
++use neli::consts::rtnl::{
++    Arphrd, Ifa, IfaF, Iff, Ifla, RtAddrFamily, RtScope, RtTable, Rta, Rtm, RtmF, Rtn, Rtprot,
++};
++use neli::consts::socket::NlFamily;
++use neli::nl::{NlPayload, Nlmsghdr};
++use neli::router::synchronous::{NlRouter, NlRouterReceiverHandle};
++use neli::rtnl::{
++    Ifaddrmsg, IfaddrmsgBuilder, Ifinfomsg, IfinfomsgBuilder, RtattrBuilder, Rtmsg, RtmsgBuilder,
++};
++use neli::types::RtBuffer;
++use neli::utils::Groups;
+ use rustix::system::sethostname;
+ 
+-use crate::utils::env::find_in_path;
+-use crate::utils::fs::find_executable;
++/// Set interface flags for eth0 (interface index 2) with a given mask
++fn flags_eth0(rtnl: &NlRouter, mask: Iff, set: Iff) -> Result<()> {
++    let ifinfomsg = IfinfomsgBuilder::default()
++        .ifi_family(RtAddrFamily::Unspecified)
++        .ifi_type(Arphrd::Ether)
++        .ifi_index(2)
++        .ifi_change(mask)
++        .ifi_flags(set)
++        .build()?;
++
++    let _: NlRouterReceiverHandle<Rtm, Ifinfomsg> =
++        rtnl.send(Rtm::Newlink, NlmF::REQUEST, NlPayload::Payload(ifinfomsg))?;
++
++    Ok(())
++}
++
++/// Set MTU for eth0 (interface index 2)
++fn mtu_eth0(rtnl: &NlRouter, mtu: u32) -> Result<()> {
++    let ifinfomsg = IfinfomsgBuilder::default()
++        .ifi_family(RtAddrFamily::Unspecified)
++        .ifi_type(Arphrd::Ether)
++        .ifi_index(2)
++        .rtattrs(RtBuffer::from_iter([RtattrBuilder::default()
++            .rta_type(Ifla::Mtu)
++            .rta_payload(mtu)
++            .build()?]))
++        .build()?;
++
++    let _: NlRouterReceiverHandle<Rtm, Ifinfomsg> =
++        rtnl.send(Rtm::Newlink, NlmF::REQUEST, NlPayload::Payload(ifinfomsg))?;
++
++    Ok(())
++}
++
++/// Add or delete IPv4 routes for eth0 (interface index 2)
++fn route4_eth0(rtnl: &NlRouter, what: Rtm, gw: Ipv4Addr) -> Result<()> {
++    let rtmsg = RtmsgBuilder::default()
++        .rtm_family(RtAddrFamily::Inet)
++        .rtm_dst_len(0)
++        .rtm_src_len(0)
++        .rtm_tos(0)
++        .rtm_table(RtTable::Main)
++        .rtm_protocol(Rtprot::Boot)
++        .rtm_scope(RtScope::Universe)
++        .rtm_type(Rtn::Unicast)
++        .rtm_flags(RtmF::empty())
++        .rtattrs(RtBuffer::from_iter([
++            RtattrBuilder::default()
++                .rta_type(Rta::Oif)
++                .rta_payload(2)
++                .build()?,
++            RtattrBuilder::default()
++                .rta_type(Rta::Dst)
++                .rta_payload(Ipv4Addr::UNSPECIFIED.octets().to_vec())
++                .build()?,
++            RtattrBuilder::default()
++                .rta_type(Rta::Gateway)
++                .rta_payload(gw.octets().to_vec())
++                .build()?,
++        ]))
++        .build()?;
++
++    let _: NlRouterReceiverHandle<Rtm, Rtmsg> = rtnl.send(
++        what,
++        NlmF::CREATE | NlmF::REQUEST,
++        NlPayload::Payload(rtmsg),
++    )?;
++
++    Ok(())
++}
++
++/// Add or delete IPv4 addresses for eth0 (interface index 2)
++fn addr4_eth0(rtnl: &NlRouter, what: Rtm, addr: Ipv4Addr, prefix_len: u8) -> Result<()> {
++    let ifaddrmsg = IfaddrmsgBuilder::default()
++        .ifa_family(RtAddrFamily::Inet)
++        .ifa_prefixlen(prefix_len)
++        .ifa_scope(RtScope::Universe)
++        .ifa_index(2)
++        .rtattrs(RtBuffer::from_iter([
++            RtattrBuilder::default()
++                .rta_type(Ifa::Local)
++                .rta_payload(addr.octets().to_vec())
++                .build()?,
++            RtattrBuilder::default()
++                .rta_type(Ifa::Address)
++                .rta_payload(addr.octets().to_vec())
++                .build()?,
++        ]))
++        .build()?;
++
++    let _: NlRouterReceiverHandle<Rtm, Ifaddrmsg> = rtnl.send(
++        what,
++        NlmF::CREATE | NlmF::REQUEST,
++        NlPayload::Payload(ifaddrmsg),
++    )?;
++
++    Ok(())
++}
++
++/// Send DISCOVER with Rapid Commit, process ACK, configure address and route
++fn do_dhcp(rtnl: &NlRouter) -> Result<()> {
++    // Temporary link-local address and route avoid the need for raw sockets
++    route4_eth0(rtnl, Rtm::Newroute, Ipv4Addr::UNSPECIFIED)?;
++    addr4_eth0(rtnl, Rtm::Newaddr, Ipv4Addr::new(169, 254, 1, 1), 16)?;
++
++    // Send request (DHCPDISCOVER)
++    let socket = UdpSocket::bind("0.0.0.0:68").expect("Failed to bind");
++    let mut buf = [0; 576 /* RFC 2131, Section 2 */ ];
++
++    const REQUEST: &[u8; 300 /* From RFC 951: >= 60 B of options */ ] = const_str::concat_bytes!(
++        1, // BOOTREQUEST
++        0x01, // Hardware address type: Ethernet
++        6, // Hardware address length
++        0, // DHCP relay Hops
++        [1, 2, 3, 4], // Transaction ID: we're the only client, use a fixed one
++        [0, 0], // Seconds elapsed since beginning of acquisition or renewal
++        [0x80, 0x0], // DHCP message flags: Broadcast
++        [0; 16], // All-zero ciaddr, yiaddr, siaddr, giaddr
++        [0; 16], // Client hardware address, not set as we're the only client
++        [0; 64], // Server host name
++        [0; 128], // Boot file name
++        [0x63, 0x82, 0x53, 0x63], // Magic cookie prefix before options
++        // Options
++        [
++            53, 1, 1, // DHCPDISCOVER
++            80, 0, // Rapid Commit (RFC 4039)
++        ],
++        0xff, // End of options
++        [0; 54], // Pad (up to 300 bytes)
++    );
++
++    socket.set_broadcast(true)?;
++    socket.send_to(REQUEST, "255.255.255.255:67")?;
++
++    // Keep IPv6-only fast
++    let _ = socket.set_read_timeout(Some(Duration::from_millis(100)));
++
++    // Get and process response (DHCPACK) if any
++    if let Ok((len, _)) = socket.recv_from(&mut buf) {
++        let msg = &mut buf[..len];
++
++        let addr = Ipv4Addr::new(msg[16], msg[17], msg[18], msg[19]);
++        let mut netmask = Ipv4Addr::UNSPECIFIED;
++        let mut router = Ipv4Addr::UNSPECIFIED;
++        let mut mtu: u16 = 65520;
++        let mut p: usize = 240;
++        let mut resolv = fs::File::options()
++            .append(true)
++            .open("/etc/resolv.conf")
++            .context("Failed to open /etc/resolv.conf")?;
++
++        while p < len {
++            let o = msg[p];
++            let l: u8 = msg[p + 1];
++            p += 2; // Length doesn't include code and length field itself
++
++            if o == 1 {
++                // Option 1: Subnet Mask
++                netmask = Ipv4Addr::new(msg[p], msg[p + 1], msg[p + 2], msg[p + 3]);
++            } else if o == 3 {
++                // Option 3: Router
++                router = Ipv4Addr::new(msg[p], msg[p + 1], msg[p + 2], msg[p + 3]);
++            } else if o == 6 {
++                // Option 6: Domain Name Server
++                for dns_p in (p..p + l as usize).step_by(4) {
++                    let dns =
++                        Ipv4Addr::new(msg[dns_p], msg[dns_p + 1], msg[dns_p + 2], msg[dns_p + 3]);
++                    resolv
++                        .write_all(format!("nameserver {}\n", dns).as_bytes())
++                        .context("Failed to write to resolv.conf")?;
++                }
++            } else if o == 26 {
++                // Option 26: Interface MTU
++                mtu = (msg[p] as u16) << 8 | msg[p + 1] as u16;
++
++                // We don't know yet if IPv6 is available: don't go below 1280 B
++                mtu = mtu.clamp(1280, 65520);
++            } else if o == 0xff {
++                // Option 255: End (of options)
++                break;
++            }
++
++            p += l as usize;
++        }
++
++        let prefix_len: u8 = netmask.to_bits().leading_ones() as u8;
++
++        // Drop temporary address and route, configure what we got instead
++        route4_eth0(rtnl, Rtm::Delroute, Ipv4Addr::UNSPECIFIED)?;
++        addr4_eth0(rtnl, Rtm::Deladdr, Ipv4Addr::new(169, 254, 1, 1), 16)?;
++
++        addr4_eth0(rtnl, Rtm::Newaddr, addr, prefix_len)?;
++        route4_eth0(rtnl, Rtm::Newroute, router)?;
++
++        mtu_eth0(rtnl, mtu.into())?;
++    } else {
++        // Clean up: we're clearly too cool for IPv4
++        route4_eth0(rtnl, Rtm::Delroute, Ipv4Addr::UNSPECIFIED)?;
++        addr4_eth0(rtnl, Rtm::Deladdr, Ipv4Addr::new(169, 254, 1, 1), 16)?;
++    }
++
++    Ok(())
++}
++
++/// Wait for SLAAC to complete or fail
++fn wait_for_slaac(rtnl: &NlRouter) -> Result<()> {
++    let mut global_seen = false;
++    let mut global_wait = true;
++    let mut ll_seen = false;
++
++    // Busy-netlink-loop until we see a link-local address, and a global unicast
++    // address as long as we might expect one (see below)
++    while !ll_seen || (global_wait && !global_seen) {
++        let ifaddrmsg = IfaddrmsgBuilder::default()
++            .ifa_family(RtAddrFamily::Inet6)
++            .ifa_prefixlen(0)
++            .ifa_scope(RtScope::Universe)
++            .ifa_index(2)
++            .build()?;
++
++        let recv = rtnl.send(Rtm::Getaddr, NlmF::ROOT, NlPayload::Payload(ifaddrmsg))?;
++
++        for response in recv {
++            let header: Nlmsghdr<Rtm, Ifaddrmsg> = response?;
++            if let NlPayload::Payload(p) = header.nl_payload() {
++                if p.ifa_scope() == &RtScope::Link {
++                    // A non-tentative link-local address implies we sent a
++                    // router solicitation that didn't get any response
++                    // (IPv4-only)? Stop waiting for the router in that case
++                    if *p.ifa_flags() & IfaF::TENTATIVE != IfaF::TENTATIVE {
++                        global_wait = false;
++                    }
++
++                    ll_seen = true;
++                } else if p.ifa_scope() == &RtScope::Universe {
++                    global_seen = true;
++                }
++            }
++        }
++    }
++
++    Ok(())
++}
+ 
+ pub fn configure_network() -> Result<()> {
+     // Allow unprivileged users to use ping, as most distros do by default.
+@@ -33,63 +285,29 @@ pub fn configure_network() -> Result<()> {
+         sethostname(hostname.as_bytes()).context("Failed to set hostname")?;
+     }
+ 
+-    let dhcpcd_path = find_in_path("dhcpcd").context("Failed to check existence of `dhcpcd`")?;
+-    let dhcpcd_path = if let Some(dhcpcd_path) = dhcpcd_path {
+-        Some(dhcpcd_path)
+-    } else {
+-        find_executable("/sbin/dhcpcd").context("Failed to check existence of `/sbin/dhcpcd`")?
+-    };
+-    if let Some(dhcpcd_path) = dhcpcd_path {
+-        let output = Command::new(dhcpcd_path)
+-            .args(["-M", "--nodev", "eth0"])
+-            .output()
+-            .context("Failed to execute `dhcpcd` as child process")?;
+-        debug!(output:?; "dhcpcd output");
+-        if !output.status.success() {
+-            let err = if let Some(code) = output.status.code() {
+-                anyhow!("`dhcpcd` process exited with status code: {code}")
+-            } else {
+-                anyhow!(
+-                    "`dhcpcd` process terminated by signal: {}",
+-                    output
+-                        .status
+-                        .signal()
+-                        .expect("either one of status code or signal should be set")
+-                )
+-            };
+-            Err(err)?;
+-        }
++    let (rtnl, _) = NlRouter::connect(NlFamily::Route, None, Groups::empty())?;
++    rtnl.enable_strict_checking(true)?;
+ 
+-        return Ok(());
++    // Disable neighbour solicitations (dodge DAD), bring up link to start SLAAC
++    {
++        // IFF_NOARP | IFF_UP in one shot delays router solicitations, avoid it
++        flags_eth0(&rtnl, Iff::NOARP, Iff::NOARP)?;
++        flags_eth0(&rtnl, Iff::UP, Iff::UP)?;
+     }
+ 
+-    let dhclient_path =
+-        find_in_path("dhclient").context("Failed to check existence of `dhclient`")?;
+-    let dhclient_path = if let Some(dhclient_path) = dhclient_path {
+-        Some(dhclient_path)
+-    } else {
+-        find_executable("/sbin/dhclient")
+-            .context("Failed to check existence of `/sbin/dhclient`")?
+-    };
+-    let dhclient_path =
+-        dhclient_path.ok_or_else(|| anyhow!("could not find required `dhcpcd` or `dhclient`"))?;
+-    let output = Command::new(dhclient_path)
+-        .output()
+-        .context("Failed to execute `dhclient` as child process")?;
+-    debug!(output:?; "dhclient output");
+-    if !output.status.success() {
+-        let err = if let Some(code) = output.status.code() {
+-            anyhow!("`dhclient` process exited with status code: {code}")
+-        } else {
+-            anyhow!(
+-                "`dhclient` process terminated by signal: {}",
+-                output
+-                    .status
+-                    .signal()
+-                    .expect("either one of status code or signal should be set")
+-            )
+-        };
+-        Err(err)?;
++    // Configure IPv4
++    {
++        do_dhcp(&rtnl)?;
++    }
++
++    // Ensure IPv6 setup is done, if available
++    {
++        wait_for_slaac(&rtnl)?;
++    }
++
++    // Re-enable neighbour solicitations and ARP requests
++    {
++        flags_eth0(&rtnl, Iff::NOARP, Iff::empty())?;
+     }
+ 
+     Ok(())
