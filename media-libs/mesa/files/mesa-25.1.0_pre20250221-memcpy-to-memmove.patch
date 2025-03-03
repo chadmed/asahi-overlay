@@ -1,0 +1,15 @@
+diff --git a/src/compiler/spirv/vtn_bindgen2.c b/src/compiler/spirv/vtn_bindgen2.c
+index bb12fb1502d..94e23082b72 100644
+--- a/src/compiler/spirv/vtn_bindgen2.c
++++ b/src/compiler/spirv/vtn_bindgen2.c
+@@ -75,8 +75,8 @@ lower_to_bindgen_return(nir_shader *nir)
+        * parameters.
+        */
+       libfunc->num_params--;
+-      memcpy(libfunc->params, libfunc->params + 1,
+-             sizeof(libfunc->params[0]) * libfunc->num_params);
++      memmove(libfunc->params, libfunc->params + 1,
++              sizeof(libfunc->params[0]) * libfunc->num_params);
+    }
+ }
+ 
