@@ -1,4 +1,4 @@
-# Copyright 1999-2024 Gentoo Authors
+# Copyright 1999-2025 Gentoo Authors
 # Distributed under the terms of the GNU General Public License v2
 
 EAPI=8
@@ -23,7 +23,8 @@ CRATES="
 	paste@1.0.14
 "
 
-RUST_MIN_VER="1.74.1"
+RUST_MIN_VER="1.78.0"
+RUST_MULTILIB=1
 RUST_OPTIONAL=1
 
 inherit cargo
@@ -38,7 +39,7 @@ else
 	SRC_URI="
 		https://gitlab.freedesktop.org/asahi/mesa/-/archive/asahi-${MY_PV}/mesa-asahi-${MY_PV}.tar.bz2
 	"
-	KEYWORDS="arm64"
+	KEYWORDS="~arm64"
 fi
 
 # This should be {CARGO_CRATE_URIS//.crate/.tar.gz} to correspond to the wrap files,
@@ -46,6 +47,10 @@ fi
 # export MESON_PACKAGE_CACHE_DIR="${DISTDIR}"
 SRC_URI+="
 	${CARGO_CRATE_URIS}
+"
+
+PATCHES="
+	${FILESDIR}/${P}-memcpy-to-memmove.patch
 "
 
 S="${WORKDIR}/mesa-asahi-${MY_PV}"
@@ -97,19 +102,22 @@ LIBDRM_DEPSTRING=">=x11-libs/libdrm-2.4.121"
 ASAHI_KERNEL_MIN_VER="6.9.12_p1"
 RDEPEND="
 	>=dev-libs/expat-2.1.0-r3[${MULTILIB_USEDEP}]
+	>=dev-util/spirv-tools-1.3.231.0[${MULTILIB_USEDEP}]
 	>=media-libs/libglvnd-1.3.2[X?,${MULTILIB_USEDEP}]
 	>=sys-libs/zlib-1.2.9[${MULTILIB_USEDEP}]
 	unwind? ( sys-libs/libunwind[${MULTILIB_USEDEP}] )
 	llvm? (
 		$(llvm_gen_dep "
-			llvm-core/llvm:\${LLVM_SLOT}[${MULTILIB_USEDEP}]
+			llvm-core/llvm:\${LLVM_SLOT}[llvm_targets_AMDGPU(+),${MULTILIB_USEDEP}]
 			opencl? (
 				dev-util/spirv-llvm-translator:\${LLVM_SLOT}
-				llvm-core/clang:\${LLVM_SLOT}[${MULTILIB_USEDEP}]
+				llvm-core/clang:\${LLVM_SLOT}[llvm_targets_AMDGPU(+),${MULTILIB_USEDEP}]
+				=llvm-core/libclc-\${LLVM_SLOT}*[spirv(-)]
 			)
 			video_cards_asahi? (
 				dev-util/spirv-llvm-translator:\${LLVM_SLOT}
-				llvm-core/clang:\${LLVM_SLOT}[${MULTILIB_USEDEP}]
+				llvm-core/clang:\${LLVM_SLOT}[llvm_targets_AMDGPU(+),${MULTILIB_USEDEP}]
+				=llvm-core/libclc-\${LLVM_SLOT}*[spirv(-)]
 			)
 		")
 		video_cards_r600? (
@@ -123,7 +131,6 @@ RDEPEND="
 	opencl? (
 		>=virtual/opencl-3
 		llvm-core/libclc[spirv(-)]
-		>=dev-util/spirv-tools-1.3.231.0
 		virtual/libelf:0=
 	)
 	vaapi? (
@@ -135,7 +142,6 @@ RDEPEND="
 			>=sys-kernel/asahi-sources-${ASAHI_KERNEL_MIN_VER}:*
 			>=virtual/dist-kernel-${ASAHI_KERNEL_MIN_VER}:asahi
 		)
-		llvm-core/libclc[spirv(-)]
 	)
 	video_cards_radeonsi? ( virtual/libelf:0=[${MULTILIB_USEDEP}] )
 	video_cards_zink? ( media-libs/vulkan-loader:=[${MULTILIB_USEDEP}] )
@@ -174,12 +180,13 @@ DEPEND="${RDEPEND}
 BDEPEND="
 	${PYTHON_DEPS}
 	opencl? (
+		>=dev-build/meson-1.7.0
+		>=dev-util/bindgen-0.71.0
 		${RUST_DEPEND}
-		>=dev-util/bindgen-0.58.0
 	)
 	video_cards_asahi? (
 		${RUST_DEPEND}
-		>=dev-util/bindgen-0.58.0
+		>=dev-util/bindgen-0.71.0
 	)
 	>=dev-build/meson-1.4.1
 	app-alternatives/yacc
@@ -190,15 +197,18 @@ BDEPEND="
 		dev-python/packaging[\${PYTHON_USEDEP}]
 		dev-python/pyyaml[\${PYTHON_USEDEP}]
 	")
-	video_cards_intel? (
-		~dev-util/intel_clc-${PV}
-		llvm-core/libclc[spirv(-)]
-		$(python_gen_any_dep "dev-python/ply[\${PYTHON_USEDEP}]")
-	)
+"
+#	video_cards_intel? (
+#		~dev-util/mesa_clc-${PV}
+#		llvm-core/libclc[spirv(-)]
+#		$(python_gen_any_dep "dev-python/ply[\${PYTHON_USEDEP}]")
+#	)
+BDEPEND+="
 	vulkan? (
 		dev-util/glslang
 		video_cards_nvk? (
-			>=dev-util/bindgen-0.68.1
+			>=dev-build/meson-1.7.0
+			>=dev-util/bindgen-0.71.0
 			>=dev-util/cbindgen-0.26.0
 			${RUST_DEPEND}
 		)
@@ -208,7 +218,7 @@ BDEPEND="
 
 QA_WX_LOAD="
 x86? (
-	usr/lib/libglapi.so.0.0.0
+	usr/lib/libgallium-*.so
 	usr/lib/libOSMesa.so.8.0.0
 	usr/lib/libGLX_mesa.so.0.0.0
 )"
@@ -290,9 +300,9 @@ python_check_deps() {
 	python_has_version -b ">=dev-python/mako-0.8.0[${PYTHON_USEDEP}]" &&
 	python_has_version -b "dev-python/packaging[${PYTHON_USEDEP}]" &&
 	python_has_version -b "dev-python/pyyaml[${PYTHON_USEDEP}]" || return 1
-	if use llvm && use vulkan && use video_cards_intel && use amd64; then
-		python_has_version -b "dev-python/ply[${PYTHON_USEDEP}]" || return 1
-	fi
+#	if use llvm && use vulkan && use video_cards_intel && use amd64; then
+#		python_has_version -b "dev-python/ply[${PYTHON_USEDEP}]" || return 1
+#	fi
 }
 
 pkg_setup() {
