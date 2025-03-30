@@ -11,7 +11,7 @@ S="${WORKDIR}/${PN}-${PV}"
 
 LICENSE="BSD"
 SLOT="0"
-KEYWORDS="~arm64"
+KEYWORDS="arm64"
 
 RDEPEND=">=media-libs/alsa-lib-1.2.1"
 DEPEND="${RDEPEND} media-libs/alsa-ucm-conf"
