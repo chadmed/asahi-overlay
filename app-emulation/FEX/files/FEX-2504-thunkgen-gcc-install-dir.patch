@@ -1,0 +1,26 @@
+diff --git a/ThunkLibs/GuestLibs/CMakeLists.txt b/ThunkLibs/GuestLibs/CMakeLists.txt
+index be88e1d..e8a1ee3 100644
+--- a/ThunkLibs/GuestLibs/CMakeLists.txt
++++ b/ThunkLibs/GuestLibs/CMakeLists.txt
+@@ -81,7 +81,7 @@ function(generate NAME SOURCE_FILE)
+     OUTPUT "${OUTFILE}"
+     DEPENDS "${GENERATOR_EXE}"
+     DEPENDS "${SOURCE_FILE}"
+-    COMMAND "${GENERATOR_EXE}" "${SOURCE_FILE}" "${NAME}" "-guest" "${OUTFILE}" "${X86_DEV_ROOTFS}" ${BITNESS_FLAGS} -- -std=c++20 ${BITNESS_FLAGS2}
++    COMMAND "${GENERATOR_EXE}" "${SOURCE_FILE}" "${NAME}" "-guest" "${OUTFILE}" "${X86_DEV_ROOTFS}" ${BITNESS_FLAGS} -- -std=c++20 ${BITNESS_FLAGS2} --config=/etc/clang/gentoo-gcc-install.cfg
+       # Expand compile definitions to space-separated list of -D parameters
+       "$<$<BOOL:${compile_prop}>:;-D$<JOIN:${compile_prop},;-D>>"
+       # Expand include directories to space-separated list of -isystem parameters
+diff --git a/ThunkLibs/HostLibs/CMakeLists.txt b/ThunkLibs/HostLibs/CMakeLists.txt
+index cec5b81..0ccbb20 100644
+--- a/ThunkLibs/HostLibs/CMakeLists.txt
++++ b/ThunkLibs/HostLibs/CMakeLists.txt
+@@ -53,7 +53,7 @@ function(generate NAME SOURCE_FILE GUEST_BITNESS)
+     OUTPUT "${OUTFILE}"
+     DEPENDS "${SOURCE_FILE}"
+     DEPENDS thunkgen
+-    COMMAND thunkgen "${SOURCE_FILE}" "${NAME}" "-host" "${OUTFILE}" "${X86_DEV_ROOTFS}" ${BITNESS_FLAGS} -- -std=c++20
++    COMMAND thunkgen "${SOURCE_FILE}" "${NAME}" "-host" "${OUTFILE}" "${X86_DEV_ROOTFS}" ${BITNESS_FLAGS} -- -std=c++20  --config=/etc/clang/gentoo-gcc-install.cfg
+       # Expand compile definitions to space-separated list of -D parameters
+       "$<$<BOOL:${compile_prop}>:;-D$<JOIN:${compile_prop},;-D>>"
+       # Expand include directories to space-separated list of -isystem parameters
