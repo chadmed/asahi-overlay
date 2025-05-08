@@ -1,0 +1,163 @@
+From 8eaf45414c05c9e7ef6f74a323d95fe7e0d883c1 Mon Sep 17 00:00:00 2001
+From: Tony Wasserka <neobrain@users.noreply.github.com>
+Date: Thu, 8 May 2025 11:42:59 +0200
+Subject: [PATCH 1/2] Async: Add run_one interface to enable more fine-grained
+ event loop control
+
+---
+ Source/Common/Async.h | 36 +++++++++++++++++++++++++++---------
+ 1 file changed, 27 insertions(+), 9 deletions(-)
+
+diff --git a/Source/Common/Async.h b/Source/Common/Async.h
+index 5bc5b3cc05..a7daa95284 100644
+--- a/Source/Common/Async.h
++++ b/Source/Common/Async.h
+@@ -54,6 +54,7 @@ struct poll_reactor {
+   std::vector<pollfd> PollFDs;
+   std::optional<int> CurrentFD; // FD that is currently being processed
+ 
++  bool is_stopped = false;
+   int AsyncStopRequest[2] = {-1, -1};
+ 
+   // Maps FD to callback
+@@ -91,12 +92,22 @@ struct poll_reactor {
+     ::close(AsyncStopRequest[1]);
+   }
+ 
+-  error run(std::optional<std::chrono::nanoseconds> Timeout = std::nullopt) {
++  void cleanup() {
++    callbacks.clear();
++  }
++
++  [[nodiscard]]
++  bool stopped() const {
++    return is_stopped;
++  }
++
++  error run_one(std::optional<std::chrono::nanoseconds> Timeout = std::nullopt) {
+     // Process events queued before entering wait loop
+     update_fd_list();
+ 
+     timespec ts = to_timespec(Timeout.value_or(std::chrono::nanoseconds {0}));
+ 
++    // ppoll may return EINTR/EAGAIN, so a loop is used here. Normally, we return in the first iteration.
+     while (true) {
+       int Result = ::ppoll(PollFDs.data(), PollFDs.size(), Timeout ? &ts : nullptr, nullptr);
+ 
+@@ -104,14 +115,10 @@ struct poll_reactor {
+         if (errno == EINTR || errno == EAGAIN) {
+           continue;
+         }
+-        callbacks.clear();
+         return error::generic_errno;
+       } else if (Result == 0) {
+-        callbacks.clear();
+         return error::timeout;
+       } else {
+-        bool exit_requested = false;
+-
+         // Walk the FDs and see if we got any results
+         for (auto& ActiveFD : PollFDs) {
+           if (ActiveFD.revents == 0) {
+@@ -139,14 +146,14 @@ struct poll_reactor {
+                 ActiveFD.revents = 0;
+               }
+             } else if (Ret == post_callback::stop_reactor) {
+-              exit_requested = true;
++              is_stopped = true;
+             }
+             CurrentFD.reset();
+           }
+           if (ActiveFD.revents & (POLLHUP | POLLERR | POLLNVAL | POLLRDHUP)) {
+             auto Callback = std::move(callbacks[ActiveFD.fd]);
+             if (Callback) {
+-              exit_requested |= (Callback(error::eof) == post_callback::stop_reactor);
++              is_stopped |= (Callback(error::eof) == post_callback::stop_reactor);
+             }
+             // Error or hangup, erase the socket from our list
+             QueuedEvents.push_back(Event {.FD = {.fd = ActiveFD.fd}, .Erase = true});
+@@ -155,12 +162,23 @@ struct poll_reactor {
+           ActiveFD.revents = 0;
+         }
+ 
+-        if (exit_requested) {
+-          callbacks.clear();
++        if (is_stopped) {
++          cleanup();
+           return error::success;
+         }
+ 
+         update_fd_list();
++        return error::success;
++      }
++    }
++  }
++
++  error run(std::optional<std::chrono::nanoseconds> Timeout = std::nullopt) {
++    while (true) {
++      auto Result = run_one(Timeout);
++      if (Result != error::success || is_stopped) {
++        cleanup();
++        return Result;
+       }
+     }
+   }
+
+From c326e2d669fd5e9356f6107e188413a449cc1fd7 Mon Sep 17 00:00:00 2001
+From: Tony Wasserka <neobrain@users.noreply.github.com>
+Date: Thu, 8 May 2025 11:46:09 +0200
+Subject: [PATCH 2/2] FEXServer: Don't time out while clients are still
+ connected
+
+---
+ Source/Tools/FEXServer/ProcessPipe.cpp | 16 +++++++++++++++-
+ 1 file changed, 15 insertions(+), 1 deletion(-)
+
+diff --git a/Source/Tools/FEXServer/ProcessPipe.cpp b/Source/Tools/FEXServer/ProcessPipe.cpp
+index 51daa573dd..b3eca20d81 100644
+--- a/Source/Tools/FEXServer/ProcessPipe.cpp
++++ b/Source/Tools/FEXServer/ProcessPipe.cpp
+@@ -24,6 +24,7 @@ constexpr int USER_PERMS = S_IRWXU | S_IRWXG | S_IRWXO;
+ int ServerLockFD {-1};
+ std::optional<fasio::tcp_acceptor> ServerAcceptor;
+ std::optional<fasio::tcp_acceptor> ServerFSAcceptor;
++int NumClients = 0;
+ time_t RequestTimeout {10};
+ bool Foreground {false};
+ std::vector<struct pollfd> PollFDs {};
+@@ -210,6 +211,7 @@ bool InitializeServerSocket(bool abstract) {
+     }
+ 
+     int FD = Socket->FD;
++    ++NumClients;
+     Reactor.bind_handler(
+       pollfd {
+         .fd = FD,
+@@ -219,6 +221,7 @@ bool InitializeServerSocket(bool abstract) {
+       [Socket = std::move(Socket).value()](fasio::error ec) mutable {
+       if (ec != fasio::error::success) {
+         close(Socket.FD);
++        --NumClients;
+         return fasio::post_callback::drop;
+       }
+       HandleSocketData(Socket);
+@@ -389,7 +392,18 @@ void CloseConnections() {
+ 
+ void WaitForRequests() {
+   Reactor.enable_async_stop();
+-  Reactor.run(Foreground ? std::nullopt : std::optional {std::chrono::seconds {RequestTimeout}});
++
++  while (true) {
++    std::optional Timeout = std::chrono::seconds {RequestTimeout};
++    if (Foreground || NumClients > 0) {
++      Timeout.reset();
++    }
++    auto Result = Reactor.run_one(Timeout);
++    if (Result != fasio::error::success || Reactor.stopped()) {
++      Reactor.cleanup();
++      break;
++    }
++  }
+ 
+   LogMan::Msg::DFmt("[FEXServer] Shutting Down");
+ 
