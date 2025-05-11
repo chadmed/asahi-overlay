@@ -1,0 +1,22 @@
+Title: Upstream Mesa now supports Apple Silicon
+Author: James Calligeros <jcalligeros99@gmail.com>
+Posted: 2025-05-10
+Revision: 1
+News-Item-Format: 2.0
+
+Now that the Asahi UAPI has been merged into the upstream kernel,
+the Asahi and Honeykrisp OpenGL and Vulkan drivers are now enabled
+in upstream Mesa as of 25.1.0.
+
+As Honeykrisp is still a rather immature driver, we will continue
+packaging our forked version to roll out important fixes faster
+than the upstream Mesa release cadence can allow. However, it is
+strongly advised that you unmask media-libs/mesa::gentoo to ensure
+you always have the latest and greatest version, no matter where
+it's coming from.
+
+If you used the asahi-gentoosupport scripts to install, you can
+unmask media-libs/mesa::gentoo by deleting the relevant line
+in /etc/portage/package.mask/asahi. Once media-libs/mesa-25.1*
+is unmasked in ::gentoo Portage will automatically offer it
+to you, superseding the version currently packaged in the overlay.
