@@ -3,7 +3,7 @@
 
 EAPI=8
 
-inherit meson
+inherit flag-o-matic meson
 
 if [[ ${PV} == "9999" ]] ; then
 	EGIT_REPO_URI="https://gitlab.freedesktop.org/asahi/virglrenderer.git"
@@ -40,6 +40,8 @@ DEPEND="${RDEPEND}"
 RESTRICT="test"
 
 src_configure() {
+	append-cflags -Wno-error=pedantic
+
 	local emesonargs=(
 		-Ddefault_library=$(usex static-libs both shared)
 		-Ddrm-renderers=asahi-experimental
