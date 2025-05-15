@@ -254,6 +254,7 @@ src_compile() {
 
 		# Fix compilation on systems which use a Clang/LLVM toolchain
 		export CC="${CTARGET}-gcc -m32"
+		export CPP="${CTARGET}-gcc -E -m32"
 		export AS="${CTARGET}-as"
 		export AR="${CTARGET}-ar"
 		export RANLIB="${CTARGET}-ranlib"
@@ -266,6 +267,7 @@ src_compile() {
 		x86mt-build glibc x86
 		export libc_cv_slibdir="${prefix}/lib64"
 		export CC="${CTARGET}-gcc"
+		export CPP="${CTARGET}-gcc -E"
 		x86mt-build glibc amd64
 	)
 	local file
