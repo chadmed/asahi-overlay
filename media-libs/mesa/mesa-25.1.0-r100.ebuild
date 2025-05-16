@@ -12,8 +12,8 @@ inherit flag-o-matic llvm-r1 meson-multilib python-any-r1 linux-info rust-toolch
 
 MY_P="${P/_/-}"
 
-# $PV is expected to be of following form: 23.2.0_pre20230530
-MY_PV="$(ver_cut 5)"
+# Just override this for now
+MY_PV="20250425"
 
 CRATES="
 	syn@2.0.68
