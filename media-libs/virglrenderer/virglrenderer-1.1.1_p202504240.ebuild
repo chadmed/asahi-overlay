@@ -16,7 +16,7 @@ else
 	SRC_URI="https://gitlab.freedesktop.org/asahi/${PN}/-/archive/${MY_PV}/${MY_P}.tar.bz2"
 	S="${WORKDIR}/${MY_P}"
 
-	KEYWORDS="~amd64 ~arm64 ~loong ~riscv ~x86"
+	KEYWORDS="~amd64 ~arm64"
 fi
 
 DESCRIPTION="library used implement a virtual 3D GPU used by qemu"
@@ -29,7 +29,7 @@ IUSE="static-libs"
 RDEPEND="
 	>=x11-libs/libdrm-2.4.50
 	media-libs/libepoxy
-	media-libs/mesa
+	=media-libs/mesa-25.1.0-r100
 	x11-libs/libX11
 "
 
