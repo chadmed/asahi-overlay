@@ -17,7 +17,7 @@ CRATES="
 	lv2-units@0.1.3
 	lv2-urid@2.1.0
 	lv2@0.6.0
-	matrixmultiply@0.3.9
+	matrixmultiply@0.3.10
 	nalgebra-macros@0.2.2
 	nalgebra@0.33.2
 	num-bigint@0.4.6
