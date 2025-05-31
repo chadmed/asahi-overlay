@@ -61,7 +61,7 @@ LICENSE="GPL-2+"
 # Dependent crate licenses
 LICENSE+=" Apache-2.0 MIT Unicode-3.0"
 SLOT="0"
-KEYWORDS="~arm64"
+KEYWORDS="arm64"
 
 DEPEND="
 media-libs/lv2
