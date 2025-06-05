@@ -7,7 +7,7 @@ DESCRIPTION="Asahi Linux configurations"
 HOMEPAGE="https://asahilinux.org/"
 LICENSE="MIT"
 SLOT="0"
-KEYWORDS="~arm64"
+KEYWORDS="arm64"
 
 src_unpack() {
 	mkdir "${S}"
