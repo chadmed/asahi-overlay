@@ -70,6 +70,8 @@ DEPEND="
 	${DEPEND}
 	dev-util/bindgen
 	debug? ( dev-util/pahole )
+	sys-boot/m1n1
+	sys-boot/u-boot
 "
 
 PDEPEND="
