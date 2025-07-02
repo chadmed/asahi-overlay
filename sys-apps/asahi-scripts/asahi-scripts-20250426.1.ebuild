@@ -1,27 +1,19 @@
-# Copyright 2022 James Calligeros <jcalligeros99@gmail.com>
+# Copyright 2022-2025 Gentoo Authors
 # Distributed under the terms of the GNU General Public License v2
 
 EAPI="8"
 
 DESCRIPTION="Apple Silicon support scripts"
 HOMEPAGE="https://asahilinux.org/"
-SRC_URI="https://github.com/AsahiLinux/${PN}/archive/refs/tags/${PV}.tar.gz -> ${PN}-${PV}.tar.gz"
+SRC_URI="https://github.com/AsahiLinux/${PN}/archive/refs/tags/${PV}.tar.gz -> ${P}.tar.gz"
+
 LICENSE="MIT"
 SLOT="0"
 KEYWORDS="arm64"
 
 BDEPEND="
-	dev-build/make
 	virtual/udev
 "
-
-src_prepare() {
-	default
-}
-
-src_compile() {
-	emake || die "Could not invoke emake"
-}
 
 src_install() {
 	emake DESTDIR="${D}" PREFIX="/usr" SYS_PREFIX="" install-dracut
