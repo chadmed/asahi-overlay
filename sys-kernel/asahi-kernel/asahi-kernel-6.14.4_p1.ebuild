@@ -7,7 +7,7 @@ ETYPE="sources"
 K_NODRYRUN="1"
 
 RUST_MIN_VER="1.78.0"
-RUST_MAX_VER="1.87.0" # Issue with kernel crates
+RUST_MAX_VER="1.86.0" # Issue with kernel crates
 RUST_REQ_USE='rust-src,rustfmt'
 
 inherit kernel-build rust
