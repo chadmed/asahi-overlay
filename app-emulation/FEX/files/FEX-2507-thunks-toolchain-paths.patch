@@ -1,0 +1,89 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 14e15e370..551d3120f 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -481,6 +481,9 @@ if (BUILD_THUNKS)
+       "-DFEX_PROJECT_SOURCE_DIR=${FEX_PROJECT_SOURCE_DIR}"
+       "-DGENERATOR_EXE=$<TARGET_FILE:thunkgen>"
+       "-DX86_DEV_ROOTFS=${X86_DEV_ROOTFS}"
++      "-DX86_CFLAGS=${X86_CFLAGS}"
++      "-DX86_CXXFLAGS=${X86_CXXFLAGS}"
++      "-DX86_LDFLAGS=${X86_LDFLAGS}"
+     INSTALL_COMMAND ""
+     BUILD_ALWAYS ON
+     DEPENDS thunkgen
+diff --git a/ThunkLibs/GuestLibs/CMakeLists.txt b/ThunkLibs/GuestLibs/CMakeLists.txt
+index cff9943e9..3b7482489 100644
+--- a/ThunkLibs/GuestLibs/CMakeLists.txt
++++ b/ThunkLibs/GuestLibs/CMakeLists.txt
+@@ -67,10 +67,10 @@ function(generate NAME SOURCE_FILE)
+ 
+   if (BITNESS EQUAL 32)
+     set(BITNESS_FLAGS "-for-32bit-guest")
+-    set(BITNESS_FLAGS2 "-m32" "--target=i686-linux-gnu" "-isystem" "/usr/i686-linux-gnu/include/")
++    set(BITNESS_FLAGS2 "-m32" "--target=i686-linux-gnu")
+   else()
+     set(BITNESS_FLAGS "")
+-    set(BITNESS_FLAGS2 "--target=x86_64-linux-gnu" "-isystem" "/usr/x86_64-linux-gnu/include/")
++    set(BITNESS_FLAGS2 "--target=x86_64-linux-gnu")
+   endif()
+ 
+   add_custom_command(
+@@ -110,6 +110,7 @@ function(add_guest_lib NAME SONAME)
+ 
+   add_library(${NAME}-guest ${TARGET_TYPE} ${SOURCE_FILE} ${GEN_lib${NAME}})
+   target_include_directories(${NAME}-guest PRIVATE "${CMAKE_CURRENT_BINARY_DIR}/gen/")
++  target_include_directories(${NAME}-guest PRIVATE "__REPLACE_ME_WITH_HEADER_DIR__")
+   target_compile_definitions(${NAME}-guest PRIVATE GUEST_THUNK_LIBRARY)
+   target_link_libraries(${NAME}-guest PRIVATE lib${NAME}-guest-deps)
+ 
+diff --git a/ThunkLibs/libwayland-client/libwayland-client_interface.cpp b/ThunkLibs/libwayland-client/libwayland-client_interface.cpp
+index 575d2e195..c82672e3f 100644
+--- a/ThunkLibs/libwayland-client/libwayland-client_interface.cpp
++++ b/ThunkLibs/libwayland-client/libwayland-client_interface.cpp
+@@ -1,3 +1,9 @@
++#ifndef __aarch64__
++#define _GLIBCXX_MATH_H 1
++#define _MATH_H 1
++double round(double);
++#endif
++
+ #include <common/GeneratorInterface.h>
+ 
+ #include <wayland-client.h>
+diff --git a/Data/CMake/toolchain_x86_32.cmake b/Data/CMake/toolchain_x86_32.cmake
+index 89e3134d3..18fe655d1 100644
+--- a/Data/CMake/toolchain_x86_32.cmake
++++ b/Data/CMake/toolchain_x86_32.cmake
+@@ -15,6 +15,11 @@ if (ENABLE_CLANG_THUNKS)
+   set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${CLANG_FLAGS}")
+   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${CLANG_FLAGS}")
+ else()
+-  set(CMAKE_C_COMPILER x86_64-linux-gnu-gcc -m32)
+-  set(CMAKE_CXX_COMPILER x86_64-linux-gnu-g++ -m32)
++  set(CMAKE_C_FLAGS "${X86_CFLAGS}")
++  set(CMAKE_CXX_FLAGS "${X86_CXXFLAGS}")
++  set(CMAKE_C_COMPILER __REPLACE_ME_WITH_C_COMPILER__)
++  set(CMAKE_CXX_COMPILER __REPLACE_ME_WITH_CXX_COMPILER__)
++  set(CMAKE_EXE_LINKER_FLAGS "${X86_LDFLAGS}")
++  set(CMAKE_MODULE_LINKER_FLAGS "${X86_LDFLAGS}")
++  set(CMAKE_SHARED_LINKER_FLAGS "${X86_LDFLAGS}")
+ endif()
+diff --git a/Data/CMake/toolchain_x86_64.cmake b/Data/CMake/toolchain_x86_64.cmake
+index 9aa856a01..8da9da8ee 100644
+--- a/Data/CMake/toolchain_x86_64.cmake
++++ b/Data/CMake/toolchain_x86_64.cmake
+@@ -15,6 +15,11 @@ if (ENABLE_CLANG_THUNKS)
+   set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${CLANG_FLAGS}")
+   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${CLANG_FLAGS}")
+ else()
+-  set(CMAKE_C_COMPILER x86_64-linux-gnu-gcc)
+-  set(CMAKE_CXX_COMPILER x86_64-linux-gnu-g++)
++  set(CMAKE_C_FLAGS "${X86_CFLAGS}")
++  set(CMAKE_CXX_FLAGS "${X86_CXXFLAGS}")
++  set(CMAKE_C_COMPILER __REPLACE_ME_WITH_C_COMPILER__)
++  set(CMAKE_CXX_COMPILER __REPLACE_ME_WITH_CXX_COMPILER__)
++  set(CMAKE_EXE_LINKER_FLAGS "${X86_LDFLAGS}")
++  set(CMAKE_MODULE_LINKER_FLAGS "${X86_LDFLAGS}")
++  set(CMAKE_SHARED_LINKER_FLAGS "${X86_LDFLAGS}")
+ endif()
