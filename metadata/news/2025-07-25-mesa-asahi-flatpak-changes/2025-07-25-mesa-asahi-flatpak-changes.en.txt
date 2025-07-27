@@ -1,0 +1,15 @@
+Title: media-libs/mesa-asahi-flatpak changes
+Author: James Calligeros <jcalligeros99@gmail.com>
+Posted: 2025-07-25
+Revision: 1
+News-Item-Format: 2.0
+
+As of June, the Freedesktop Runtime for Flatpak has shipped with Mesa 25.1.
+This negates the need to package a runtime extension, as the Asahi and
+Honeykrisp GPU drivers for Apple Silicon are enabled upstream as of this
+version.
+
+As such, the Flatpak runtime extension for version 24.08 will be removed
+from your system next time you update it. The extension for 23.08 will
+continue to work until 23.08 reaches end of life next month. At that time,
+the media-libs/mesa-asahi-flatpak package will be removed entirely.
