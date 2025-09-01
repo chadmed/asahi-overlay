@@ -77,7 +77,7 @@ PATCHES="
 	${FILESDIR}/${PN}-2503-thunkgen-gcc-install-dir.patch
 "
 
-IUSE="crossdev-toolchain fexconfig qt6 +thunks"
+IUSE="crossdev-toolchain +fexconfig +qt6 +thunks"
 
 REQUIRED_USE="
 	crossdev-toolchain? ( thunks )
