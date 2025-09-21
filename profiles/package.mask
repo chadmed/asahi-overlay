@@ -10,3 +10,9 @@
 # FDO runtimes (24.08 and 25.08) include mesa-25.2 with full asahi support.
 # Please uninstall media-libs/mesa-asahi-flatpak.
 =media-libs/mesa-asahi-flatpak-25.1.0_pre20250425-r1
+
+# media-libs/mesa-25.1.9 and media-libs/mesa-25.2.0 in gentoo have full asahi
+# GPU support. The stable media-libs/mesa-25.1.7 (as of writing this) only
+# misses virtgpu support.
+# Install media-libs/mesa from the gentoo repository.
+=media-libs/mesa-25.1.0-r100
