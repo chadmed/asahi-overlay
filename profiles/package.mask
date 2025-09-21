@@ -1,0 +1,7 @@
+# Mask all asahi-overlay media-libs/virglrenderer versions. virglrenderer 1.2.0
+# fully supports asahi so the gentoo media-libs/virglrenderer-1.2.0 or later
+# ebuild can be used.
+# Install media-libs/virglrenderer from the gentoo repository.
+=media-libs/virglrenderer-1.1.1_p20250806
+=media-libs/virglrenderer-1.1.1_p202504240
+=media-libs/virglrenderer-1.1.1_p202508060
