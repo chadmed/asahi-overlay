@@ -16,3 +16,10 @@
 # misses virtgpu support.
 # Install media-libs/mesa from the gentoo repository.
 =media-libs/mesa-25.1.0-r100
+
+# app-emulation/fex-rootfs-mesa-asahi-20250425 is incompatible with the
+# upstream asahi virtgpu DRM native context protocol.
+# Update app-emulation/fex-rootfs-gentoo to 20250904 or later and uninstall
+# app-emulation/fex-rootfs-mesa-asahi.
+=app-emulation/fex-rootfs-gentoo-20250425
+=app-emulation/fex-rootfs-mesa-asahi-20250425
