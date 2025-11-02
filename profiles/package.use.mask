@@ -1,0 +1,3 @@
+# James Calligeros <jcalligeros99@gmail.com> (2025-11-02)
+# Mask Gecko and MinGW for wine-fex
+app-emulation/wine-fex gecko mingw
