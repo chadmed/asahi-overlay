@@ -9,7 +9,7 @@ K_NODRYRUN="1"
 KERNEL_IUSE_MODULES_SIGN=1
 
 RUST_MIN_VER="1.85.0"
-RUST_MAX_VER="1.89.0"
+RUST_MAX_VER="1.90.0"
 RUST_REQ_USE='rust-src,rustfmt'
 
 inherit kernel-build rust toolchain-funcs verify-sig
