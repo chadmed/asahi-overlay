@@ -1,4 +1,4 @@
-# Copyright 1999-2024 Gentoo Authors
+# Copyright 1999-2025 Gentoo Authors
 # Distributed under the terms of the GNU General Public License v2
 
 EAPI=8
@@ -6,7 +6,7 @@ EAPI=8
 inherit desktop xdg
 
 STEAMVER="1.0.0.81"
-ARM64_WRAPPER_COMMIT="fb3e8aeaffe5bb374b34f2eacc91130a05b17b21"
+ARM64_WRAPPER_COMMIT="111e86cd84f8d04a51a2d5237a35c377543176af"
 
 DESCRIPTION="Steam launcher bundled with AArch64/ARM64 wrapper for Asahi Linux systems"
 HOMEPAGE="
@@ -16,7 +16,7 @@ HOMEPAGE="
 
 SRC_URI="
 	https://repo.steampowered.com/steam/archive/stable/steam_${STEAMVER}.tar.gz
-	https://github.com/chadmed/steam-aarch64/archive/${ARM64_WRAPPER_COMMIT}.tar.gz -> ${PN}-aarch64.tar.gz
+	https://github.com/chadmed/steam-aarch64/archive/${ARM64_WRAPPER_COMMIT}.tar.gz -> ${PN}-aarch64-${ARM64_WRAPPER_COMMIT}.tar.gz
 "
 
 S="${WORKDIR}"
@@ -29,12 +29,11 @@ KEYWORDS="-* ~arm64"
 RDEPEND="
 	app-emulation/FEX
 	app-emulation/muvm
-	gnome-extra/zenity
+	|| (
+		gnome-extra/zenity
+		kde-apps/kdialog
+	)
 "
-
-src_unpack() {
-	default
-}
 
 src_configure() {
 	true
