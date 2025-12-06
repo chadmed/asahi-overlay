@@ -8,5 +8,5 @@ SLOT="asahi/${PVR}"
 KEYWORDS="arm64"
 
 RDEPEND="
-	~sys-kernel/asahi-kernel-${PV}:asahi-${PVR}=
+	~sys-kernel/asahi-kernel-${PV}:asahi-${PV}=
 "
