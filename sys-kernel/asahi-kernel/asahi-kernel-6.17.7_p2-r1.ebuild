@@ -73,7 +73,7 @@ SRC_URI+="
 S=${WORKDIR}/${BASE_P}
 
 LICENSE="GPL-2"
-SLOT="asahi-${PVR}"
+SLOT="asahi-${PV}"
 KEYWORDS="arm64"
 IUSE="debug experimental hardened"
 # mask untested USE flags
