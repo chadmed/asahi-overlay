@@ -66,7 +66,7 @@ RDEPEND="
 "
 DEPEND="
 	dev-cpp/range-v3
-	>=sys-kernel/linux-headers-6.14
+	>=sys-kernel/linux-headers-6.17
 	${RDEPEND}
 "
 
