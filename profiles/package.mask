@@ -23,3 +23,8 @@
 # app-emulation/fex-rootfs-mesa-asahi.
 =app-emulation/fex-rootfs-gentoo-20250425
 =app-emulation/fex-rootfs-mesa-asahi-20250425
+
+# James Calligeros <jcalligeros99@gmail.com> (2025-12-10)
+# No longer required since FEX is now unconditionally built with clang/LLVM.
+# Will be removed 2026-01-01.
+sys-devel/x86_64-multilib-toolchain
