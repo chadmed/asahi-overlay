@@ -1,0 +1,71 @@
+From d5b51daba65921049dd7300139b98c28a519b0da Mon Sep 17 00:00:00 2001
+From: Val Packett <val@invisiblethingslab.com>
+Date: Sat, 29 Nov 2025 22:57:28 -0300
+Subject: [PATCH] vmm: linux: Do not use guest_memfd outside of TEE builds
+ (fixes #478)
+
+aarch64 KVM has recently introduced guest_memfd support, but since there
+are no VM TEEs with upstream support on that arch, it returns EINVAL when
+we try to create a non-mappable memfd (which is what flags==0 implies).
+
+Then.. even if we make it mappable and skip setting the private flag,
+we get a 100% CPU busy loop in the guest. Same happens in QEMU though
+so that's not a libkrun bug. Still, let's avoid *all* of that by not
+trying to use guest_memfd for protecting the VM's memory outside of
+platforms where that's explicitly supported (SEV/TDX).
+
+Signed-off-by: Val Packett <val@invisiblethingslab.com>
+---
+ src/vmm/src/linux/vstate.rs | 18 +++++++++++++++---
+ 1 file changed, 15 insertions(+), 3 deletions(-)
+
+diff --git a/src/vmm/src/linux/vstate.rs b/src/vmm/src/linux/vstate.rs
+index 0948c669b..074340836 100644
+--- a/src/vmm/src/linux/vstate.rs
++++ b/src/vmm/src/linux/vstate.rs
+@@ -669,7 +669,17 @@ impl Vm {
+         let start = region.start_addr().raw_value();
+         let end = start + region.len();
+ 
+-        if !self.fd.check_extension(GuestMemfd) {
++        // GuestMemfd is generally intended for either of two purposes:
++        // * sharing the memory with out-of-process components, and conversely,
++        // * hiding the memory completely from the VMM process (Confidential Computing).
++        //
++        // We only use it for the second use case currently, so don't even try to use it
++        // outside of TEE builds. Software-protected VMs are only available on x86_64 and
++        // are marked with strongly-worded warnings about them being for development only,
++        // as of late 2025. Also, on other architectures like aarch64, guest_memfd in
++        // general is unstable for now, so don't try to use it without a reason.
++
++        if cfg!(not(feature = "tee")) {
+             let memory_region = kvm_userspace_memory_region {
+                 slot: self.next_mem_slot,
+                 guest_phys_addr: start,
+@@ -686,6 +696,10 @@ impl Vm {
+                     .map_err(Error::SetUserMemoryRegion)?;
+             };
+         } else {
++            if !self.fd.check_extension(GuestMemfd) {
++                return Err(Error::KvmCap(GuestMemfd));
++            }
++
+             // Create a guest_memfd and set the region.
+             let guest_memfd = self
+                 .fd
+@@ -716,7 +730,6 @@ impl Vm {
+                     .map_err(Error::SetUserMemoryRegion)?;
+             };
+ 
+-            #[cfg(not(target_arch = "riscv64"))]
+             let attr = kvm_memory_attributes {
+                 address: start,
+                 size: region.len(),
+@@ -724,7 +737,6 @@ impl Vm {
+                 flags: 0,
+             };
+ 
+-            #[cfg(not(target_arch = "riscv64"))]
+             self.fd
+                 .set_memory_attributes(attr)
+                 .map_err(Error::SetMemoryAttributes)?;
