@@ -94,7 +94,7 @@ CRATES="
 	windows_x86_64_msvc@0.52.6
 "
 
-inherit cargo udev
+inherit cargo udev systemd
 
 DESCRIPTION="Speaker protection daemon for embedded Linux systems"
 HOMEPAGE="https://github.com/AsahiLinux/speakersafetyd/"
@@ -121,6 +121,12 @@ src_install() {
 
 pkg_postinst() {
 	udev_reload
+	[[ "${MERGE_TYPE}" == "buildonly" || "$(systemd_is_booted)" == 1 ]] && return
+	elog "speakersafetyd must be running for builtin speakers to function"
+	elog "To enable as a service in OpenRC:"
+	elog "# rc-update add speakersafetyd-noroot default"
+	elog "# rc-service speakersafetyd-noroot start"
+	elog "On Systemd systems, it should be started automatically via a udev rule."
 }
 
 pkg_postrm() {
