@@ -14,7 +14,7 @@ SRC_URI="https://github.com/AsahiLinux/u-boot/archive/refs/tags/${MY_P}.tar.gz -
 LICENSE="GPL-2"
 SLOT="0"
 
-KEYWORDS="~arm64"
+KEYWORDS="arm64"
 
 PATCHES=(
 )
