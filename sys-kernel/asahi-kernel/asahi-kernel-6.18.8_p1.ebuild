@@ -20,7 +20,7 @@ PATCHSET=linux-gentoo-patches-6.18.4
 # forked to https://github.com/projg2/fedora-kernel-config-for-gentoo
 CONFIG_VER=6.18.3-gentoo
 GENTOO_CONFIG_VER=g18
-SHA256SUM_DATE=20260112
+SHA256SUM_DATE=20260130
 
 # asahi specific tag and version parsing
 ASAHI_TAGV=${PV#*_p}
