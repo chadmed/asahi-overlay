@@ -48,10 +48,12 @@ src_configure() {
 
 src_compile() {
 	cd "${S}" || die
+
+	# BUG: Using lld results in an incorrect image size header field. Force bfd.
 	emake  HOSTCC=$(tc-getCC) \
 		CC=$(tc-getCC) \
-		HOSTLD=$(tc-getLD) \
-		LD=$(tc-getLD)
+		HOSTLD=aarch64-unknown-linux-gnu-ld \
+		LD=aarch64-unknown-linux-gnu-ld
 }
 
 src_install() {
