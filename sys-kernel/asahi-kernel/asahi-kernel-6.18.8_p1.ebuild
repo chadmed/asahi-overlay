@@ -96,7 +96,7 @@ BDEPEND="
 	verify-sig? ( >=sec-keys/openpgp-keys-kernel-20250702 )
 "
 PDEPEND="
-	>=virtual/dist-kernel-${PATCH_PV}
+	>=virtual/dist-kernel-${PATCH_PV}:asahi
 "
 
 QA_FLAGS_IGNORED="
