@@ -245,6 +245,7 @@ KEYWORDS="-* ~amd64 ~arm64"
 
 RDEPEND="
 	dev-libs/libkrunfw
+	sys-libs/libcap-ng
 	media-libs/virglrenderer
 "
 DEPEND="
