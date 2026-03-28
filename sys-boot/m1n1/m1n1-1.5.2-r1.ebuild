@@ -1,7 +1,7 @@
 # Copyright 2022 James Calligeros <jcalligeros99@gmail.com>
 # Distributed under the terms of the GNU General Public License v2
 
-EAPI="7"
+EAPI=8
 
 DESCRIPTION="Apple Silicon bootloader and experimentation playground"
 HOMEPAGE="https://asahilinux.org/"
