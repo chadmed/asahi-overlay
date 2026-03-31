@@ -25,6 +25,7 @@ BDEPEND="
 	app-arch/cpio
 	dev-lang/perl
 	sys-devel/bc
+	sys-devel/binutils
 	sys-devel/bison
 	sys-devel/flex
 	dev-build/make
