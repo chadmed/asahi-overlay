@@ -44,7 +44,7 @@ src_unpack() {
 }
 
 src_configure() {
-	emake apple_m1_defconfig
+	emake HOSTCC=$(tc-getCC) CC=$(tc-getCC) apple_m1_defconfig
 }
 
 src_compile() {
