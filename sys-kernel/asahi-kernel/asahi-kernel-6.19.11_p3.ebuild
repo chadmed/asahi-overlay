@@ -140,7 +140,7 @@ src_prepare() {
 	done
 
 	eapply "${DISTDIR}/linux-${ASAHI_BASE_TAG}.diff"
-	eapply "linux-${ASAHI_BASE_TAG}..${ASAHI_TAG}.diff"
+	eapply "${DISTDIR}/linux-${ASAHI_BASE_TAG}..${ASAHI_TAG}.diff"
 
 	default
 
