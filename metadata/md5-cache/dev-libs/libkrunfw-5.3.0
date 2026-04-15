@@ -1,0 +1,12 @@
+BDEPEND=app-alternatives/bc app-alternatives/cpio dev-build/make dev-lang/perl || ( ( dev-lang/python:3.14 dev-python/pyelftools[python_targets_python3_14(-)] ) ( dev-lang/python:3.13 dev-python/pyelftools[python_targets_python3_13(-)] ) ( dev-lang/python:3.12 dev-python/pyelftools[python_targets_python3_12(-)] ) ( dev-lang/python:3.11 dev-python/pyelftools[python_targets_python3_11(-)] ) ) sys-devel/bison sys-devel/flex >=sys-libs/ncurses-5.2 virtual/libelf virtual/pkgconfig
+DEFINED_PHASES=compile install setup unpack
+DESCRIPTION=A dynamic library bundling the guest payload consumed by libkrun
+EAPI=8
+HOMEPAGE=https://github.com/containers/libkrunfw
+INHERIT=python-any-r1 toolchain-funcs
+KEYWORDS=-* ~amd64 ~arm64
+LICENSE=GPL-2 LGPL-2.1
+SLOT=0
+SRC_URI=https://cdn.kernel.org/pub/linux/kernel/v6.x/linux-6.12.76.tar.xz https://github.com/containers/libkrunfw/archive/refs/tags/v5.3.0.tar.gz -> libkrunfw-5.3.0.tar.gz
+_eclasses_=eapi9-pipestatus	d2c134036ac31c3085aebc9147f572bd	multiprocessing	45d0620f25c2f063ad6276ecd9ed9399	python-any-r1	891415dfe39ad9b41b461f2b86354af0	python-utils-r1	9c4180f103a0e8340bc993fc85dbdadd	toolchain-funcs	5195689ff6a73b0e789acfa09d4fbcb9
+_md5_=2071cf4475410d6bcf756732d3aacbef

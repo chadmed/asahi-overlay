@@ -1,0 +1,12 @@
+BDEPEND=dev-build/make clang? ( llvm-core/clang )
+DEFINED_PHASES=compile install postinst postrm
+DESCRIPTION=Apple Silicon bootloader and experimentation playground
+EAPI=8
+HOMEPAGE=https://asahilinux.org/
+IUSE=clang
+KEYWORDS=arm64
+LICENSE=MIT
+RDEPEND=sys-boot/u-boot || ( sys-kernel/asahi-sources virtual/dist-kernel:asahi )
+SLOT=0
+SRC_URI=https://github.com/AsahiLinux/m1n1/archive/refs/tags/v1.5.2.tar.gz -> m1n1-1.5.2.tar.gz
+_md5_=33fc7e4f226b527f8331286c76e49c71

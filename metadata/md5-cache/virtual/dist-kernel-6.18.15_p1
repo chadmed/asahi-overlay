@@ -1,0 +1,7 @@
+DEFINED_PHASES=-
+DESCRIPTION=Virtual to depend on any Distribution Kernel
+EAPI=8
+KEYWORDS=~arm64
+RDEPEND=~sys-kernel/asahi-kernel-6.18.15_p1:asahi-6.18.15_p1=
+SLOT=asahi/6.18.15_p1
+_md5_=fa9678e58ce2f01020a0bd39b745046c
