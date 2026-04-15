@@ -1,0 +1,13 @@
+BDEPEND=app-arch/cpio dev-lang/perl sys-devel/bc sys-devel/binutils sys-devel/bison sys-devel/flex dev-build/make >=sys-libs/ncurses-5.2 virtual/libelf virtual/pkgconfig sys-apps/dtc dev-vcs/git
+DEFINED_PHASES=compile configure install postinst postrm unpack
+DESCRIPTION=Asahi Linux fork of Das U-Boot
+EAPI=8
+HOMEPAGE=https://asahilinux.org/
+INHERIT=toolchain-funcs
+KEYWORDS=~arm64
+LICENSE=GPL-2
+RDEPEND=app-arch/cpio dev-lang/perl sys-devel/bc sys-devel/binutils sys-devel/bison sys-devel/flex dev-build/make >=sys-libs/ncurses-5.2 virtual/libelf virtual/pkgconfig sys-apps/dtc dev-vcs/git sys-apps/asahi-scripts
+SLOT=0
+SRC_URI=https://github.com/AsahiLinux/u-boot/archive/refs/tags/asahi-v2025.10-1.tar.gz -> u-boot-2025.10_p1.tar.gz
+_eclasses_=toolchain-funcs	5195689ff6a73b0e789acfa09d4fbcb9
+_md5_=edc2f50e1e77c8c45aef4cde972ad694

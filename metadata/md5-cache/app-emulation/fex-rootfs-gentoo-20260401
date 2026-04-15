@@ -1,0 +1,15 @@
+BDEPEND=virtual/pkgconfig
+DEFINED_PHASES=install postinst prerm pretend setup
+DEPEND=gnome-extra/zenity sys-apps/xdg-desktop-portal systemd? ( sys-apps/systemd ) !app-emulation/fex-rootfs-mesa-asahi
+DESCRIPTION=A x86 system image used for FEX
+EAPI=8
+HOMEPAGE=https://github.com/WhatAmISupposedToPutHere/fex-rootfs
+INHERIT=systemd linux-info
+IUSE=systemd
+KEYWORDS=-* ~arm64
+LICENSE=metapackage MIT
+RDEPEND=gnome-extra/zenity sys-apps/xdg-desktop-portal systemd? ( sys-apps/systemd ) !app-emulation/fex-rootfs-mesa-asahi
+SLOT=0
+SRC_URI=https://github.com/WhatAmISupposedToPutHere/fex-rootfs/releases/download/20260401/fex-rootfs.sqfs -> fex-rootfs-gentoo-20260401-root.sqfs https://github.com/WhatAmISupposedToPutHere/fex-rootfs/releases/download/20260401/fex-chroot.sqfs -> fex-rootfs-gentoo-20260401-chroot.sqfs https://github.com/WhatAmISupposedToPutHere/fex-rootfs/archive/refs/tags/20260401.tar.gz -> fex-rootfs-gentoo-20260401.tar.gz
+_eclasses_=linux-info	efd923656513c879204fec6638eadee5	systemd	a964c0cbe818b5729da1dbfcee5be861	toolchain-funcs	5195689ff6a73b0e789acfa09d4fbcb9
+_md5_=b2ee20566e11307bee891df532d3f4bd

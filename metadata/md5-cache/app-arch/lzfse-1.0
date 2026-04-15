@@ -1,4 +1,4 @@
-BDEPEND=dev-build/make >=dev-build/cmake-3.20.5
+BDEPEND=dev-build/make >=dev-build/cmake-3.28.5
 DEFINED_PHASES=compile configure install prepare test
 DESCRIPTION=LZFSE compression utilities
 EAPI=8
@@ -8,5 +8,5 @@ KEYWORDS=arm64
 LICENSE=BSD
 SLOT=0
 SRC_URI=https://github.com/lzfse/lzfse/archive/refs/tags/lzfse-1.0.tar.gz
-_eclasses_=toolchain-funcs	e56c7649b804f051623c8bc1a1c44084	multilib	c19072c3cd7ac5cb21de013f7e9832e0	flag-o-matic	288c54efeb5e2aa70775e39032695ad4	multiprocessing	30ead54fa2e2b5f9cd4e612ffc34d0fe	ninja-utils	2df4e452cea39a9ec8fb543ce059f8d6	xdg-utils	baea6080dd821f5562d715887954c9d3	cmake	c7c9a62d6232cac66d4ea32d575c3e7c
+_eclasses_=cmake	3395ce6618fc5c7af03335471b896644	flag-o-matic	fd3558f73f6503093adee69adf41020d	multiprocessing	45d0620f25c2f063ad6276ecd9ed9399	ninja-utils	d063ea1900a793f93eb095010d6d9156	toolchain-funcs	5195689ff6a73b0e789acfa09d4fbcb9	xdg-utils	42869b3c8d86a70ef3cf75165a395e09
 _md5_=a18fbf0efbab1676590793f40e17338a
