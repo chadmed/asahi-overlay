@@ -78,7 +78,7 @@ S=${WORKDIR}/${BASE_P}
 
 LICENSE="GPL-2"
 SLOT="asahi-${PV}"
-KEYWORDS="~arm64"
+KEYWORDS="arm64"
 IUSE="debug experimental hardened"
 # mask untested USE flags
 REQUIRED_USE="
