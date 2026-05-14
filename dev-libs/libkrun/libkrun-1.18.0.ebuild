@@ -1,0 +1,239 @@
+# Copyright 1999-2026 Gentoo Authors
+# Distributed under the terms of the GNU General Public License v2
+
+EAPI=8
+
+CRATES="
+	adler2@2.0.1
+	aho-corasick@1.1.4
+	allocator-api2@0.2.21
+	annotate-snippets@0.9.2
+	anstream@0.6.21
+	anstyle-parse@0.2.7
+	anstyle-query@1.1.5
+	anstyle-wincon@3.0.11
+	anstyle@1.0.14
+	anyhow@1.0.102
+	async-trait@0.1.89
+	autocfg@1.5.0
+	base64@0.22.1
+	bincode@2.0.1
+	bincode_derive@2.0.1
+	bindgen@0.69.5
+	bindgen@0.72.1
+	bitfield-macros@0.19.4
+	bitfield@0.19.4
+	bitflags@1.3.2
+	bitflags@2.11.0
+	block-buffer@0.10.4
+	bumpalo@3.20.2
+	bzip2-sys@0.1.13+1.0.8
+	bzip2@0.5.2
+	caps@0.5.6
+	cc@1.2.57
+	cexpr@0.6.0
+	cfg-expr@0.15.8
+	cfg-if@1.0.4
+	cfg_aliases@0.2.1
+	clang-sys@1.8.1
+	colorchoice@1.0.5
+	convert_case@0.6.0
+	cookie-factory@0.3.3
+	cpufeatures@0.2.17
+	crc32fast@1.5.0
+	crossbeam-channel@0.5.15
+	crossbeam-utils@0.8.21
+	crypto-common@0.1.7
+	digest@0.10.7
+	either@1.15.0
+	env_filter@1.0.0
+	env_logger@0.11.9
+	equivalent@1.0.2
+	errno@0.3.14
+	filetime@0.2.27
+	find-msvc-tools@0.1.9
+	flate2@1.1.9
+	foldhash@0.2.0
+	futures-channel@0.3.32
+	futures-core@0.3.32
+	futures-executor@0.3.32
+	futures-io@0.3.32
+	futures-macro@0.3.32
+	futures-sink@0.3.32
+	futures-task@0.3.32
+	futures-util@0.3.32
+	futures@0.3.32
+	generic-array@0.14.7
+	getrandom@0.3.4
+	glob@0.3.3
+	hashbrown@0.16.1
+	heck@0.5.0
+	imago@0.2.2
+	indexmap@2.13.0
+	iocuddle@0.1.1
+	is_terminal_polyfill@1.70.2
+	itertools@0.12.1
+	itertools@0.13.0
+	itoa@1.0.18
+	jiff-static@0.2.23
+	jiff@0.2.23
+	jobserver@0.1.34
+	js-sys@0.3.91
+	kbs-types@0.13.0
+	kvm-bindings@0.12.1
+	kvm-ioctls@0.22.1
+	lazy_static@1.5.0
+	lazycell@1.3.0
+	libc@0.2.183
+	libloading@0.8.9
+	libredox@0.1.14
+	libspa-sys@0.8.0
+	libspa@0.8.0
+	linux-loader@0.13.2
+	linux-raw-sys@0.12.1
+	log@0.4.29
+	lru@0.16.3
+	memchr@2.8.0
+	memoffset@0.7.1
+	memoffset@0.9.1
+	minimal-lexical@0.2.1
+	miniz_oxide@0.8.9
+	nitro-enclaves@0.5.0
+	nitro-enclaves@0.6.1
+	nix@0.26.4
+	nix@0.27.1
+	nix@0.30.1
+	nix@0.31.2
+	nom@7.1.3
+	once_cell@1.21.4
+	once_cell_polyfill@1.70.2
+	page_size@0.6.0
+	pin-project-lite@0.2.17
+	pin-utils@0.1.0
+	pipewire-sys@0.8.0
+	pipewire@0.8.0
+	pkg-config@0.3.32
+	plain@0.2.3
+	portable-atomic-util@0.2.6
+	portable-atomic@1.13.1
+	ppv-lite86@0.2.21
+	proc-macro2@1.0.106
+	quote@1.0.45
+	r-efi@5.3.0
+	rand@0.9.2
+	rand_chacha@0.9.0
+	rand_core@0.9.5
+	redox_syscall@0.7.3
+	regex-automata@0.4.14
+	regex-syntax@0.8.10
+	regex@1.12.3
+	remain@0.2.15
+	rustc-hash@1.1.0
+	rustc-hash@2.1.1
+	rustc_version@0.4.1
+	rustix@1.1.4
+	rustversion@1.0.22
+	semver@1.0.27
+	serde@1.0.228
+	serde_core@1.0.228
+	serde_derive@1.0.228
+	serde_json@1.0.149
+	serde_spanned@0.6.9
+	sha2@0.10.9
+	shlex@1.3.0
+	signal-hook-registry@1.4.8
+	signal-hook@0.3.18
+	simd-adler32@0.3.8
+	slab@0.4.12
+	sm3@0.4.2
+	smallvec@1.15.1
+	static_assertions@1.1.0
+	strum@0.27.2
+	strum_macros@0.27.2
+	syn@2.0.117
+	system-deps@6.2.2
+	tar@0.4.45
+	target-lexicon@0.12.16
+	tdx@0.1.0
+	thiserror-impl@1.0.69
+	thiserror-impl@2.0.18
+	thiserror@1.0.69
+	thiserror@2.0.18
+	tokio@1.50.0
+	toml@0.8.23
+	toml_datetime@0.6.11
+	toml_edit@0.22.27
+	tracing-attributes@0.1.31
+	tracing-core@0.1.36
+	tracing@0.1.44
+	typenum@1.19.0
+	unicode-ident@1.0.24
+	unicode-segmentation@1.12.0
+	unicode-width@0.1.14
+	unty@0.0.4
+	utf8parse@0.2.2
+	uuid@1.22.0
+	version-compare@0.2.1
+	version_check@0.9.5
+	virtio-bindings@0.2.7
+	virtue@0.0.18
+	vm-fdt@0.3.0
+	vm-memory@0.17.1
+	vmm-sys-util@0.12.1
+	vmm-sys-util@0.14.0
+	vsock@0.5.3
+	wasip2@1.0.2+wasi-0.2.9
+	wasm-bindgen-macro-support@0.2.114
+	wasm-bindgen-macro@0.2.114
+	wasm-bindgen-shared@0.2.114
+	wasm-bindgen@0.2.114
+	winapi-i686-pc-windows-gnu@0.4.0
+	winapi-x86_64-pc-windows-gnu@0.4.0
+	winapi@0.3.9
+	windows-link@0.2.1
+	windows-sys@0.61.2
+	winnow@0.7.15
+	wit-bindgen@0.51.0
+	xattr@1.6.1
+	yansi-term@0.1.2
+	zerocopy-derive@0.8.47
+	zerocopy@0.8.47
+	zmij@1.0.21
+	zstd-safe@7.2.4
+	zstd-sys@2.0.16+zstd.1.5.7
+	zstd@0.13.3
+"
+
+RUST_MIN_VER="1.87.0"
+
+inherit cargo
+
+DESCRIPTION="A dynamic library providing Virtualization-based process isolation capabilities"
+HOMEPAGE="https://github.com/containers/libkrun"
+
+SRC_URI="
+	${CARGO_CRATE_URIS}
+	https://github.com/containers/libkrun/archive/refs/tags/v${PV}.tar.gz -> ${P}.tar.gz
+"
+
+LICENSE="0BSD Apache-2.0 Apache-2.0-with-LLVM-exceptions BSD BSD-2 Boost-1.0 ISC MIT MPL-2.0 Unicode-DFS-2016 Unlicense ZLIB"
+SLOT="0"
+KEYWORDS="-* ~amd64 ~arm64"
+
+RDEPEND="
+	dev-libs/libkrunfw
+	sys-libs/libcap-ng
+	media-libs/virglrenderer
+"
+DEPEND="
+	${RDEPEND}
+"
+
+src_compile() {
+	unset ARCH
+	emake PREFIX=/usr GPU=1 BLK=1 NET=1
+}
+
+src_install() {
+	emake DESTDIR="${D}" PREFIX=/usr install
+}
