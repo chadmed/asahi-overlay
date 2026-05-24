@@ -1,0 +1,31 @@
+From 7bc5223ed71bdee422c01c67b0456c4238b4a36e Mon Sep 17 00:00:00 2001
+From: Janne Grunau <j@jannau.net>
+Date: Sat, 23 May 2026 20:47:46 +0200
+Subject: [PATCH 1/1] config: gentoo: Drop RANDSTRUCT from
+ GENTOO_KERNEL_SELF_PROTECTION_COMMON
+
+It is incompatible with RUST and the current method of selected it
+results in Kconfig breakage due to circular dependencies. Drop it for
+asahi-kernel.
+
+Signed-off-by: Janne Grunau <j@jannau.net>
+---
+ distro/Kconfig | 4 +---
+ 1 file changed, 1 insertion(+), 3 deletions(-)
+
+diff --git a/distro/Kconfig b/distro/Kconfig
+index 9166e4a9abe6..ad4b417e0da7 100644
+--- a/distro/Kconfig
++++ b/distro/Kconfig
+@@ -218,8 +218,6 @@ config GENTOO_KERNEL_SELF_PROTECTION_COMMON
+ 	select SECURITY_DMESG_RESTRICT
+ 	select PANIC_ON_OOPS
+ 	select GCC_PLUGIN_LATENT_ENTROPY
+-	select GCC_PLUGIN_RANDSTRUCT
+-	select RANDSTRUCT_FULL
+ 	select ZERO_CALL_USED_REGS if CC_HAS_ZERO_CALL_USED_REGS
+ 
+ 	help
+-- 
+2.45.0
+
