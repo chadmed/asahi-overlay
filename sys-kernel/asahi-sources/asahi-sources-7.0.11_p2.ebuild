@@ -48,9 +48,9 @@ HOMEPAGE="https://asahilinux.org"
 SRC_URI="${KERNEL_URI} ${GENPATCHES_URI} ${ARCH_URI}
 	https://github.com/AsahiLinux/linux/compare/v${MY_BASE}...${ASAHI_BASE_TAG}.diff
 		-> linux-${ASAHI_BASE_TAG}.diff
+	https://github.com/AsahiLinux/linux/compare/${ASAHI_BASE_TAG}...${ASAHI_TAG}.diff
+		-> linux-${ASAHI_BASE_TAG}..${ASAHI_TAG}.diff
 "
-	# https://github.com/AsahiLinux/linux/compare/${ASAHI_BASE_TAG}...${ASAHI_TAG}.diff
-	# 	-> linux-${ASAHI_BASE_TAG}..${ASAHI_TAG}.diff
 
 KV_FULL="${PVR/_p/-asahi-}"
 S="${WORKDIR}/linux-${KV_FULL}"
@@ -66,8 +66,8 @@ UNIPATCH_STRICTORDER="yes"
 UNIPATCH_LIST="
 	${FILESDIR}/${PN}-7.0-config-gentoo-Drop-RANDSTRUCT-from-GENTOO_KERNEL_SEL.patch
 	${DISTDIR}/linux-${ASAHI_BASE_TAG}.diff
+	${DISTDIR}/linux-${ASAHI_BASE_TAG}..${ASAHI_TAG}.diff
 "
-	# ${DISTDIR}/linux-${ASAHI_BASE_TAG}..${ASAHI_TAG}.diff
 
 pkg_postinst() {
 	einfo "For more information about Asahi Linux please visit ${HOMEPAGE},"
