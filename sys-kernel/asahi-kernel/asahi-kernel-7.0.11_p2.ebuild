@@ -48,13 +48,13 @@ SRC_URI+="
 	https://gitweb.gentoo.org/fork/fedora/kernel.git/snapshot/kernel-${CONFIG_VER}.tar.bz2
 	https://github.com/AsahiLinux/linux/compare/v${PATCH_PV}...${ASAHI_BASE_TAG}.diff
 		-> linux-${ASAHI_BASE_TAG}.diff
+	https://github.com/AsahiLinux/linux/compare/${ASAHI_BASE_TAG}...${ASAHI_TAG}.diff
+		-> linux-${ASAHI_BASE_TAG}..${ASAHI_TAG}.diff
 	verify-sig? (
 		https://cdn.kernel.org/pub/linux/kernel/v$(ver_cut 1).x/sha256sums.asc
 			-> linux-$(ver_cut 1).x-sha256sums-${SHA256SUM_DATE}.asc
 	)
 "
-	# https://github.com/AsahiLinux/linux/compare/${ASAHI_BASE_TAG}...${ASAHI_TAG}.diff
-	# 	-> linux-${ASAHI_BASE_TAG}..${ASAHI_TAG}.diff
 S=${WORKDIR}/${BASE_P}
 
 SLOT="asahi-${PV}"
@@ -108,7 +108,7 @@ src_prepare() {
 	eapply "${WORKDIR}/${PATCHSET}"
 
 	eapply "${DISTDIR}/linux-${ASAHI_BASE_TAG}.diff"
-	# eapply "${DISTDIR}/linux-${ASAHI_BASE_TAG}..${ASAHI_TAG}.diff"
+	eapply "${DISTDIR}/linux-${ASAHI_BASE_TAG}..${ASAHI_TAG}.diff"
 
 	eapply "${FILESDIR}/${PN}-7.0-config-gentoo-Drop-RANDSTRUCT-from-GENTOO_KERNEL_SEL.patch"
 
