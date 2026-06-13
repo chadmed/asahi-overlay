@@ -18,6 +18,7 @@ BDEPEND="
 src_install() {
 	emake DESTDIR="${D}" PREFIX="/usr" SYS_PREFIX="" install-dracut
 	emake DESTDIR="${D}" PREFIX="/usr" install-macsmc-battery
+	emake DESTDIR="${D}" PREFIX="/usr" install-udev-hwdb
 
 	newinitd "${FILESDIR}/${PN}-macsmc-battery.openrc" "macsmc-battery"
 
