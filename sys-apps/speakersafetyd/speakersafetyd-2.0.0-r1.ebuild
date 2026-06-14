@@ -101,7 +101,7 @@ QA_FLAGS_IGNORED="usr/bin/${PN}"
 src_install() {
 	cargo_src_install
 	emake DESTDIR="${D}" install-data
-	doinitd "${FILESDIR}/speakersafetyd-noroot-${PV}"
+	doinitd "${FILESDIR}/speakersafetyd"
 }
 
 pkg_postinst() {
@@ -109,8 +109,8 @@ pkg_postinst() {
 	[[ "${MERGE_TYPE}" == "buildonly" || "$(systemd_is_booted)" == 1 ]] && return
 	elog "speakersafetyd must be running for builtin speakers to function"
 	elog "To enable as a service in OpenRC:"
-	elog "# rc-update add speakersafetyd-noroot default"
-	elog "# rc-service speakersafetyd-noroot start"
+	elog "# rc-update add speakersafetyd default"
+	elog "# rc-service speakersafetyd start"
 	elog "On Systemd systems, it should be started automatically via a udev rule."
 }
 
