@@ -38,7 +38,7 @@ ASAHI_TAG="asahi-${MY_BASE}-${MY_TAG}"
 # ASAHI_BASE is used for when there are multiple asahi tags for a specific
 # kernel release. If this is not the case comment "ASAHI_BASE=..." and all
 # which reference "${ASAHI_BASE_TAG}..${ASAHI_TAG}"
-#ASAHI_BASE=$(ver_cut 4)
+ASAHI_BASE=1
 # ASAHI_BASE_TAG is the first used TAG of specific release, i.e. usually
 # the first tag of a linux 6.x or linux stable 6.x.y release
 ASAHI_BASE_TAG="asahi-${MY_BASE}-${ASAHI_BASE:-${MY_TAG}}"
@@ -49,10 +49,10 @@ SRC_URI="${KERNEL_URI} ${GENPATCHES_URI} ${ARCH_URI}
 	https://github.com/AsahiLinux/linux/compare/v${MY_BASE}...${ASAHI_BASE_TAG}.diff
 		-> linux-${ASAHI_BASE_TAG}.diff
 "
-# SRC_URI+="
-# 	https://github.com/AsahiLinux/linux/compare/${ASAHI_BASE_TAG}...${ASAHI_TAG}.diff
-# 		-> linux-${ASAHI_BASE_TAG}..${ASAHI_TAG}.diff
-# "
+SRC_URI+="
+	https://github.com/AsahiLinux/linux/compare/${ASAHI_BASE_TAG}...${ASAHI_TAG}.diff
+		-> linux-${ASAHI_BASE_TAG}..${ASAHI_TAG}.diff
+"
 
 KV_FULL="${PVR/_p/-asahi-}"
 S="${WORKDIR}/linux-${KV_FULL}"
@@ -69,9 +69,9 @@ UNIPATCH_LIST="
 	${FILESDIR}/${PN}-7.0-config-gentoo-Drop-RANDSTRUCT-from-GENTOO_KERNEL_SEL.patch
 	${DISTDIR}/linux-${ASAHI_BASE_TAG}.diff
 "
-# UNIPATCH_LIST+="
-# 	${DISTDIR}/linux-${ASAHI_BASE_TAG}..${ASAHI_TAG}.diff
-# "
+UNIPATCH_LIST+="
+	${DISTDIR}/linux-${ASAHI_BASE_TAG}..${ASAHI_TAG}.diff
+"
 
 pkg_postinst() {
 	einfo "For more information about Asahi Linux please visit ${HOMEPAGE},"
