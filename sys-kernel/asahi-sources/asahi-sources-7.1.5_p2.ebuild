@@ -38,7 +38,7 @@ ASAHI_TAG="asahi-${MY_BASE}-${MY_TAG}"
 # ASAHI_BASE is used for when there are multiple asahi tags for a specific
 # kernel release. If this is not the case comment "ASAHI_BASE=..." and all
 # which reference "${ASAHI_BASE_TAG}..${ASAHI_TAG}"
-ASAHI_BASE=1
+#ASAHI_BASE=$(ver_cut 4)
 # ASAHI_BASE_TAG is the first used TAG of specific release, i.e. usually
 # the first tag of a linux 6.x or linux stable 6.x.y release
 ASAHI_BASE_TAG="asahi-${MY_BASE}-${ASAHI_BASE:-${MY_TAG}}"
