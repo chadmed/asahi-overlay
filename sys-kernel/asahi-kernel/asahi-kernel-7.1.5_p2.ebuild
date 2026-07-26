@@ -32,7 +32,7 @@ ASAHI_TAG="asahi-${PATCH_PV}-${ASAHI_TAGV}"
 # ASAHI_BASE is used for when there are multiple asahi tags for a specific
 # kernel release. If this is not the case comment "ASAHI_BASE=..." and all
 # which reference "${ASAHI_BASE_TAG}..${ASAHI_TAG}"
-#ASAHI_BASE=1
+ASAHI_BASE=1
 # ASAHI_BASE_TAG is the first used TAG of specific release, i.e. usually
 # the first tag of a linux 6.x or linux stable 6.x.y release
 ASAHI_BASE_TAG="asahi-${PATCH_PV}-${ASAHI_BASE:-${ASAHI_TAGV}}"
@@ -57,10 +57,10 @@ SRC_URI+="
 			-> linux-$(ver_cut 1).x-sha256sums-${SHA256SUM_DATE}.asc
 	)
 "
-# SRC_URI+="
-# 	https://github.com/AsahiLinux/linux/compare/${ASAHI_BASE_TAG}...${ASAHI_TAG}.diff
-# 		-> linux-${ASAHI_BASE_TAG}..${ASAHI_TAG}.diff
-# "
+SRC_URI+="
+	https://github.com/AsahiLinux/linux/compare/${ASAHI_BASE_TAG}...${ASAHI_TAG}.diff
+		-> linux-${ASAHI_BASE_TAG}..${ASAHI_TAG}.diff
+"
 S=${WORKDIR}/${BASE_P}
 
 SLOT="asahi-${PV}"
@@ -113,7 +113,7 @@ src_prepare() {
 	eapply "${WORKDIR}/${PATCHSET}"
 
 	eapply "${DISTDIR}/linux-${ASAHI_BASE_TAG}.diff"
-	# eapply "${DISTDIR}/linux-${ASAHI_BASE_TAG}..${ASAHI_TAG}.diff"
+	eapply "${DISTDIR}/linux-${ASAHI_BASE_TAG}..${ASAHI_TAG}.diff"
 
 	eapply "${FILESDIR}/${PN}-7.0-config-gentoo-Drop-RANDSTRUCT-from-GENTOO_KERNEL_SEL.patch"
 
