@@ -33,7 +33,7 @@ src_unpack() {
 	if [[ ${PV} == 9999 ]]; then
 		git-r3_src_unpack
 	else
-		unpack ${MY_P}.tar.gz
+		unpack ${P}.tar.gz
 	fi
 }
 
