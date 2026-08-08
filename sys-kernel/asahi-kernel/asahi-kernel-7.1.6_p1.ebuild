@@ -77,7 +77,10 @@ REQUIRED_USE="
 # Rust is non-negotiable for the dist kernel
 DEPEND="
 	${DEPEND}
-	sys-boot/m1n1
+	|| (
+		sys-boot/m1n1
+		sys-boot/m1n1-bin
+	)
 	sys-boot/u-boot
 "
 BDEPEND="
