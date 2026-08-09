@@ -78,8 +78,8 @@ REQUIRED_USE="
 DEPEND="
 	${DEPEND}
 	|| (
-		sys-boot/m1n1
 		sys-boot/m1n1-bin
+		sys-boot/m1n1
 	)
 	sys-boot/u-boot
 "
