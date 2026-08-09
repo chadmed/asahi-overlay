@@ -72,7 +72,9 @@ src_unpack() {
 
 src_configure() {
 	for CHOST in ${HOSTS[@]}; do
-		per_host_src_configure
+		(
+			per_host_src_configure
+		)
 	done
 }
 
@@ -134,7 +136,9 @@ per_host_src_configure() {
 
 src_compile() {
 	for CHOST in ${HOSTS[@]}; do
-		per_host_src_compile
+		(
+			per_host_src_compile
+		)
 	done
 }
 
@@ -150,7 +154,9 @@ per_host_src_compile() {
 
 src_install() {
 	for CHOST in ${HOSTS[@]}; do
-		per_host_src_install
+		(
+			per_host_src_install
+		)
 	done
 }
 
