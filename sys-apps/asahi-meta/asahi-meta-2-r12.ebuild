@@ -13,8 +13,8 @@ IUSE="kde +mesa sound v4l"
 
 RDEPEND="
 	|| (
-		sys-boot/m1n1
 		sys-boot/m1n1-bin
+		sys-boot/m1n1
 	)
 	sys-boot/u-boot
 	sys-apps/asahi-scripts
