@@ -45,10 +45,6 @@ BDEPEND="${BDEPEND}
 	clang? ( llvm-core/clang )
 "
 
-PATCHES=(
-	"${FILESDIR}/${P}-unvendor-fatfs.patch"
-)
-
 src_compile() {
 	cd "${S}" || die
 	if use clang; then
