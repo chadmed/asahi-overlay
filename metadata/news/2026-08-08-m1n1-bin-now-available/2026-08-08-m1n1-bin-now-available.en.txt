@@ -1,7 +1,7 @@
 Title: sys-boot/m1n1-bin is now available
 Author: James Calligeros <jcalligeros99@gmail.com>
 Posted: 2026-08-08
-Revision: 2
+Revision: 3
 News-Item-Format: 2.0
 
 As most Asahi users will be aware, m1n1 now requires Rust. More
@@ -18,7 +18,10 @@ As a user, you have two options:
     If you are using dev-lang/rust, you have the option of building
     std for an arbitrary set of target triples. Create the file
     /etc/portage/env/dev-lang/rust with the contents:
-        RUST_CROSS_TARGETS=("AArch64:aarch64-unknown-none-softfloat:aarch64-unknown-linux-gnu")
+        I_KNOW_WHAT_I_AM_DOING_CROSS=yes
+        RUST_CROSS_TARGETS=(
+                "AArch64:aarch64-unknown-none-softfloat:aarch64-unknown-linux-gnu"
+        )
     and rebuild dev-lang/rust. You should now be able to build sys-boot/m1n1
     just as before.
 
