@@ -19,7 +19,7 @@ fi
 
 S="${WORKDIR}/${PN}-${PV}"
 
-LICENSE="GPL-3.0-or-later"
+LICENSE="GPL-3"
 SLOT="0"
 
 DEPEND="media-libs/libva"
