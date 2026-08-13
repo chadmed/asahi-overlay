@@ -60,7 +60,7 @@ fi
 KV_FULL="${PVR/_p/-asahi-}"
 S="${WORKDIR}/linux-${KV_FULL}"
 
-KEYWORDS="~amd64 ~arm64"
+KEYWORDS="~amd64 arm64"
 
 DEPEND="
 	${DEPEND}
