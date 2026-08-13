@@ -67,7 +67,7 @@ S=${WORKDIR}/${BASE_P}
 
 SLOT="asahi-${PV}"
 
-KEYWORDS="~arm64"
+KEYWORDS="arm64"
 IUSE="debug hardened"
 REQUIRED_USE="
 	hppa? ( savedconfig )
