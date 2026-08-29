@@ -70,6 +70,7 @@ DEPEND="
 UNIPATCH_STRICTORDER="yes"
 UNIPATCH_LIST="
 	${FILESDIR}/${PN}-7.0-config-gentoo-Drop-RANDSTRUCT-from-GENTOO_KERNEL_SEL.patch
+	${FILESDIR}/${PN}-7.1.8-drop-kspp-mte.patch
 	${DISTDIR}/linux-${ASAHI_BASE_TAG}.diff
 "
 if [ ${ASAHI_BASE_TAG} != ${ASAHI_TAG} ]; then
