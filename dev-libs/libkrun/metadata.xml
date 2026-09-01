@@ -5,6 +5,6 @@
   <email>asahi@gentoo.org</email>
 </maintainer>
 <upstream>
-  <remote-id type="github">containers/libkrun</remote-id>
+  <remote-id type="github">libkrun/libkrun</remote-id>
 </upstream>
 </pkgmetadata>
