@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE pkgmetadata SYSTEM "https://www.gentoo.org/dtd/metadata.dtd">
+<pkgmetadata>
+	<maintainer type="person">
+		<email>janne-gnt@jannau.net</email>
+		<name>Janne Grunau</name>
+	</maintainer>
+	<upstream>
+		<remote-id type="github">AsahiLinux/asahi-fix27</remote-id>
+	</upstream>
+</pkgmetadata>
