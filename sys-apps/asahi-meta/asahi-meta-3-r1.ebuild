@@ -1,0 +1,47 @@
+# Copyright 1999-2023 Gentoo Authors
+# Distributed under the terms of the GNU General Public License v2
+
+EAPI=8
+
+DESCRIPTION="Metapackage for the Asahi support packages"
+HOMEPAGE="https://asahilinux.org/"
+
+LICENSE="metapackage"
+SLOT=0
+KEYWORDS="~arm64"
+IUSE="kde +mesa sound v4l vaapi"
+REQUIRED_USE="vaapi? ( v4l )"
+
+RDEPEND="
+	|| (
+		sys-boot/m1n1-bin
+		sys-boot/m1n1
+	)
+	sys-boot/u-boot
+	sys-apps/asahi-scripts
+	sys-apps/asahi-configs
+	sys-firmware/asahi-firmware
+	sys-fs/asahi-fix27
+	media-libs/alsa-ucm-conf-asahi
+	kde? ( kde-plasma/kwin[filecaps] )
+	sound? ( media-libs/asahi-audio )
+	mesa? (
+		>=media-libs/mesa-24.1.0_pre20240228[video_cards_asahi(-)]
+	)
+	v4l? ( sys-firmware/avd-fw )
+	vaapi? ( media-libs/libva-v4l2_request )
+"
+
+S=${WORKDIR}
+
+src_install() {
+	default
+
+	keepdir /usr/share/"${PN}"
+}
+
+pkg_postinst() {
+	if [ ! -e "${ROOT}"/usr/share/"${PN}"/asahi-fix27.done ]; then
+		"${ROOT}"/usr/bin/asahi-fix27 --confirm | tee -a "${ROOT}"/usr/share/"${PN}"/asahi-fix27.done
+	fi
+}
