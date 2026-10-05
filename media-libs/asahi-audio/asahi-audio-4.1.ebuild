@@ -9,7 +9,7 @@ SRC_URI="https://github.com/AsahiLinux/${PN}/archive/refs/tags/v${PV}.tar.gz -> 
 LICENSE="MIT"
 SLOT="0/2.0"
 
-KEYWORDS="~arm64"
+KEYWORDS="arm64"
 
 RDEPEND="
 	>=media-video/pipewire-1.0.2[extra,lv2,sound-server]
