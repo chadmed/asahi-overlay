@@ -7,6 +7,7 @@ CRATES="
 	bitflags@2.13.0
 	log@0.4.33
 	uuid@1.23.4
+	sha1_smol@1.0.1
 "
 
 declare -A GIT_CRATES=(
@@ -26,7 +27,7 @@ SRC_URI="
 "
 LICENSE="MIT"
 SLOT="0"
-KEYWORDS="arm64"
+KEYWORDS="~arm64"
 IUSE="clang"
 
 BDEPEND="dev-build/make"
