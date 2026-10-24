@@ -50,4 +50,4 @@ LICENSE="GPL-2"
 # Dependent crate licenses
 LICENSE+=" MIT Unicode-3.0"
 SLOT="0"
-KEYWORDS="~arm64"
+KEYWORDS="arm64"
