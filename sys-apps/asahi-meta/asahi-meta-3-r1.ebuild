@@ -8,7 +8,7 @@ HOMEPAGE="https://asahilinux.org/"
 
 LICENSE="metapackage"
 SLOT=0
-KEYWORDS="~arm64"
+KEYWORDS="arm64"
 IUSE="kde +mesa sound v4l vaapi"
 REQUIRED_USE="vaapi? ( v4l )"
 
