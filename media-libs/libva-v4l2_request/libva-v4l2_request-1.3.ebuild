@@ -13,7 +13,7 @@ if [[ ${PV} == 9999 ]]; then
 	inherit git-r3
 else
 	SRC_URI="https://github.com/sofus13/${PN}/archive/refs/tags/${PV}.tar.gz -> ${PF}.tar.gz"
-	KEYWORDS="~arm64"
+	KEYWORDS="arm64"
 fi
 
 
