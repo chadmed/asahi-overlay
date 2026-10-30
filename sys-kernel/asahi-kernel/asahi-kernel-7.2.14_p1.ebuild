@@ -14,12 +14,12 @@ inherit kernel-build rust toolchain-funcs verify-sig
 
 BASE_P=linux-${PV%.*}
 PATCH_PV=${PV%_p*}
-PATCHSET=linux-gentoo-patches-7.1.9
+PATCHSET=linux-gentoo-patches-7.2.13
 # https://koji.fedoraproject.org/koji/packageinfo?packageID=8
 # forked to git.gentoo.org:fork/fedora/kernel
 CONFIG_VER=7.2.10-gentoo
 GENTOO_CONFIG_P=gentoo-kernel-config-g19
-SHA256SUM_DATE=20261015
+SHA256SUM_DATE=20261030
 # Debian kconfig commit from:
 # https://salsa.debian.org/kernel-team/linux/-/tree/debian/latest/debian/
 DEBIAN_COMMIT=31e70f1f469ef1ce4c910df1d12b7de09da561d1
@@ -120,8 +120,6 @@ src_prepare() {
 	if [ ${ASAHI_BASE_TAG} != ${ASAHI_TAG} ]; then
 		eapply "${DISTDIR}/linux-${ASAHI_BASE_TAG}..${ASAHI_TAG}.diff"
 	fi
-
-	eapply "${FILESDIR}/${PN}-7.0-config-gentoo-Drop-RANDSTRUCT-from-GENTOO_KERNEL_SEL.patch"
 
 	default
 
