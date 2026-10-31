@@ -23,7 +23,9 @@ LICENSE="GPL-3"
 SLOT="0"
 
 DEPEND="media-libs/libva"
-RDEPEND="${DEPEND}"
+RDEPEND="${DEPEND}
+	!=sys-apps/asahi-configs-3
+"
 BDEPEND=""
 
 src_unpack() {
