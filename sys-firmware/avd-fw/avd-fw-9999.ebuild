@@ -14,12 +14,13 @@ if [[ ${PV} == 9999 ]]; then
 	EGIT_REPO_URI="https://github.com/asahilinux/avd-fw.git"
 	inherit git-r3
 else
-	SRC_URI="https://github.com/AsahiLinux/${PN}/archive/refs/tags/v${PV}.tar.gz -> ${PN}-${PV}.tar.gz"
+	SRC_URI="https://github.com/AsahiLinux/${PN}/releases/download/v${PV}/${P}.tar.xz"
 	KEYWORDS="~arm64"
 fi
 
 LICENSE="MIT"
 SLOT="0"
+IUSE="+proprietary-codecs"
 
 DEPEND=""
 RDEPEND="${DEPEND}"
@@ -33,18 +34,18 @@ src_unpack() {
 	if [[ ${PV} == 9999 ]]; then
 		git-r3_src_unpack
 	else
-		unpack ${P}.tar.gz
+		unpack ${P}.tar.xz
 	fi
 }
 
 src_configure() {
 	local emesonargs=()
 
+	emesonargs+=(--cross-file=./llvm.ini)
 	emesonargs+=(--libdir=lib)
-
 	emesonargs+=(-Dfirmwaredir=firmware/updates)
 
-	emesonargs+=(--cross-file=./llvm.ini)
+	emesonargs+=(-Dvideo-codecs=$(usex proprietary-codecs "all" "all_free"))
 
 	meson_src_configure
 }

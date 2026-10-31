@@ -6,13 +6,13 @@ EAPI=8
 inherit meson
 
 DESCRIPTION="A VA-API (libva) backend driver for video decoders on Apple silicon systems"
-HOMEPAGE="https://github.com/sofus13/asahi-va-driver"
+HOMEPAGE="https://github.com/AsahiLinux/asahi-va-driver"
 
 if [[ ${PV} == 9999 ]]; then
-	EGIT_REPO_URI="https://github.com/sofus13/asahi-va-driver.git"
+	EGIT_REPO_URI="https://github.com/AsahiLinux/${PN}.git"
 	inherit git-r3
 else
-	SRC_URI="https://github.com/sofus13/${PN}/archive/refs/tags/${PV}.tar.gz -> ${PF}.tar.gz"
+	SRC_URI="https://github.com/AsahiLinux/${PN}/archive/refs/tags/${PV}/${PN}-${PV}.tar.gz"
 	KEYWORDS="~arm64"
 fi
 
