@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE pkgmetadata SYSTEM "https://www.gentoo.org/dtd/metadata.dtd">
+<pkgmetadata>
+<maintainer type="person">
+  <email>janne-gentoo@jannau.net</email>
+  <name>Janne Grunau</name>
+</maintainer>
+<use>
+  <flag name="proprietary-codecs">Enable codecs for patent-encumbered audio and video formats.</flag>
+</use>
+<upstream>
+  <remote-id type="github">AsahiLinux/avd-fw</remote-id>
+</upstream>
+</pkgmetadata>
