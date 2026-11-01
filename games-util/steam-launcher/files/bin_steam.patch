@@ -1,0 +1,82 @@
+--- a/bin_steam.sh
++++ b/bin_steam.sh
+@@ -118,7 +118,7 @@
+ {
+ 	# Maybe be smarter someday
+ 	# Right now this is the only platform we have a bootstrap for, so hard-code it.
+-	echo ubuntu12_32
++	echo steamrtarm64
+ }
+ 
+ function setup_variables()
+@@ -229,7 +229,7 @@
+ 	# this script we assume that ~/.steam/steam and ~/.steam/root
+ 	# are the same: they only differ in developer use-cases which
+ 	# also bypass this script
+-	local srt="${STEAM_RUNTIME_SCOUT:-"$data/ubuntu12_32/steam-runtime"}"
++	local srt="${STEAM_RUNTIME_SCOUT:-"$data/steamrtarm64/steam-runtime"}"
+ 	local argv="$2"
+ 
+ 	if [[ -n "$data" && -x "$data/$STEAMBOOTSTRAP" ]]; then
+@@ -247,8 +247,8 @@
+ 		return 1
+ 	fi
+ 
+-	local runtime="$STEAMCONFIG/root/ubuntu12_32/steam-runtime"
+-	local remote="$runtime/amd64/usr/bin/steam-runtime-steam-remote"
++	local runtime="$STEAMCONFIG/root/steamrtarm64"
++	local remote="$runtime/steam"
+ 
+ 	if [ -x "$remote" ] && "$remote" "$@" 2>/dev/null; then
+ 		return 0
+@@ -268,46 +268,8 @@
+ 
+ # If Steam is already running, try to forward the command-line to it.
+ # If successful, there's nothing more to do.
+-if forward_command_line "$@"; then
+-	exit 0
+-fi
+-
+-if ! check_bootstrap "$LAUNCHSTEAMDIR" "$*"; then
+-	# See if we just need to recreate the data link
+-	if check_bootstrap "$DEFAULTSTEAMDIR" "$*"; then
+-		# Usually ~/.steam/steam -> ~/.local/share/Steam
+-		log $"Repairing installation, linking $STEAMDATALINK to $DEFAULTSTEAMDIR"
+-		repair_bootstrap "$DEFAULTSTEAMDIR"
+-	elif check_bootstrap "$CLASSICSTEAMDIR" "$*"; then
+-		# Legacy: ~/.steam/steam -> ~/Steam
+-		log $"Repairing installation, linking $STEAMDATALINK to $CLASSICSTEAMDIR"
+-		repair_bootstrap "$CLASSICSTEAMDIR"
+-	fi
+-fi
+-
+-if [[ ! -L "$STEAMDATALINK" ]] || ( ! check_bootstrap "$LAUNCHSTEAMDIR" "$*" ); then
+-	install_bootstrap "$DEFAULTSTEAMDIR"
+-fi
+-
+-if ! check_bootstrap "$LAUNCHSTEAMDIR" "$*"; then
+-	show_message --error $"Couldn't set up Steam data - please contact technical support"
+-	exit 1
+-fi
+-
+-# Leave a copy of the bootstrap tarball in ~/.steam so that Steam can
+-# re-bootstrap itself if required
+-if ! cmp -s "$LAUNCHSTEAMBOOTSTRAPFILE" "$LAUNCHSTEAMDIR/bootstrap.tar.xz"; then
+-    cp "$LAUNCHSTEAMBOOTSTRAPFILE" "$LAUNCHSTEAMDIR/bootstrap.tar.xz"
+-fi
+-
+-STEAMDEPS="${STEAMSCRIPT%/*}/steamdeps"
+-if [ -x "$STEAMDEPS" ]; then
+-	if ! "$STEAMDEPS"; then
+-		log "Unable to install Steam dependencies by running $STEAMDEPS, trying to continue anyway..."
+-	fi
+-fi
+-
+-# go to the install directory and run the client
+-cd "$LAUNCHSTEAMDIR"
++#if forward_command_line "$@"; then
++#	exit 0
++#fi
+ 
+-exec "$LAUNCHSTEAMDIR/$STEAMBOOTSTRAP" ${log_opened+-srt-logger-opened} "$@"
++exec "$LAUNCHSTEAMDIR/$LAUNCHSTEAMPLATFORM/steam" "$@"
