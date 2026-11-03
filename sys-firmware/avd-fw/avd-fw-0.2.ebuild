@@ -15,7 +15,7 @@ if [[ ${PV} == 9999 ]]; then
 	inherit git-r3
 else
 	SRC_URI="https://github.com/AsahiLinux/${PN}/releases/download/v${PV}/${PN}-v${PV}.tar.xz -> ${P}.tar.xz"
-	KEYWORDS="~arm64"
+	KEYWORDS="arm64"
 fi
 
 LICENSE="MIT"
