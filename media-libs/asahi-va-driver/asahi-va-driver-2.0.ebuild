@@ -13,7 +13,7 @@ if [[ ${PV} == 9999 ]]; then
 	inherit git-r3
 else
 	SRC_URI="https://github.com/AsahiLinux/${PN}/archive/refs/tags/${PV}/${PN}-${PV}.tar.gz"
-	KEYWORDS="~arm64"
+	KEYWORDS="arm64"
 fi
 
 
@@ -37,6 +37,11 @@ src_unpack() {
 }
 
 pkg_postinst() {
+	einfo "asahi-va-driver will be autoselected on systems with asahi GPU driver"
+	einfo "On systems without GPU driver (M3 devices in November 2026) the driver"
+	einfo "has to be manually selected with the environment variable"
+	einfo "\"LIBVA_DRIVER_NAME\"."
+	einfo
 	einfo "Hardware decoding in firefox will only work if the following is set:"
 	einfo "    export MOZ_DISABLE_RDD_SANDBOX=1"
 	einfo "Note that disabling the RDD sandbox trades away some of the protection"
