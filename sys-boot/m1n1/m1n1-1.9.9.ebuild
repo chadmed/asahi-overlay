@@ -27,7 +27,7 @@ SRC_URI="
 "
 LICENSE="MIT"
 SLOT="0"
-KEYWORDS="~arm64"
+KEYWORDS="arm64"
 IUSE="clang"
 
 BDEPEND="dev-build/make"
